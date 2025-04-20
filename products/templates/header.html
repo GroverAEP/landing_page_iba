@@ -1,0 +1,148 @@
+{% load static %}
+
+<!-- Humberger Begin -->
+<div class="humberger__menu__overlay"></div>
+<div class="humberger__menu__wrapper">
+    <div class="humberger__menu__logo">
+        <a href=" {% url "catalog_products" %} "><img src="{% static "img/logo.png" %}" alt=""></a>
+    </div>
+    <div class="humberger__menu__cart">
+        <ul>
+            <li> <a href="https://www.facebook.com/share/1KKirRcqZs/"><i class="fa fa-facebook"></i></a> </li>
+            <li> <a href="https://www.tiktok.com/@corporacion.ibafe4?is_from_webapp=1&sender_device=pc"><i class="fa fa-instagram"></i></a> </li>
+            <li> <a href="#"><i class="fa fa-linkedin"></i></a> </li>
+
+
+        </ul>
+    </div>
+    <div class="humberger__menu__widget">
+        <div class="header__top__right__language">
+            <img src="{% static "img/peru.png" %}" alt="bandera peru" width="30px">
+            <div>Peru</div>
+        </div>
+        
+    </div>
+    <nav class="humberger__menu__nav mobile-menu">
+        <ul>
+            <li class="active"><a href="#">Catalogo</a></li>
+        </ul>
+    </nav>
+    <div id="mobile-menu-wrap"></div>
+    <div class="humberger__menu__contact">
+        <ul>
+            <li><i class="fa fa-envelope"></i>Ibafex.Ha@gmail.com</li>
+            <li>Distribución de productos esenciales con rapidez, calidad y confianza.</li>
+        </ul>
+    </div>
+</div>
+<!-- Humberger End -->
+
+<!-- Header Section Begin -->
+<header class="header">
+    <div class="header__top">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="header__top__left">
+                        <ul>
+                            <li><i class="fa fa-envelope"></i> Ibafex@gmail.com</li>
+                            <li>Distribución de productos esenciales con rapidez, calidad y confianza.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="header__top__right">
+                        <div class="header__top__right__social">
+                            <a href="https://www.facebook.com/share/1KKirRcqZs/"><i class="fa fa-facebook"></i></a>
+                            <a href="https://www.tiktok.com/@corporacion.ibafe4?is_from_webapp=1&sender_device=pc"><i class="fa fa-instagram"></i></a>
+                            <a href="#"><i class="fa fa-linkedin"></i></a>
+                        </div>
+                        <div class="header__top__right__language">
+                            <img src="{% static "img/peru.png" %}" alt="bandera peru" width="30px">
+                            <div>Peru</div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="container">
+
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="header__logo">
+                    <a href=" {% url "catalog_products" %} "><img src="{% static "img/logo.png" %}" alt=""></a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <nav class="header__menu">
+                    <ul>
+                        <li class="active"><a href="#">catalogo</a></li>
+                    </ul>
+                </nav>
+            </div>
+
+        </div>
+        <div class="humberger__open">
+            <i class="fa fa-bars"></i>
+        </div>
+    </div>
+</header>
+<!-- Header Section End -->
+
+<!-- Hero Section Begin -->
+<section class="hero hero-normal">
+    <div class="container">
+        <div class="row">
+
+
+            <div class="col-lg-3">
+                <div class="hero__categories">
+                    <div class="hero__categories__all">
+                        <i class="fa fa-bars"></i>
+                        <span>Categorias</span>
+                    </div>
+                    <ul>
+                        <li><a href="{% url 'catalog_products' %}">Todo</a></li>
+                        {% for category in categories %}
+                            <li><a href="?category={{ category.id }}" class="category-link">{{ category.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+
+            <div class="col-lg-9">
+                <div class="hero__search">
+
+                    {% comment %} barra de buscar producto {% endcomment %}
+                    <div class="hero__search__form">
+                        <form action="{% url 'search_products' %}" method="GET" onsubmit="saveScrollPosition()">
+                            {% csrf_token %}
+                            <input type="text" id="search-box" name="q" placeholder="Escriba el producto" class="form-control">
+                            <button type="submit" class="site-btn">Buscar</button>
+                        </form>
+                    </div>
+
+                    <div class="hero__search__phone">
+                        <div class="hero__search__phone__icon">
+                            <i class="fa fa-phone"></i>
+                        </div>
+                        <div class="hero__search__phone__text">
+                            <h5> +51 951754559 </h5>
+                            <span> Soporte 24/7  </span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+<!-- Hero Section End -->
+
+

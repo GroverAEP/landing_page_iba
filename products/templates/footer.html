@@ -1,0 +1,93 @@
+{% load static %}
+<!-- Footer Section Begin -->
+<footer class="footer spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-md-6">
+                <div class="footer__about">
+                    <div class="footer__about__logo">
+                        <a href="{% url "catalog_products" %}"><img src="{% static "img/logo.png" %}" alt=""></a>
+                    </div>
+                    <p class="text-justify">
+                        IBAFEX CORPORACION S.A.C. es una empresa dedicada a la venta al por mayor en
+                        el rubro de abarrotes. Con una sólida presencia en el mercado, se especializa 
+                        en ofrecer productos de calidad a mayoristas, garantizando precios competitivos y un servicio
+                        eficiente.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 offset-lg-1">
+                <div class="footer__widget">
+                    <h6>IBAFEX CORPORACION S.A.C</h6>
+                    <ul>
+                        <li><a href="#">RUC: 92323213213</a></li>
+                        <li><a href="#">Telefono: <span class="number_style">(+51) 951 754 559</span></a></li>
+                        <li><a href="#">Telefono: <span class="number_style">(+51) 919 295 017</span></a></li>
+                        <li><a href="#">Telefono: <span class="number_style">(+51) 924 301 912</span></a></li>
+                        <li><a href="#">Telefono: <span class="number_style">(+51) 919 294 966</span></a></li>
+                    </ul>
+                    
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-12">
+                <div class="footer__widget">
+                    <h6>Únete a Nuestro Boletín Ahora</h6>
+                    <p>Recibe actualizaciones por correo electrónico sobre nuestra tienda y ofertas especiales.</p>
+                    <form action="#">
+                        <input type="text" placeholder="Ingrese Su Correo">
+                        <button type="submit" class="site-btn">Suscribirse</button>
+                    </form>
+                    <div class="footer__widget__social">
+                        <a href="#"><i class="fa fa-facebook"></i></a>
+                        <a href="#"><i class="fa fa-instagram"></i></a>
+                        <a href="#"><i class="fa fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="footer__copyright__payment"><img src="{% static "img/medios_pagos.png" %}" width="300px" alt=""></div>
+            <div class="footer__copyright__payment"><img src="{% static "img/banner-footer.png" %}" alt=""></div>
+            <div class="col-lg-12">
+                <div class="footer__copyright">
+                    <div class="footer__copyright__text">
+                        <p><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                            Copyright &copy;<script>document.write(new Date().getFullYear());</script> Todos los derechos reservados | La tienda virtual es hecho por IbaFex</a>
+                            <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Función para guardar la posición de scroll
+    function saveScrollPosition() {
+        localStorage.setItem('scrollPosition', window.scrollY); // Guardar la posición del scroll en localStorage
+    }
+
+    // Restaurar la posición de scroll cuando la página se recarga
+    window.onload = function() {
+        let scrollPosition = localStorage.getItem('scrollPosition');  // Obtener la posición guardada
+
+        if (scrollPosition) {
+            window.scrollTo(0, scrollPosition); // Restaurar la posición del scroll
+            localStorage.removeItem('scrollPosition'); // Limpiar la posición después de restaurarla
+        }
+    }
+</script>
+
+<script>
+    document.querySelector('a[href^="#"]').addEventListener('click', function(e) {
+        e.preventDefault();
+        var targetId = this.getAttribute("href");
+        document.querySelector(targetId).scrollIntoView({
+            behavior: "smooth"
+        });
+    });
+</script>
+
+
+
