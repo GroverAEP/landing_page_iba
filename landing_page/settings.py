@@ -20,13 +20,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-a0lb8@!7x#ap-4y66gci^#t37_qcw1xagpcv2%0bb5y)tb21dr"
+# SECRET_KEY = "django-insecure-a0lb8@!7x#ap-4y66gci^#t37_qcw1xagpcv2%0bb5y)tb21dr"
+SECRET_KEY = os.environ.get('SECRET_KEY', default= "asassasadasd")
+DEBUG = 'RENDER' not in os.environ
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = []  
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 
+if RENDER_EXTERNAL_HOSTNAME:
+   ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+STATICFILES_DIRS = [
+    BASE_DIR / "products" / "static",
+    BASE_DIR / "products" / "media",
+
+    # os.path.join(BASE_DIR, 'prueba_imagenes/static'),  # Asumiendo que está en esa carpeta
+
+    # BASE_DIR / "prueba_imagenes\static\images\cats_3.png",
+]
 
 # Application definition
 
@@ -43,6 +57,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # 👈 esta línea corregida
+
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -55,7 +71,7 @@ ROOT_URLCONF = "landing_page.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        'DIRS': [BASE_DIR / 'templates'],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -118,12 +134,14 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # 👈 esta línea es clave
 
 # Configuración para archivos multimedia (como imágenes subidas por el usuario)
 MEDIA_URL = '/media/'  # URL pública desde la cual accederás a las imágenes
 MEDIA_ROOT = os.path.join(BASE_DIR, 'products/media')  # Ruta real en el sistema donde se almacenarán las imágenes
 
-
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
