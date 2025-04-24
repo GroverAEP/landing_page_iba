@@ -23,7 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', default="asassasadasd")
 
 DEBUG = 'RENDER' not in os.environ
-DEBUG = True  # Puedes desactivarlo luego si estás en producción
+# DEBUG = True  # Puedes desactivarlo luego si estás en producción
+DEBUG = False
 
 ALLOWED_HOSTS = []  
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
