@@ -4,7 +4,7 @@ from django.urls import path
 
 urlpatterns = [
     
-    path("catalog/products/", views.catalog_products , name="catalog_products"),
+    path("", views.catalog_products , name="catalog_products"),
     path('search/', views.catalog_products, name='search_products'),
     
 ] 

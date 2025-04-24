@@ -24,7 +24,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("ibafex/", include("products.urls"), name="products"),
+    path("", include("products.urls"), name="products"),
     # path("accounts/", include("accounts.urls"), name="accounts"),
     
 ]# Servir archivos multimedia en desarrollo
