@@ -10,39 +10,28 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
-from pathlib import Path
 import os
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+from pathlib import Path
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+SECRET_KEY = os.environ.get('SECRET_KEY', default="asassasadasd")
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = "django-insecure-a0lb8@!7x#ap-4y66gci^#t37_qcw1xagpcv2%0bb5y)tb21dr"
-SECRET_KEY = os.environ.get('SECRET_KEY', default= "asassasadasd")
 DEBUG = 'RENDER' not in os.environ
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True  # Puedes desactivarlo luego si estás en producción
 
 ALLOWED_HOSTS = []  
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-
 if RENDER_EXTERNAL_HOSTNAME:
-   ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 STATICFILES_DIRS = [
     BASE_DIR / "products" / "static",
     BASE_DIR / "products" / "media",
-
-    # os.path.join(BASE_DIR, 'prueba_imagenes/static'),  # Asumiendo que está en esa carpeta
-
-    # BASE_DIR / "prueba_imagenes\static\images\cats_3.png",
 ]
-
-# Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -52,13 +41,14 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "products",
+    "cloudinary",  # 👈 añadido para cloudinary
+    "cloudinary_storage",  # 👈 añadido para cloudinary
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # 👈 esta línea corregida
-
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -85,20 +75,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "landing_page.wsgi.application"
 
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
-
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -115,34 +97,32 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = "es"
-
 TIME_ZONE = "UTC"
-
 USE_I18N = True
-
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+# Static files (CSS, JavaScript)
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Media files (IMÁGENES SUBIDAS POR EL USUARIO)
+MEDIA_URL = '/media/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'products/media')  # ❌ Ya no se usa, porque usas Cloudinary
 
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # 👈 esta línea es clave
+# Cloudinary config
+# Configuración de Cloudinary
+cloudinary.config(
+    cloud_name='duv5jc1d0',  # Tu nombre de la nube de Cloudinary
+    api_key='561134372158658',  # Tu API Key de Cloudinary
+    api_secret='neo6ehkdBBVnaMC9lPZc-D-iPx8'  # Tu API Secret de Cloudinary
+)
 
-# Configuración para archivos multimedia (como imágenes subidas por el usuario)
-MEDIA_URL = '/media/'  # URL pública desde la cual accederás a las imágenes
-MEDIA_ROOT = os.path.join(BASE_DIR, 'products/media')  # Ruta real en el sistema donde se almacenarán las imágenes
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
+# Producción en Render con whitenoise
 if not DEBUG:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
