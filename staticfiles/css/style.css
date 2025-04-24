@@ -307,7 +307,7 @@ ol {
 
 .header__top__left {
 	padding: 10px 0 13px;
-	width: 600px;
+	width: 603px;
 }
 
 .header__top__left ul li {
@@ -662,7 +662,7 @@ ol {
 	position: absolute;
 	right: 18px;
 	top: 9px;
-	content: "3";
+	/* content: "3"; */
 	font-family: "ElegantIcons";
 	font-size: 18px;
 	color: #ffffff;
@@ -881,9 +881,10 @@ ol {
 }
 
 .image-label img {
-	width: 45%; /* Ajusta el tamaño de la imagen */
+	width: 20%; /* Ajusta el tamaño de la imagen */
 	height: auto;
 	object-fit: contain;
+	margin-top: 5px;
 }
 
 
@@ -1149,7 +1150,7 @@ ol {
 
 .breadcrumb__option span {
 	display: inline-block;
-	font-size: 16px;
+	font-size: 20px;
 	color: #ffffff;
 }
 
@@ -1507,6 +1508,8 @@ ol {
 .filter__sort {
 	display: flex;
 	justify-content: center;
+	align-items: center;
+	gap: 5px;
 }
 
 .filter__sort span {
