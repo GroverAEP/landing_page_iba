@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="{% static "css/font-awesome.min.css" %}" type="text/css">
     <link rel="stylesheet" href="{% static "css/slicknav.min.css" %}" type="text/css">
     <link rel="stylesheet" href="{% static "css/style.css" %}" type="text/css">
-    <script src="https://kit.fontawesome.com/eb496ab1a0.js" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/04437d275d.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -37,7 +37,8 @@
                     <div class="breadcrumb__text">
                         <h2>CATALOGO</h2>
                         <div class="breadcrumb__option">
-                            <span>Nuestro compromiso es facilitar tu compra y superar tus expectativas, entregando siempre a tiempo y con la mejor calidad del mercado.</span>
+                            <span>🔥 ¡PRECIOS ESPECIALES POR COMPRAS AL POR MAYOR! 🔥</span>
+                            {% comment %} <span>Nuestro compromiso es facilitar tu compra y superar tus expectativas, entregando siempre a tiempo y con la mejor calidad del mercado.</span> {% endcomment %}
                         </div>
                     </div>
                 </div>
@@ -66,9 +67,10 @@
                     </div>
                 </div>
                 {% if total_products == 0 %}
+                    {% if query %}
                     <div class="container text-center mt-5 mb-5 ">
                         <h3>¡Lo Sentimos!</h3>
-                        <p>No se encontro ningún resultado para tu busqueda "{{ query }}" </p>
+                        <p>No se encontró ningún resultado para tu búsqueda "{{ query }}"</p>
                         <div>
                             <ul class="list-unstyled mb-3">
                                 <li>Asegúrate que las palabras estén bien escritas.</li>
@@ -76,12 +78,25 @@
                                 <li>Prueba palabras clave más generales.</li>
                             </ul>
                         </div>
-                        
-                        <button class="site-btn">Volver al inicio</button>
+                        <a class="site-btn" href="{% url "catalog_products" %}"> Volver al inicio </a>
                         <figure>
                             <img src="{% static "img/not_results.png" %}" alt="">
                         </figure>
                     </div>
+                {% else %}
+                    <div class="container text-center mt-5 mb-5">
+                        <h3>¡Lo Sentimos!</h3>
+                        <p>No hay productos disponibles en el catálogo.</p>
+                        <div>
+                            <ul class="list-unstyled mb-3">
+                                <li>¡Pronto estarán disponibles nuevos productos!</li>
+                                <li>Te invitamos a regresar más tarde.</li>
+                            </ul>
+                        </div>
+                        <a class="site-btn" href="{% url "catalog_products" %}"> Volver al inicio </a>
+                    </div>
+                {% endif %}
+                    
                 {% else %}
                     <div class="col-lg-12 col-md-12">
                         <div class="filter__item">
@@ -123,9 +138,10 @@
                                     <div class="card product__item">
                                         <div class="product__item__pic set-bg card-img-top position-relative" data-setbg="{{ product.image.url }}">
                                             <!-- Contenedor de la imagen en la esquina superior derecha (frente al "Agotado") -->
-                                            {% comment %} <div class="image-label">
-                                                <img src="{% static 'img/octagonal__advertencia.png' %}" alt="Imagen Promocional">
-                                            </div> {% endcomment %}
+                                            {% comment %} tiene un width de 20% graduar ese width dependiendo de la imagen {% endcomment %}
+                                            <div class="image-label">
+                                                <img src="{% static 'img/icon_logo.png' %}" alt="Imagen Promocional">
+                                            </div> 
                                             <!-- Contenedor de "Agotado" en la esquina superior izquierda -->
                                             {% if not product.product_of_stock %}
                                                 <div class="agotado-label position-absolute top-0 start-0 p-2 bg-danger text-white" style="font-size: 13px; font-weight: bold;">
@@ -138,14 +154,34 @@
                                                 <li><a href="#" class="text-decoration-none"><i class="fa fa-shopping-cart"></i></a></li>
                                             </ul> {% endcomment %}
                                         </div>
+                                        
+                                        {% comment %} ESTA PARTE ESTA EN DESRROLLO FALTA TERMINAR {% endcomment %}
                                         <div class="card-body product__item__text">
-                                            <h6 class="card-title text-muted txt__brand__style"> <span style="text-transform: uppercase;" >{{ product.brand }}</span> - {{ product.category }}</h6>
+                                            <h6 class="card-title text-muted txt__brand__style">
+                                                <span style="text-transform: uppercase;">{{ product.brand }}</span> - {{ product.category }}
+                                            </h6>
                                             <p class="card-text txt__name__product__style">{{ product.name }}</p>
+                                            <span class="text-muted txt__brand__style">S/ {{ product.unit_price }} x {{ product.unit_of_measure }}</span>
+                                                {% comment %} <span>
+                                                    A partir de <strong>{{ product.bulk_quantity }} unids.</strong>
+                                                </span> {% endcomment %}
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <h5 class="color__precie">S/ {{ product.price }}</h5>
+                                                <strong class="color__precie"> S/ {{ product.bulk_price }} x {{ product.bulk_unit_of_measure }} </strong> 
                                             </div>
                                         </div>
-                                        <a  class="w-100 button-details text-center" href="https://wa.me/51951754559?text=👋%20¡Hola%20IbaFex!%0A%0AEstoy%20interesado%20en%20adquirir%20el%20producto%20siguiente%3A%0A%0A🛒%20*Producto*%3A%20Leche%20Gloria%0A💡%20*Marca*%3A%20Gloria%0A💰%20*Precio*%3A%20S%2F%2015%0A📜%20*Descripción*%3A%20Leche%20fresca%20y%20nutritiva.%0A%0AGracias%20y%20espero%20su%20respuesta%20pronto.">Solicitar Producto</a>
+                                        
+
+                                        {% comment %} SOLICITAR PRODUCTO POR WASSAP {% endcomment %}
+                                        {% comment %} <a  class="w-100 button-details text-center"  href="https://wa.me/51919294944?text=👋%20¡Hola%20IbaFex!%0A%0AEstoy%20interesado%20en%20adquirir%20este%20producto:%0A%0A🛒%20*Producto*:%20{{ product.name|urlencode }}%0A💡%20*Marca*:%20{{ product.brand|urlencode }}%0A💰%20*Precio*:%20S/%20{{ product.price|floatformat:2|urlencode }}%0A%0A📣%20*DESCUENTO%20POR%20MAYOR!*%20🚀%0ACuanto%20más%20unidades%20compres%2C%20¡mejor%20precio!%20🤑%0A%0A¡Gracias%20y%20quedo%20atento!">Solicitar Producto</a> {% endcomment %}
+                                        <a
+                                            class="w-100 button-details text-center"
+                                            href="https://wa.me/51919294944?text=👋%20¡Hola%20IbaFex!%0A%0AEstoy%20interesado%20en%20adquirir%20este%20producto:%0A%0A🛒%20Producto:%20{{ product.name|urlencode }}%0A💡%20Marca:%20{{ product.brand|urlencode }}%0A🏷️%20Precio:%20S/%20{{ product.unit_price|floatformat:2|urlencode }}%20x%20{{ product.unit_of_measure.name|urlencode }}%0A%0A💲%20Precio%20al%20por%20mayor:%20S/%20{{ product.bulk_price|floatformat:2|urlencode }}%20x%20{{ product.bulk_unit_of_measure.name|urlencode }}%0A%0A¡Gracias%20y%20quedo%20atento!"
+                                            target="_blank"
+                                            rel="noopener"
+                                            >
+                                            Solicitar Producto
+                                        </a>
+
                                     </div>
                                 </div>
                             {% endfor %}
@@ -168,7 +204,7 @@
         </div>
     </section>
     <!-- WhatsApp Floating Button -->
-    <a href="https://wa.me/51951754559?text=Hola%2C%20estoy%20interesado%20en%20tu%20producto" class="btn-wsp" target="_blank">
+    <a href="https://wa.me/51919294944?text=Hola%2C%20estoy%20interesado(a)%20en%20conocer%20más%20sobre%20sus%20productos.%20¿Podrían%20asesorarme?" class="btn-wsp" target="_blank">
 	    <i class="fa fa-whatsapp icono"></i>Contáctanos por WhatsApp
     </a>
     <!-- Product Section End -->

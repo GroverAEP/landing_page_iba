@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.core.paginator import Paginator
 from .models import Producto, Categoria
+from urllib.parse import quote_plus
 from django.http import JsonResponse
 # Create your views here.
 
@@ -11,21 +12,21 @@ def catalog_products(request):
     categories = Categoria.objects.filter(producto__isnull=False).distinct()  # Filtrar categorías con productos
     
     # Filtrar los productos si hay una consulta de búsqueda (por nombre o marca)
-    query = request.GET.get('q', '')  # Obtener el valor de búsqueda del parámetro 'q'
+    query = request.GET.get('q', '').strip()  # Obtener el valor de búsqueda del parámetro 'q'
     if query:
         products = products.filter(name__icontains=query) | products.filter(brand__icontains=query)
-
+    
     # Filtrar productos por categoría seleccionada si es necesario
     category_id = request.GET.get('category')
     if category_id:
         products = products.filter(category_id=category_id)  # Filtrar productos por categoría seleccionada
 
     # Ordenar los productos por precio si se pasa el parámetro 'order_by_price'
-    order_by = request.GET.get('order_by_price')
+    order_by = request.GET.get('order_by_unit_price')
     if order_by == 'barato':
-        products = products.order_by('price')  # Ordenar de menor a mayor precio
+        products = products.order_by('unit_price')  # Ordenar de menor a mayor precio
     elif order_by == 'caro':
-        products = products.order_by('-price')  # Ordenar de mayor a menor precio
+        products = products.order_by('-unit_price')  # Ordenar de mayor a menor precio
     
     # Paginación: 16 productos por página
     paginator = Paginator(products, 16)

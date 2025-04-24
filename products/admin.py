@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Producto, Categoria
+from .models import Producto, Categoria, UnidadMedida
 
 # Acción personalizada para marcar varios productos como agotados
 def marcar_como_agotados(modeladmin, request, queryset):
@@ -14,7 +14,7 @@ def marcar_como_disponibles(modeladmin, request, queryset):
 # Personalización de la interfaz de administración para 'Producto'
 class ProductoAdmin(admin.ModelAdmin):
     # Mostrar las columnas en la lista de productos
-    list_display = ('id', 'name', 'category', 'price', 'product_of_stock')
+    list_display = ('id', 'name', 'category', 'unit_price', 'unit_of_measure', 'bulk_price', 'bulk_unit_of_measure', 'product_of_stock')
 
     # Filtro de búsqueda en la lista
     search_fields = ('name', 'brand', 'category__name')
@@ -25,7 +25,7 @@ class ProductoAdmin(admin.ModelAdmin):
     # Personalización de las etiquetas en la interfaz
     fieldsets = (
         (None, {
-            'fields': ('name', 'brand', 'category', 'price', 'image')
+            'fields': ('name', 'brand', 'category', 'unit_price', 'unit_of_measure', 'bulk_price', 'bulk_unit_of_measure', 'image')
         }),
         ('Disponibilidad', {
             'fields': ('product_of_stock',),
@@ -53,7 +53,10 @@ class CategoriaAdmin(admin.ModelAdmin):
     list_display = ('name',)  # Mostrar solo el nombre de la categoría
     search_fields = ('name',)  # Permite buscar por nombre de la categoría
 
+class UnidadMedidadAdmin(admin.ModelAdmin):
+    list_dispaly = ('name')
 
 # Registro del modelo 'Producto' con la clase 'ProductoAdmin'
 admin.site.register(Producto, ProductoAdmin)
 admin.site.register(Categoria, CategoriaAdmin)
+admin.site.register(UnidadMedida, UnidadMedidadAdmin)
