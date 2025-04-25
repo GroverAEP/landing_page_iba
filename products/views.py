@@ -22,11 +22,11 @@ def catalog_products(request):
         products = products.filter(category_id=category_id)  # Filtrar productos por categoría seleccionada
 
     # Ordenar los productos por precio si se pasa el parámetro 'order_by_price'
-    order_by = request.GET.get('order_by_unit_price')
+    order_by = request.GET.get('order_by_price')
     if order_by == 'barato':
-        products = products.order_by('unit_price')  # Ordenar de menor a mayor precio
+        products = products.order_by('bulk_price')  # Ordenar de menor a mayor precio
     elif order_by == 'caro':
-        products = products.order_by('-unit_price')  # Ordenar de mayor a menor precio
+        products = products.order_by('-bulk_price')  # Ordenar de mayor a menor precio
     
     # Paginación: 16 productos por página
     paginator = Paginator(products, 16)

@@ -3,4 +3,5 @@ db.sqlite3
 # Entornos virtuales
 venv/
 .env/
-
+product/
+media/
