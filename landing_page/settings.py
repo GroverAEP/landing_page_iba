@@ -85,6 +85,7 @@ WSGI_APPLICATION = "landing_page.wsgi.application"
 #     }
 # }
 
+# etsa configruacion es cuando se conecta de amnera remota a nuestra bd
 DATABASES = {
     'default': dj_database_url.config(
         default="postgresql://ibafex:4ngr02QYxXXylde8cq6fdsZU6VmRwisD@dpg-d057chi4d50c73ahcgs0-a.oregon-postgres.render.com/bd_ibafex",

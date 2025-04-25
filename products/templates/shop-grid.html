@@ -114,11 +114,30 @@
                                         </form>
                                     </div>
                                 </div>
+
+
+                                {% comment %} <div class="col-lg-3 col-md-5">
+                                    <div class="filter__sort">
+                                        <span>Ordenar Por</span>
+                                        <form action="{% url 'catalog_products' %}" method="GET" onsubmit="saveScrollPosition()" >
+                                            {% csrf_token %}
+                                            <select name="order_by_price" onchange="this.form.submit()" >
+                                                <option value="{% url "catalog_products" %}">Por Defecto</option>
+                                                <option value="caro" {% if request.GET.order_by_price == 'caro' %}selected{% endif %}>Mayor Precio</option>
+                                                <option value="barato" {% if request.GET.order_by_price == 'barato' %}selected{% endif %}>Menor Precio</option>
+                                            </select>
+                                        </form>
+                                    </div>
+                                </div> {% endcomment %}
+
+
                                 <div class="col-lg-3 col-md-4">
                                     <div class="filter__found">
                                         <h6><span>{{ total_products }}</span> Productos</h6>
                                     </div>
                                 </div>
+
+
                                 <div class="col-lg-3 col-md-3 delete">
                                 </div>
                                 
@@ -189,7 +208,7 @@
                         {% comment %} Paginación de los productos {% endcomment %}
                         <div class="product__pagination">
                             {% if page_obj.has_previous %}
-                                <a href="?page=1">P</a>
+                                <a href="?page=1">Inicio</a>
                                 <a href="?page={{ page_obj.previous_page_number }}">&laquo;</a>
                             {% endif %}
                             <span class="current-page">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
