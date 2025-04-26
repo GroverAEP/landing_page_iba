@@ -4,4 +4,4 @@ db.sqlite3
 venv/
 .env/
 product/
-media/
+# media/

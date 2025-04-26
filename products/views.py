@@ -3,6 +3,7 @@ from django.core.paginator import Paginator
 from .models import Producto, Categoria
 from urllib.parse import quote_plus
 from django.http import JsonResponse
+from django.db.models import Q
 # Create your views here.
 
 def catalog_products(request):
@@ -13,9 +14,17 @@ def catalog_products(request):
     
     # Filtrar los productos si hay una consulta de búsqueda (por nombre o marca)
     query = request.GET.get('q', '').strip()  # Obtener el valor de búsqueda del parámetro 'q'
-    if query:
-        products = products.filter(name__icontains=query) | products.filter(brand__icontains=query)
     
+    # Si la consulta de búsqueda no está vacía, realizar los filtros
+    if query:
+        # Filtrar los productos según la búsqueda
+        products = products.filter(
+            Q(name__icontains=query) |
+            Q(brand__icontains=query) |
+            Q(category__name__icontains=query)
+        )
+        
+        
     # Filtrar productos por categoría seleccionada si es necesario
     category_id = request.GET.get('category')
     if category_id:
