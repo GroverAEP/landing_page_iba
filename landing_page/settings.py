@@ -24,7 +24,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', default="asassasadasd")
 
 DEBUG = 'RENDER' not in os.environ
 # DEBUG = True  # Puedes desactivarlo luego si estás en producción
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []  
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
@@ -78,20 +78,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "landing_page.wsgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
 
 # etsa configruacion es cuando se conecta de amnera remota a nuestra bd
-# DATABASES = {
-#     'default': dj_database_url.config(
-#         default="postgresql://ibafex:4ngr02QYxXXylde8cq6fdsZU6VmRwisD@dpg-d057chi4d50c73ahcgs0-a.oregon-postgres.render.com/bd_ibafex",
-#         conn_max_age=600,
-#     )
-# }
+DATABASES = {
+    'default': dj_database_url.config(
+        default="postgresql://ibafex:4ngr02QYxXXylde8cq6fdsZU6VmRwisD@dpg-d057chi4d50c73ahcgs0-a.oregon-postgres.render.com/bd_ibafex",
+        conn_max_age=600,
+    )
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -123,11 +123,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'products/media')  # ❌ Ya no se usa, porqu
 
 # Cloudinary config
 # Configuración de Cloudinary
-# cloudinary.config(
-#     cloud_name='duv5jc1d0',  # Tu nombre de la nube de Cloudinary
-#     api_key='561134372158658',  # Tu API Key de Cloudinary
-#     api_secret='neo6ehkdBBVnaMC9lPZc-D-iPx8'  # Tu API Secret de Cloudinary
-# )
+cloudinary.config(
+    cloud_name='duv5jc1d0',  # Tu nombre de la nube de Cloudinary
+    api_key='561134372158658',  # Tu API Key de Cloudinary
+    api_secret='neo6ehkdBBVnaMC9lPZc-D-iPx8'  # Tu API Secret de Cloudinary
+)
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
