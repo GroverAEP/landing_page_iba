@@ -21,8 +21,8 @@ class UnidadMedida(models.Model):
     
 class Producto(models.Model):
     
-    image = models.ImageField(upload_to='product/', verbose_name="Imagen del Producto")  # Imagen del producto
-    # image = CloudinaryField(verbose_name="Imagen del Producto")  # Cambiado a CloudinaryField
+    # image = models.ImageField(upload_to='product/', verbose_name="Imagen del Producto")  # Imagen del producto
+    image = CloudinaryField(verbose_name="Imagen del Producto")  # Cambiado a CloudinaryField
     brand = models.CharField(max_length=255, verbose_name="Marca del Producto")  # Marca o fabricante del producto
     # Cambiar el campo 'category' para ser una clave foránea hacia 'Categoria'
     category = models.ForeignKey(Categoria, on_delete=models.CASCADE, verbose_name="Categoría")
