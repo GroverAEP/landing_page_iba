@@ -22,7 +22,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', default="asassasadasd")
 
+DEFAULT_CHARSET = 'utf-8'
+
 DEBUG = 'RENDER' not in os.environ
+
 # DEBUG = True  # Puedes desactivarlo luego si estás en producción
 DEBUG = False
 
