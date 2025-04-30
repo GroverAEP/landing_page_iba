@@ -13,8 +13,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 import cloudinary
-import cloudinary.uploader
-import cloudinary.api
 import dj_database_url
 
 
