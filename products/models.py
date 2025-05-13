@@ -46,13 +46,17 @@ class Producto(models.Model):
         max_digits=10,
         decimal_places=2,
         verbose_name="Precio por paquete",
-        validators=[MinValueValidator(0)]
+        validators=[MinValueValidator(0)],
+        blank=True,
+        null=True
     )
     bulk_unit_of_measure = models.ForeignKey(
         UnidadMedida,
         on_delete=models.CASCADE,
         verbose_name="Unidad de paquete",
-        related_name="productos_por_paquete" 
+        related_name="productos_por_paquete",
+        blank=True,
+        null=True
     )
     
     

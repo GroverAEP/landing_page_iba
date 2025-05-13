@@ -23,8 +23,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', default="asassasadasd")
 DEFAULT_CHARSET = 'utf-8'
 
 DEBUG = 'RENDER' not in os.environ
-
-# DEBUG = True  # Puedes desactivarlo luego si estás en producción
+# DEBUG = True  # desactivarlo si estás en producción
 DEBUG = False
 
 ALLOWED_HOSTS = []  
@@ -122,7 +121,6 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'products/media')  # ❌ Ya no se usa, porque usas Cloudinary
 
-# Cloudinary config
 # Configuración de Cloudinary
 cloudinary.config(
     cloud_name='duv5jc1d0',  # Tu nombre de la nube de Cloudinary

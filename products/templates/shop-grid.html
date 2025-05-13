@@ -184,9 +184,11 @@
                                                 {% comment %} <span>
                                                     A partir de <strong>{{ product.bulk_quantity }} unids.</strong>
                                                 </span> {% endcomment %}
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <strong class="color__precie"> S/ {{ product.bulk_price }} x {{ product.bulk_unit_of_measure }} </strong> 
-                                            </div>
+                                                {% if product.bulk_price and product.bulk_unit_of_measure %}
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <strong class="color__precie"> S/ {{ product.bulk_price }} x {{ product.bulk_unit_of_measure }} </strong> 
+                                                    </div>
+                                                {% endif %}
                                         </div>
                                         
 
@@ -196,7 +198,7 @@
                                         {% comment %} correrir esta aprte parar q soporte emojis es decir correri la codificacion {% endcomment %}
                                         <a
                                             class="w-100 button-details text-center"
-                                            href="https://wa.me/51919294944?text=👋%20¡Hola%20IbaFex!%0A%0AEstoy%20interesado%20en%20adquirir%20este%20producto:%0A%0A🛒%20Producto:%20{{ product.name|urlencode }}%0A💡%20Marca:%20{{ product.brand|urlencode }}%0A🏷️%20Precio:%20S/%20{{ product.unit_price|floatformat:2 }}%20x%20{{ product.unit_of_measure.name|urlencode }}%0A%0A💲%20Precio%20al%20por%20mayor:%20S/%20{{ product.bulk_price|floatformat:2 }}%20x%20{{ product.bulk_unit_of_measure.name|urlencode }}%0A%0A¡Gracias%20y%20quedo%20atento!"
+                                            href="https://wa.me/51919294944?text=%20¡Hola%20IbaFex!%0A%0AEstoy%20interesado%20en%20adquirir%20este%20producto:%0A%0A%20Producto:%20{{ product.name|urlencode }}%0A%20Marca:%20{{ product.brand|urlencode }}%0A%20Precio:%20S/%20{{ product.unit_price|floatformat:2 }}%20x%20{{ product.unit_of_measure.name|urlencode }}%0A%0A%20Precio%20al%20por%20mayor:%20S/%20{{ product.bulk_price|floatformat:2 }}%20x%20{{ product.bulk_unit_of_measure.name|urlencode }}%0A%0A¡Gracias%20y%20quedo%20atento!"
                                             target="_blank"
                                             rel="noopener"
                                         >
