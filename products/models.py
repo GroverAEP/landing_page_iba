@@ -55,7 +55,7 @@ class Producto(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Unidad de paquete",
         related_name="productos_por_paquete",
-        blank=True,
+        blank=True, 
         null=True
     )
     

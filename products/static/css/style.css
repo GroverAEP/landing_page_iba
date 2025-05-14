@@ -684,7 +684,7 @@ ol {
 .hero__categories ul li a {
 	font-size: 16px;
 	color: #1c1c1c;
-	line-height: 39px;
+	line-height: 3px;
 	display: block;
 }
 
@@ -3285,7 +3285,7 @@ ol {
 	.sticky-movil{
 		position: sticky;
 		top: 0px;
-		z-index: 10;
+		z-index: 5;
 		padding-top: 25px;
 		padding-right: 5px;
         padding-left: 5px;

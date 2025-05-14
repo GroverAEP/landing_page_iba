@@ -108,6 +108,8 @@
                     <ul>
                         <li><a href="{% url 'catalog_products' %}">Todo</a></li>
                         {% for category in categories %}
+                            <hr>
+
                             <li><a href="?category={{ category.id }}" class="category-link">{{ category.name }}</a></li>
                         {% endfor %}
                     </ul>
