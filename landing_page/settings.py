@@ -12,8 +12,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY', default="asassasadasd")
 DEFAULT_CHARSET = 'utf-8'
 
 DEBUG = 'RENDER' not in os.environ
-# DEBUG = True  # desactivarlo si estás en producción
-DEBUG = False
+DEBUG = True  # desactivarlo si estás en producción
+# DEBUG = False
 
 ALLOWED_HOSTS = []  
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
