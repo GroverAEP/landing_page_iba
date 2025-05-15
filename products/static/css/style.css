@@ -90,8 +90,15 @@ p {
 img {
 	max-width: 100%;
 }
+
+.img-css{
+	max-width: 100%;
+	height: auto;
+}
+
 .card-text{
 	color: #000000;
+	
 }
 
 .btn-wsp{
@@ -2275,5 +2282,9 @@ ol {
 	}
 	.blog__details__hero__text h2 {
 		font-size: 24px;
+	}
+	
+	.img-css{
+		margin-top: 40px;
 	}
 }
