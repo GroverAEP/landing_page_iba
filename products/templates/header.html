@@ -101,25 +101,24 @@
 
             <div class="col-lg-3">
                 <div class="hero__categories">
-                    <div class="hero__categories__all">
+                    <!-- Botón que despliega las categorías -->
+                    <div class="hero__categories__all" id="toggle-categories" style="cursor: pointer;">
                         <i class="fa fa-bars"></i>
-                        <span>Categorias</span>
+                        <span>Categorías</span>
                     </div>
-                    <ul>
+
+                    <!-- Lista de categorías (oculta por defecto) -->
+                    <ul id="category-list" style="display: none;">
                         <li><a href="{% url 'catalog_products' %}">Todo</a></li>
                         {% for category in categories %}
                             <hr>
-
                             <li><a href="?category={{ category.id }}" class="category-link">{{ category.name }}</a></li>
                         {% endfor %}
                     </ul>
                 </div>
             </div>
-
-
             <div class="col-lg-9">
                 <div class="hero__search">
-
                     {% comment %} barra de buscar producto {% endcomment %}
                     <div class="hero__search__form">
                         <form action="{% url 'search_products' %}" method="GET" onsubmit="saveScrollPosition()">
@@ -128,7 +127,6 @@
                             <button type="submit" class="site-btn">Buscar</button>
                         </form>
                     </div>
-
                     <div class="hero__search__phone">
                         <div class="hero__search__phone__icon">
                             <i class="fa fa-phone"></i>
@@ -138,13 +136,25 @@
                             <span> Soporte 24/7  </span>
                         </div>
                     </div>
-
                 </div>
             </div>
-
         </div>
     </div>
 </section>
 <!-- Hero Section End -->
 
 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggleBtn = document.getElementById("toggle-categories");
+        const categoryList = document.getElementById("category-list");
+
+        toggleBtn.addEventListener("click", function () {
+            if (categoryList.style.display === "none") {
+                categoryList.style.display = "block";
+            } else {
+                categoryList.style.display = "none";
+            }
+        });
+    });
+</script>

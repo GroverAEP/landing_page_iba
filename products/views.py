@@ -37,8 +37,8 @@ def catalog_products(request):
     elif order_by == 'caro':
         products = products.order_by('-bulk_price')  # Ordenar de mayor a menor precio
     
-    # Paginación: 16 productos por página
-    paginator = Paginator(products, 16)
+    # Paginación: 12 productos por página
+    paginator = Paginator(products, 12)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
