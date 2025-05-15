@@ -194,13 +194,15 @@
                         {% comment %} Paginación de los productos {% endcomment %}
                         <div class="product__pagination">
                             {% if page_obj.has_previous %}
-                                <a href="?page=1">Inicio</a>
-                                <a href="?page={{ page_obj.previous_page_number }}">&laquo;</a>
+                                <a href="?page=1{% if querystring %}&{{ querystring }}{% endif %}">Inicio</a>
+                                <a href="?page={{ page_obj.previous_page_number }}{% if querystring %}&{{ querystring }}{% endif %}">&laquo;</a>
                             {% endif %}
+                            
                             <span class="current-page">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                            
                             {% if page_obj.has_next %}
-                                <a href="?page={{ page_obj.next_page_number }}">&raquo;</a> 
-                                <a href="?page={{ page_obj.paginator.num_pages }}">Fin</a>
+                                <a href="?page={{ page_obj.next_page_number }}{% if querystring %}&{{ querystring }}{% endif %}">&raquo;</a> 
+                                <a href="?page={{ page_obj.paginator.num_pages }}{% if querystring %}&{{ querystring }}{% endif %}">Fin</a>
                             {% endif %}
                         </div>
                     </div>

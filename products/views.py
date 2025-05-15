@@ -2,10 +2,19 @@ from django.shortcuts import render
 from django.core.paginator import Paginator
 from .models import Producto, Categoria
 from urllib.parse import quote_plus
-from django.http import JsonResponse
 from django.db.models import Q
 # Create your views here.
+import unicodedata
+from urllib.parse import urlencode
 
+def normalize(text):
+    if text is None:
+        return ""
+    return ''.join(
+        c for c in unicodedata.normalize('NFD', text)
+        if unicodedata.category(c) != 'Mn'
+    ).lower()
+    
 def catalog_products(request):
     # Obtener todos los productos
     products = Producto.objects.all()
@@ -15,16 +24,31 @@ def catalog_products(request):
     # Filtrar los productos si hay una consulta de búsqueda (por nombre o marca)
     query = request.GET.get('q', '').strip()  # Obtener el valor de búsqueda del parámetro 'q'
     
-    # Si la consulta de búsqueda no está vacía, realizar los filtros
+    # Si la consulta de búsqueda no está vacía, aplicamos los filtros
     if query:
-        # Filtrar los productos según la búsqueda
-        products = products.filter(
-            Q(name__icontains=query) |
-            Q(brand__icontains=query) |
-            Q(category__name__icontains=query)
-        )
-        
-        
+        words = query.split()
+        normalized_words = [normalize(word) for word in words]
+
+        filtered_products = []
+
+        for product in products:
+            name = normalize(product.name)
+            brand = normalize(product.brand)
+            category = normalize(product.category.name)
+
+            # Verificamos si alguna de las palabras aparece en alguno de los campos
+            any_word_matches = False
+            for word in normalized_words:
+                if word in name or word in brand or word in category:
+                    any_word_matches = True
+                    break
+
+            # Si alguna palabra coincide, añadimos el producto
+            if any_word_matches:
+                filtered_products.append(product)
+
+        products = filtered_products
+    
     # Filtrar productos por categoría seleccionada si es necesario
     category_id = request.GET.get('category')
     if category_id:
@@ -42,9 +66,17 @@ def catalog_products(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
+    # Obtener todos los parámetros GET excepto 'page'
+    params = request.GET.copy()
+    if 'page' in params:
+        params.pop('page')
+
+    querystring = params.urlencode()
+    
     return render(request, "shop-grid.html", {
         "page_obj": page_obj,  # Paginación de productos
-        "total_products": products.count(),  # Total de productos
+        "total_products": len(products),  # Total de productos
         "categories": categories,  # Las categorías disponibles
         "query":query,
+        "querystring": querystring,  # <-- Aquí agregamos esta variable
     })

@@ -62,7 +62,6 @@ class Producto(models.Model):
         null=True
     )
     
-    
     date_added = models.DateTimeField(auto_now_add=True, verbose_name="Fecha")  # Fecha en que se añadió el producto 
     product_of_stock = models.BooleanField(default=True, verbose_name="Disponible")  # Indica si el producto es destacado o no
     
@@ -78,13 +77,3 @@ class Producto(models.Model):
 #         if os.path.isfile(instance.image.path):
 #             os.remove(instance.image.path)
 
-
-# @register.filter
-# def cloudinary_transform(url, params="w_400,h_400,c_fill,f_auto,q_auto"):
-#     # Inserta los params después de /upload/
-#     if not url:
-#         return ""
-#     parts = url.split("/upload/")
-#     if len(parts) != 2:
-#         return url  # no es un URL típico de Cloudinary
-#     return parts[0] + "/upload/" + params + "/" + parts[1]
