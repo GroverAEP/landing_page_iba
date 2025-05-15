@@ -1,10 +1,13 @@
 from django.db import models
-from django.db.models.signals import post_delete
-from django.dispatch import receiver
-import os
+# from django.db.models.signals import post_delete
+# from django.dispatch import receiver
+# import os
 from django.core.validators import MinValueValidator
 from cloudinary.models import CloudinaryField
 # Create your models here.
+# from django import template
+# register = template.Library()
+
 
 # Crear el modelo de categorías
 class Categoria(models.Model):
@@ -68,9 +71,20 @@ class Producto(models.Model):
     
     
 # Función que elimina la imagen del producto cuando se elimina el producto
-@receiver(post_delete, sender=Producto)
-def delete_product_image(sender, instance, **kwargs):
-    # Elimina la imagen de la carpeta del producto si existe
-    if instance.image:
-        if os.path.isfile(instance.image.path):
-            os.remove(instance.image.path)
+# @receiver(post_delete, sender=Producto)
+# def delete_product_image(sender, instance, **kwargs):
+#     # Elimina la imagen de la carpeta del producto si existe
+#     if instance.image:
+#         if os.path.isfile(instance.image.path):
+#             os.remove(instance.image.path)
+
+
+# @register.filter
+# def cloudinary_transform(url, params="w_400,h_400,c_fill,f_auto,q_auto"):
+#     # Inserta los params después de /upload/
+#     if not url:
+#         return ""
+#     parts = url.split("/upload/")
+#     if len(parts) != 2:
+#         return url  # no es un URL típico de Cloudinary
+#     return parts[0] + "/upload/" + params + "/" + parts[1]

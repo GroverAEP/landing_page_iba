@@ -49,7 +49,6 @@
     <!-- Product Section Begin -->
     <section class="product spad">
         <div class="container">
-
             <div class="row">
                 <div class="col-lg-3 col-md-5 sticky-movil">
                     <div class="sidebar">
@@ -120,7 +119,6 @@
                                     </div>
                                 </div>
 
-
                                 <div class="col-lg-3 col-md-3 delete">
                                 </div>
                                 
@@ -138,18 +136,29 @@
                             {% for product in page_obj %}
                                 <div class="col-lg-3 col-md-6 col-sm-6 responsive__margin">
                                     <div class="card product__item">
-                                        <div class="product__item__pic set-bg card-img-top position-relative" data-setbg="{{ product.image.url }}">
+                                        <div class="product__item__pic set-bg card-img-top position-relative" >
                                             <!-- Contenedor de la imagen en la esquina superior derecha (frente al "Agotado") -->
                                             {% comment %} tiene un width de 20% graduar ese width dependiendo de la imagen {% endcomment %}
+                                            {% load cloudinary_filters %} 
+
                                             <div class="image-label">
                                                 <img src="{% static 'img/icon_logo.png' %}" alt="Imagen Promocional">
                                             </div> 
+
                                             <!-- Contenedor de "Agotado" en la esquina superior izquierda -->
                                             {% if not product.product_of_stock %}
                                                 <div class="agotado-label position-absolute top-0 start-0 p-2 bg-danger text-white" style="font-size: 13px; font-weight: bold;">
                                                     ¡AGOTADO!
                                                 </div>
                                             {% endif %}
+
+                                            <img 
+                                                src="{{ product.image.url|cloudinary_transform }}"
+                                                alt="{{ product.name }}" 
+                                                loading="lazy"
+                                                class="img-fluid"
+                                            > 
+                                            
                                         </div>
                                         
                                         {% comment %} ESTA PARTE ESTA EN DESRROLLO FALTA TERMINAR {% endcomment %}
