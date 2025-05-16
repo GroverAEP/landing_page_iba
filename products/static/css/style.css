@@ -1934,6 +1934,14 @@ ol {
 	.over_hid {
 		overflow: hidden;
 	}
+
+
+	.filter__found h6 {
+		font-size: 13px;
+	}
+
+
+
 }
 
 /* Wide Mobile = 480px */

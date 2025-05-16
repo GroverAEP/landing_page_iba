@@ -49,12 +49,17 @@ def catalog_products(request):
                 filtered_products.append(product)
 
         products = filtered_products
-    
+        
+        
+    selected_category = None
     # Filtrar productos por categoría seleccionada si es necesario
     category_id = request.GET.get('category')
     if category_id:
         products = products.filter(category_id=category_id)  # Filtrar productos por categoría seleccionada
-
+        try:
+            selected_category = Categoria.objects.get(id=category_id)
+        except Categoria.DoesNotExist:
+            selected_category = None
     # Ordenar los productos por precio si se pasa el parámetro 'order_by_price'
     order_by = request.GET.get('order_by_price')
     if order_by == 'barato':
@@ -81,4 +86,5 @@ def catalog_products(request):
         "categories": categories,  # Las categorías disponibles
         "query":query,
         "querystring": querystring,  # <-- Aquí agregamos esta variable
+        "selected_category": selected_category,
     })

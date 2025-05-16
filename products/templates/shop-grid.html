@@ -111,12 +111,12 @@
                                         </select>
                                     </form>
                                 </div>
-                                {% if query %}
-                                    <!-- Resultados -->
-                                    <div class="filter__found" >
+                                {% if selected_category %}
+                                    <!-- Mostrar nombre de la categoría -->
+                                    <div class="filter__found mb-3">
                                         <h6 class="mb-0">
-                                            Resultados: <span> ({{ total_products_filter }})</span> / 
-                                            <span>{{ products_total_count }}</span> Productos
+                                            CATEGORÍA - <span> {{ selected_category.name|upper }} ({{ total_products_filter }})</span>
+                                            / <span> {{ products_total_count }} </span>PRODUCTOS
                                         </h6>
                                     </div>
                                     <!-- Botón "ver todos los productos" -->
@@ -125,10 +125,24 @@
                                             Ver todos los productos
                                         </a>
                                     </div>
-                                {% else %}
-                                    <div class="filter__found" >
+                                {% elif query %}
+                                    <!-- Resultados por búsqueda -->
+                                    <div class="filter__found">
                                         <h6 class="mb-0">
-                                            <span>{{ products_total_count }}</span> Productos Total 
+                                            RESULTADOS: <span> ({{ total_products_filter }})</span> /
+                                            <span>{{ products_total_count }}</span> PRODUCTOS
+                                        </h6>
+                                    </div>
+                                    <div>
+                                        <a class="btn btn-secondary btn-sm" href="{% url 'catalog_products' %}">
+                                            Ver todos los productos
+                                        </a>
+                                    </div>
+                                {% else %}
+                                    <!-- Sin filtros -->
+                                    <div class="filter__found">
+                                        <h6 class="mb-0">
+                                            <span>{{ products_total_count }}</span> PRODUCTOS EN TOTAL
                                         </h6>
                                     </div>
                                 {% endif %}
@@ -145,26 +159,22 @@
                                             <!-- Contenedor de la imagen en la esquina superior derecha (frente al "Agotado") -->
                                             {% comment %} tiene un width de 20% graduar ese width dependiendo de la imagen {% endcomment %}
                                             {% load cloudinary_filters %} 
-
                                             <div class="image-label">
                                                 <img src="{% static 'img/icon_logo.png' %}" alt="Imagen Promocional">
                                             </div> 
-
                                             <!-- Contenedor de "Agotado" en la esquina superior izquierda -->
                                             {% if not product.product_of_stock %}
                                                 <div class="agotado-label position-absolute top-0 start-0 p-2 bg-danger text-white" style="font-size: 13px; font-weight: bold;">
                                                     ¡AGOTADO!
                                                 </div>
                                             {% endif %}
-
                                             <img 
                                                 src="{{ product.image.url|cloudinary_transform }}"
                                                 alt="{{ product.name }}" 
                                                 loading="lazy"
                                                 class="img-css"
-                                                onerror="this.onerror=null; this.src='{% static "img/img_loader.jpg" %}';"
+                                                onerror="this.onerror=null; this.src='{% static "img/not_available.jpg" %}';"
                                             > 
-                                            
                                         </div>
                                         
                                         {% comment %} ESTA PARTE ESTA EN DESRROLLO FALTA TERMINAR {% endcomment %}
@@ -192,7 +202,6 @@
                                         >
                                             Solicitar Producto
                                         </a>
-
                                     </div>
                                 </div>
                             {% endfor %}
