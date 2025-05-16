@@ -12,8 +12,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY', default="asassasadasd")
 DEFAULT_CHARSET = 'utf-8'
 
 DEBUG = 'RENDER' not in os.environ
-# DEBUG = True  # desactivarlo si estás en producción
-DEBUG = False
+DEBUG = True  # desactivarlo si estás en producción
+# DEBUG = False
 
 ALLOWED_HOSTS = []  
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
@@ -67,20 +67,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "landing_page.wsgi.application"
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
 
 # esta configruacion es cuando se conecta de amnera remota a nuestra bd
-DATABASES = {
-    'default': dj_database_url.config(
-        default="postgresql://ibafex:4ngr02QYxXXylde8cq6fdsZU6VmRwisD@dpg-d057chi4d50c73ahcgs0-a.oregon-postgres.render.com/bd_ibafex",
-        conn_max_age=600,
-    )
-}
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default="postgresql://ibafex:4ngr02QYxXXylde8cq6fdsZU6VmRwisD@dpg-d057chi4d50c73ahcgs0-a.oregon-postgres.render.com/bd_ibafex",
+#         conn_max_age=600,
+#     )
+# }
 
 AUTH_PASSWORD_VALIDATORS = [
     {

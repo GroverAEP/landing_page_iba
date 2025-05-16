@@ -18,6 +18,7 @@ def normalize(text):
 def catalog_products(request):
     # Obtener todos los productos
     products = Producto.objects.all()
+    products_total_count = products.count()
     # Obtener solo las categorías que tienen productos asignados
     categories = Categoria.objects.filter(producto__isnull=False).distinct()  # Filtrar categorías con productos
     
@@ -61,8 +62,8 @@ def catalog_products(request):
     elif order_by == 'caro':
         products = products.order_by('-bulk_price')  # Ordenar de mayor a menor precio
     
-    # Paginación: 12 productos por página
-    paginator = Paginator(products, 12)
+    # Paginación: 16 productos por página
+    paginator = Paginator(products, 16)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
@@ -75,7 +76,8 @@ def catalog_products(request):
     
     return render(request, "shop-grid.html", {
         "page_obj": page_obj,  # Paginación de productos
-        "total_products": len(products),  # Total de productos
+        "total_products_filter": len(products),  # Total de productos
+        "products_total_count": products_total_count,
         "categories": categories,  # Las categorías disponibles
         "query":query,
         "querystring": querystring,  # <-- Aquí agregamos esta variable

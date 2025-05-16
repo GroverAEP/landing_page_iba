@@ -64,7 +64,7 @@
                         </div>
                     </div>
                 </div>
-                {% if total_products == 0 %}
+                {% if total_products_filter == 0 %}
                     {% if query %}
                     <div class="container text-center mt-5 mb-5 ">
                         <h3>¡Lo Sentimos!</h3>
@@ -98,35 +98,40 @@
                 {% else %}
                     <div class="col-lg-12 col-md-12">
                         <div class="filter__item">
-                            <div class="row">
-                                <div class="col-lg-3 col-md-5">
-                                    <div class="filter__sort">
-                                        <span>Ordenar Por</span>
-                                        <form action="{% url 'catalog_products' %}" method="GET" onsubmit="saveScrollPosition()" >
-                                            {% csrf_token %}
-                                            <select name="order_by_price" onchange="this.form.submit()" >
-                                                <option value="{% url "catalog_products" %}">Por Defecto</option>
-                                                <option value="caro" {% if request.GET.order_by_price == 'caro' %}selected{% endif %}>Mayor Precio</option>
-                                                <option value="barato" {% if request.GET.order_by_price == 'barato' %}selected{% endif %}>Menor Precio</option>
-                                            </select>
-                                        </form>
+                            <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-center gap-4 py-3">
+                                <!-- Ordenar por -->
+                                <div>
+                                    <form action="{% url 'catalog_products' %}" method="GET" onsubmit="saveScrollPosition()" class="d-flex align-items-center">
+                                        {% csrf_token %}
+                                        <label class="me-2 mb-0 fw-bold">Ordenar Por:</label>
+                                        <select name="order_by_price" onchange="this.form.submit()" class="form-select form-select-sm w-auto">
+                                            <option value="{% url 'catalog_products' %}">Por Defecto</option>
+                                            <option value="caro" {% if request.GET.order_by_price == 'caro' %}selected{% endif %}>Mayor Precio</option>
+                                            <option value="barato" {% if request.GET.order_by_price == 'barato' %}selected{% endif %}>Menor Precio</option>
+                                        </select>
+                                    </form>
+                                </div>
+                                {% if query %}
+                                    <!-- Resultados -->
+                                    <div class="filter__found" >
+                                        <h6 class="mb-0">
+                                            Resultados: <span> ({{ total_products_filter }})</span> / 
+                                            <span>{{ products_total_count }}</span> Productos
+                                        </h6>
                                     </div>
-                                </div>
-
-                                <div class="col-lg-3 col-md-4">
-                                    <div class="filter__found">
-                                        <h6><span>{{ total_products }}</span> Productos</h6>
+                                    <!-- Botón "ver todos los productos" -->
+                                    <div>
+                                        <a class="btn btn-secondary btn-sm" href="{% url 'catalog_products' %}">
+                                            Ver todos los productos
+                                        </a>
                                     </div>
-                                </div>
-
-                                <div class="col-lg-3 col-md-3 delete">
-                                </div>
-                                
-                                <div class="col-lg-3 col-md-3">
-                                    <div class="filter__option">
-                                        <span class="icon_grid-2x2 active"></span>
+                                {% else %}
+                                    <div class="filter__found" >
+                                        <h6 class="mb-0">
+                                            <span>{{ products_total_count }}</span> Productos Total 
+                                        </h6>
                                     </div>
-                                </div>
+                                {% endif %}
                             </div>
                         </div>
                         {% comment %} Productos {% endcomment %}
