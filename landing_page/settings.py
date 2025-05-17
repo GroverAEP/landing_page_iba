@@ -1,28 +1,27 @@
-
 import os
 from pathlib import Path
 import cloudinary
 import dj_database_url
 
-
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 SECRET_KEY = os.environ.get('SECRET_KEY', default="asassasadasd")
-
 DEFAULT_CHARSET = 'utf-8'
-
 DEBUG = 'RENDER' not in os.environ
-# DEBUG = True  # desactivarlo si estás en producción
-DEBUG = False
+DEBUG = False  # desactivarlo si estás en producción
 
-ALLOWED_HOSTS = []  
-RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+ALLOWED_HOSTS = []
+if os.environ.get('RENDER_EXTERNAL_HOSTNAME'):
+    ALLOWED_HOSTS.append(os.environ['RENDER_EXTERNAL_HOSTNAME'])
+    
+# STATICFILES_DIRS se inicia siempre (lista vacía en produccion) 
+# parar q no haiga archivos duplicados ya q collecstatic ya los crea autoamticamente 
+STATICFILES_DIRS = []
 
-# STATICFILES_DIRS = [
-#     BASE_DIR / "products" / "static", #Esta llamando a la app products y a la carpeta static que esta dentro
-# ]
+# solo se ejecutarar el base dir si debug es true es decir que si esta en desarrollo
+if DEBUG:
+    STATICFILES_DIRS = [
+        BASE_DIR / "products" / "static",
+    ]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -73,7 +72,7 @@ WSGI_APPLICATION = "landing_page.wsgi.application"
 #     }
 # }
 
-# esta configruacion es cuando se conecta de amnera remota a nuestra bd
+# Esta configruacion es cuando se conecta de amnera remota a nuestra bd
 DATABASES = {
     'default': dj_database_url.config(
         default="postgresql://ibafex:4ngr02QYxXXylde8cq6fdsZU6VmRwisD@dpg-d057chi4d50c73ahcgs0-a.oregon-postgres.render.com/bd_ibafex",
