@@ -20,10 +20,9 @@ RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
-# STATICFILES_DIRS = [
-#     BASE_DIR / "products" / "static",
-#     BASE_DIR / "products" / "media",
-# ]
+STATICFILES_DIRS = [
+    BASE_DIR / "products" / "static", #Esta llamando a la app products y a la carpeta static que esta dentro
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -106,11 +105,11 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Media files (IMÁGENES SUBIDAS POR EL USUARIO)
+# Media files (IMÁGENES SUBIDAS POR EL USUARIO LOCALMENTE)
 # MEDIA_URL = '/media/'
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'products/media')  # ❌ Ya no se usa, porque usas Cloudinary
 
-# Configuración de Cloudinary
+# Configuración de Cloudinary IMAGENES SUBIDAS 
 cloudinary.config(
     cloud_name='duv5jc1d0',  # Tu nombre de la nube de Cloudinary
     api_key='561134372158658',  # Tu API Key de Cloudinary
