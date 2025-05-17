@@ -1950,6 +1950,11 @@ ol {
 	.hero__categories {
 		margin-bottom: 30px;
 	}
+
+	.filter__found h6 {
+		font-size: 13px;
+	}
+
 	.hero__search {
 		margin-bottom: 30px;
 	}
@@ -2235,10 +2240,6 @@ ol {
 		padding-right: 5px;
     	padding-left: 5px;
     }
-
-	.filter__found h6 {
-		font-size: 13px;
-	}
 }
 
 /* Small Device = 320px */
