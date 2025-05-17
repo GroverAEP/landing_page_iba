@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from django.core.paginator import Paginator
 from .models import Producto, Categoria
-from django.db.models import Q
-# Create your views here.
+# from django.db.models import Q
 import unicodedata
+# Create your views here.
 
 def normalize(text):
     if text is None:
@@ -12,7 +12,7 @@ def normalize(text):
         c for c in unicodedata.normalize('NFD', text)
         if unicodedata.category(c) != 'Mn'
     ).lower()
-    
+
 def catalog_products(request):
     # Obtener todos los productos
     products = Producto.objects.all()
@@ -21,19 +21,23 @@ def catalog_products(request):
     categories = Categoria.objects.filter(producto__isnull=False).distinct()  # Filtrar categorías con productos
     # Filtrar los productos si hay una consulta de búsqueda (por nombre o marca)
     query = request.GET.get('q', '').strip()  # Obtener el valor de búsqueda del parámetro 'q'
+    
     # Si la consulta de búsqueda no está vacía, aplicamos los filtros
     if query:
-        words = query.split()
-        q_objects = Q()
-        for word in words:
-            normalized_word = normalize(word)
-            q_objects |= (
-                Q(name__icontains=normalized_word) |
-                Q(brand__icontains=normalized_word) |
-                Q(category__name__icontains=normalized_word)
-            )
-        products = Producto.objects.filter(q_objects)
-    
+        normalized_query = normalize(query)
+        filtered_products = []
+        for product in products:
+            name = normalize(product.name)
+            brand = normalize(product.brand)
+            category = normalize(product.category.name)
+
+            # Buscamos la frase completa normalizada en alguno de los campos normalizados
+            if (normalized_query in name or
+                normalized_query in brand or
+                normalized_query in category):
+                filtered_products.append(product)
+        products = filtered_products
+        
     selected_category = None
     # Filtrar productos por categoría seleccionada si es necesario
     category_id = request.GET.get('category')
@@ -68,7 +72,7 @@ def catalog_products(request):
         "total_products_filter": len(products),  # Total de productos
         "products_total_count": products_total_count,
         "categories": categories,  # Las categorías disponibles
-        "query":query,
+        "query": query,
         "querystring": querystring,  # <-- Aquí agregamos esta variable
         "selected_category": selected_category,
     })
