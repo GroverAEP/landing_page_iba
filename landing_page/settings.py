@@ -20,9 +20,9 @@ RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
-STATICFILES_DIRS = [
-    BASE_DIR / "products" / "static", #Esta llamando a la app products y a la carpeta static que esta dentro
-]
+# STATICFILES_DIRS = [
+#     BASE_DIR / "products" / "static", #Esta llamando a la app products y a la carpeta static que esta dentro
+# ]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
