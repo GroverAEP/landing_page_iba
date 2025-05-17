@@ -107,7 +107,7 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files (IMÁGENES SUBIDAS POR EL USUARIO)
-MEDIA_URL = '/media/'
+# MEDIA_URL = '/media/'
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'products/media')  # ❌ Ya no se usa, porque usas Cloudinary
 
 # Configuración de Cloudinary
