@@ -2235,6 +2235,10 @@ ol {
 		padding-right: 5px;
     	padding-left: 5px;
     }
+
+	.filter__found h6 {
+		font-size: 13px;
+	}
 }
 
 /* Small Device = 320px */
@@ -2243,7 +2247,9 @@ ol {
 	.hero__search__form form .hero__search__categories {
 		display: none;
 	}
-
+	.filter__found h6 {
+		font-size: 13px;
+	}	
 	.txt__brand__style{
 		font-size: 13px;
 	}
