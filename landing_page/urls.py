@@ -16,15 +16,22 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path, include
-
+from django.urls import path, include, re_path
+from django.views.static import serve
 from django.conf import settings
 from django.conf.urls.static import static
+from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("products.urls"), name="products")
-]# Servir archivos multimedia en desarrollo
+]
+# Sólo en DEBUG sirve estáticos desde disco (o media)
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += [
+        re_path(r'^media/(?P<path>.*)$',
+            serve,
+            {'document_root': BASE_DIR / 'media'}),
+    ]
