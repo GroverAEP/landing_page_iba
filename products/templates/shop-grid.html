@@ -66,34 +66,34 @@
                 </div>
                 {% if total_products_filter == 0 %}
                     {% if query %}
-                    <div class="container text-center mt-5 mb-5 ">
-                        <h3>¡Lo Sentimos!</h3>
-                        <p>No se encontró ningún resultado para tu búsqueda "{{ query }}"</p>
-                        <div>
-                            <ul class="list-unstyled mb-3">
-                                <li>Asegúrate que las palabras estén bien escritas.</li>
-                                <li>Prueba buscando por la marca del producto.</li>
-                                <li>Prueba palabras clave más generales.</li>
-                            </ul>
+                        <div class="container text-center mt-5 mb-5 ">
+                            <h3>¡Lo Sentimos!</h3>
+                            <p>No se encontró ningún resultado para tu búsqueda "{{ query }}"</p>
+                            <div>
+                                <ul class="list-unstyled mb-3">
+                                    <li>Asegúrate que las palabras estén bien escritas.</li>
+                                    <li>Prueba buscando por la marca del producto.</li>
+                                    <li>Prueba palabras clave más generales.</li>
+                                </ul>
+                            </div>
+                            <a class="site-btn" href="{% url "catalog_products" %}"> Volver al inicio </a>
+                            <figure>
+                                <img src="{% static "img/not_results.png" %}" alt="">
+                            </figure>
                         </div>
-                        <a class="site-btn" href="{% url "catalog_products" %}"> Volver al inicio </a>
-                        <figure>
-                            <img src="{% static "img/not_results.png" %}" alt="">
-                        </figure>
-                    </div>
-                {% else %}
-                    <div class="container text-center mt-5 mb-5">
-                        <h3>¡Lo Sentimos!</h3>
-                        <p>No hay productos disponibles en el catálogo.</p>
-                        <div>
-                            <ul class="list-unstyled mb-3">
-                                <li>¡Pronto estarán disponibles nuevos productos!</li>
-                                <li>Te invitamos a regresar más tarde.</li>
-                            </ul>
+                    {% else %}
+                        <div class="container text-center mt-5 mb-5">
+                            <h3>¡Lo Sentimos!</h3>
+                            <p>No hay productos disponibles en el catálogo.</p>
+                            <div>
+                                <ul class="list-unstyled mb-3">
+                                    <li>¡Pronto estarán disponibles nuevos productos!</li>
+                                    <li>Te invitamos a regresar más tarde.</li>
+                                </ul>
+                            </div>
+                            <a class="site-btn" href="{% url "catalog_products" %}"> Volver al inicio </a>
                         </div>
-                        <a class="site-btn" href="{% url "catalog_products" %}"> Volver al inicio </a>
-                    </div>
-                {% endif %}
+                    {% endif %}
                     
                 {% else %}
                     <div class="col-lg-12 col-md-12">
