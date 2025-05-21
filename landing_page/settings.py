@@ -91,7 +91,7 @@ WSGI_APPLICATION = "landing_page.wsgi.application"
 
 # DATABASE CONEXION A NEON
 DATABASES = {
-    'default': dj_database_url.config(
+    'default': dj_database_url.parse(
         # aqui debo hacer la conexion respectiva a neon 
         default='postgresql://neondb_owner:npg_Q3dsFhVKfri2@ep-winter-sky-acuumc1h-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require',
         conn_max_age=600,
