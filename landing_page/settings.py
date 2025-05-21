@@ -2,12 +2,12 @@ import os
 from pathlib import Path
 import cloudinary
 import dj_database_url
-from dotenv import load_dotenv
-from urllib.parse import urlparse
+# from dotenv import load_dotenv
+# from urllib.parse import urlparse
 
-load_dotenv()
-# Replace the DATABASES section of your settings.py with this
-tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
+# load_dotenv()
+# # Replace the DATABASES section of your settings.py with this
+# tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
 
 
 # con la siguiente configuracion puedo trabajar con los datos de la bd remota en mi loca,
