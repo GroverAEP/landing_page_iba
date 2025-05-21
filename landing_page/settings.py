@@ -2,8 +2,13 @@ import os
 from pathlib import Path
 import cloudinary
 import dj_database_url
-# from dotenv import load_dotenv
-# load_dotenv()
+from dotenv import load_dotenv
+from urllib.parse import urlparse
+
+load_dotenv()
+# Replace the DATABASES section of your settings.py with this
+tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
+
 
 # con la siguiente configuracion puedo trabajar con los datos de la bd remota en mi loca,
 # pero si cambiamos de bd remota a local trabajmos con ella exitosamente
@@ -94,14 +99,6 @@ WSGI_APPLICATION = "landing_page.wsgi.application"
 #     )
 # }
 # Add these at the top of your settings.py
-import os
-from dotenv import load_dotenv
-from urllib.parse import urlparse
-
-load_dotenv()
-
-# Replace the DATABASES section of your settings.py with this
-tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
 
 DATABASES = {
     'default': {
