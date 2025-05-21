@@ -76,7 +76,7 @@ WSGI_APPLICATION = "landing_page.wsgi.application"
 #     }
 # }
 
-# Esta configruacion es cuando se conecta de amnera remota a nuestra bd
+# DATABASE CONEXION A RENDER
 # DATABASES = {
 #     'default': dj_database_url.config(
 #         default="postgresql://ibafex:4ngr02QYxXXylde8cq6fdsZU6VmRwisD@dpg-d057chi4d50c73ahcgs0-a.oregon-postgres.render.com/bd_ibafex",
@@ -84,10 +84,11 @@ WSGI_APPLICATION = "landing_page.wsgi.application"
 #     )
 # }
 
+# DATABASE CONEXION A NEON
 DATABASES = {
-    'default': dj_database_url.parse(
+    'default': dj_database_url.config(
         # aqui debo hacer la conexion respectiva a neon 
-        'postgresql://neondb_owner:npg_Q3dsFhVKfri2@ep-winter-sky-acuumc1h-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require',
+        default='postgresql://neondb_owner:npg_Q3dsFhVKfri2@ep-winter-sky-acuumc1h-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require',
         conn_max_age=600,
         ssl_require=True
     )
