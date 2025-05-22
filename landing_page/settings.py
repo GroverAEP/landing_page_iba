@@ -82,12 +82,12 @@ WSGI_APPLICATION = "landing_page.wsgi.application"
 # }
 
 # DATABASE CONEXION A RENDER
-# DATABASES = {
-#     'default': dj_database_url.config(
-#         default="postgresql://ibafex:4ngr02QYxXXylde8cq6fdsZU6VmRwisD@dpg-d057chi4d50c73ahcgs0-a.oregon-postgres.render.com/bd_ibafex",
-#         conn_max_age=600,
-#     )
-# }
+DATABASES = {
+    'default': dj_database_url.config(
+        default="postgresql://ibafex:4ngr02QYxXXylde8cq6fdsZU6VmRwisD@dpg-d057chi4d50c73ahcgs0-a.oregon-postgres.render.com/bd_ibafex",
+        conn_max_age=600,
+    )
+}
 
 # DATABASE CONEXION A NEON
 # DATABASES = {
@@ -99,33 +99,19 @@ WSGI_APPLICATION = "landing_page.wsgi.application"
 #     )
 # }
 
-
-# Add these at the top of your settings.py
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': tmpPostgres.path.replace('/', ''),
-#         'USER': tmpPostgres.username,
-#         'PASSWORD': tmpPostgres.password,
-#         'HOST': tmpPostgres.hostname,
-#         'PORT': 5432,
+#         'NAME': 'neondb',
+#         'USER': 'neondb_owner',
+#         'PASSWORD': 'npg_Q3dsFhVKfri2',
+#         'HOST': 'ep-winter-sky-acuumc1h-pooler.sa-east-1.aws.neon.tech',
+#         'PORT': '5432',
+#         'OPTIONS': {
+#             'sslmode': 'require',
+#         },
 #     }
 # }
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'neondb',
-        'USER': 'neondb_owner',
-        'PASSWORD': 'npg_Q3dsFhVKfri2',
-        'HOST': 'ep-winter-sky-acuumc1h-pooler.sa-east-1.aws.neon.tech',
-        'PORT': '5432',
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
-    }
-}
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
