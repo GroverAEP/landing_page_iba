@@ -82,12 +82,12 @@ WSGI_APPLICATION = "landing_page.wsgi.application"
 # }
 
 # DATABASE CONEXION A RENDER
-DATABASES = {
-    'default': dj_database_url.config(
-        default="postgresql://ibafex:4ngr02QYxXXylde8cq6fdsZU6VmRwisD@dpg-d057chi4d50c73ahcgs0-a.oregon-postgres.render.com/bd_ibafex",
-        conn_max_age=600,
-    )
-}
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default="postgresql://ibafex:4ngr02QYxXXylde8cq6fdsZU6VmRwisD@dpg-d057chi4d50c73ahcgs0-a.oregon-postgres.render.com/bd_ibafex",
+#         conn_max_age=600,
+#     )
+# }
 
 # DATABASE CONEXION A NEON
 # DATABASES = {
