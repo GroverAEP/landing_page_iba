@@ -3,7 +3,7 @@ from django import template
 register = template.Library()
 
 @register.filter
-def cloudinary_transform(url, params="w_300,h_300,c_fill,f_auto,q_auto"):
+def cloudinary_transform(url, params="w_900,h_900,c_fill,f_auto,q_auto"):
     if not url:
         return ""
     parts = url.split("/upload/")

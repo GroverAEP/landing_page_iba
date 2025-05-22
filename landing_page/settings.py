@@ -74,6 +74,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "landing_page.wsgi.application"
 
+# DATABASE CONEXION LOCAL
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "django.db.backends.sqlite3",
@@ -90,15 +91,6 @@ WSGI_APPLICATION = "landing_page.wsgi.application"
 # }
 
 # DATABASE CONEXION A NEON
-# DATABASES = {
-#     'default': dj_database_url.parse(
-#         # aqui debo hacer la conexion respectiva a neon 
-#         'postgresql://neondb_owner:npg_Q3dsFhVKfri2@ep-winter-sky-acuumc1h-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require',
-#         conn_max_age=600,
-#         ssl_require=True
-#     )
-# }
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -113,6 +105,16 @@ DATABASES = {
         },
     }
 }
+
+# DATABASES = {
+#     'default': dj_database_url.parse(
+#         # aqui debo hacer la conexion respectiva a neon 
+#         'postgresql://neondb_owner:npg_Q3dsFhVKfri2@ep-winter-sky-acuumc1h-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require',
+#         conn_max_age=600,
+#         ssl_require=True
+#     )
+# }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
