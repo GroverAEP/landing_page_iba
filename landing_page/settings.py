@@ -99,19 +99,20 @@ DATABASES = {
 #     )
 # }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'neondb',
-#         'USER': 'neondb_owner',
-#         'PASSWORD': 'npg_Q3dsFhVKfri2',
-#         'HOST': 'ep-winter-sky-acuumc1h-pooler.sa-east-1.aws.neon.tech',
-#         'PORT': '5432',
-#         'OPTIONS': {
-#             'sslmode': 'require',
-#         },
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'ibafex_bd',
+        'USER': 'ibafex_bd_owner',
+        'PASSWORD': 'npg_9iaWAcweIb2o',
+        'HOST': 'ep-restless-union-a6yj00of-pooler.us-west-2.aws.neon.tech',
+        'PORT': '5432',
+        'CONN_MAX_AGE': 600,
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
+    }
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
