@@ -98,8 +98,9 @@ DATABASES = {
 #         ssl_require=True
 #     )
 # }
-# Add these at the top of your settings.py
 
+
+# Add these at the top of your settings.py
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
@@ -110,6 +111,21 @@ DATABASES = {
 #         'PORT': 5432,
 #     }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'neondb',
+        'USER': 'neondb_owner',
+        'PASSWORD': 'npg_Q3dsFhVKfri2',
+        'HOST': 'ep-winter-sky-acuumc1h-pooler.sa-east-1.aws.neon.tech',
+        'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
+    }
+}
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
