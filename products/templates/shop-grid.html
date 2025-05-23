@@ -168,11 +168,17 @@
                                                     ¡AGOTADO!
                                                 </div>
                                             {% endif %}
+
+                                            {% comment %} <div class="preloader" id="preloader-{{ product.id }}">
+                                                <div class="spinner"></div>
+                                            </div> {% endcomment %}
+
                                             <img 
                                                 src="{{ product.image.url|cloudinary_transform }}"
                                                 alt="{{ product.name }}" 
                                                 loading="lazy"
                                                 class="img-css"
+                                                {% comment %} onload="setTimeout(() => { document.getElementById('preloader-{{ product.id }}').style.display = 'none'; }, 2000);" {% endcomment %}
                                                 onerror="this.onerror=null; this.src='{% static "img/not_available.jpg" %}';"
                                             > 
                                         </div>
