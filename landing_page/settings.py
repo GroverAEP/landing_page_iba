@@ -91,20 +91,20 @@ WSGI_APPLICATION = "landing_page.wsgi.application"
 # }
 
 # DATABASE CONEXION A NEON
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ibafex_bd',
-        'USER': 'ibafex_bd_owner',
-        'PASSWORD': 'npg_9iaWAcweIb2o',
-        'HOST': 'ep-restless-union-a6yj00of-pooler.us-west-2.aws.neon.tech',
-        'PORT': '5432',
-        'CONN_MAX_AGE': 600,
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'ibafex_bd',
+#         'USER': 'ibafex_bd_owner',
+#         'PASSWORD': 'npg_9iaWAcweIb2o',
+#         'HOST': 'ep-restless-union-a6yj00of-pooler.us-west-2.aws.neon.tech',
+#         'PORT': '5432',
+#         'CONN_MAX_AGE': 600,
+#         'OPTIONS': {
+#             'sslmode': 'require',
+#         },
+#     }
+# }
 
 # DATABASES = {
 #     'default': dj_database_url.parse(
@@ -114,6 +114,18 @@ DATABASES = {
 #         ssl_require=True
 #     )
 # }
+
+# DATABASE CONEXION A RAILWAY
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'railway',  # nombre de la base de datos
+        'USER': 'postgres',  # usuario
+        'PASSWORD': 'BMUXzGhsYYtjHMyJUGLSfqbRFuOQTJyM',  # contraseña
+        'HOST': 'shuttle.proxy.rlwy.net',  # host
+        'PORT': '16472',  # puerto
+    }
+}
 
 
 AUTH_PASSWORD_VALIDATORS = [
