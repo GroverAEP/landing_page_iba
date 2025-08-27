@@ -103,6 +103,7 @@ DATABASES = {
         'CONN_MAX_AGE': 600,
         'OPTIONS': {
             'sslmode': 'require',
+            'options': '-c search_path=public',   # 👈 esto es lo que faltaba
         },
     }
 }
