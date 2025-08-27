@@ -90,14 +90,15 @@ WSGI_APPLICATION = "landing_page.wsgi.application"
 #     )
 # }
 
-# DATABASE CONEXION A NEON - INFOPILLACA
+
+# DATABASE CONEXION A NEON - PILLAMARLON
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ibafex_bd',
-        'USER': 'ibafex_bd_owner',
-        'PASSWORD': 'npg_9iaWAcweIb2o',
-        'HOST': 'ep-restless-union-a6yj00of-pooler.us-west-2.aws.neon.tech',
+        'NAME': 'neondb',
+        'USER': 'neondb_owner',
+        'PASSWORD': 'npg_T3A4VFPKEcLi',
+        'HOST': 'ep-damp-meadow-afdzvw41-pooler.c-2.us-west-2.aws.neon.tech',
         'PORT': '5432',
         'CONN_MAX_AGE': 600,
         'OPTIONS': {
@@ -105,6 +106,23 @@ DATABASES = {
         },
     }
 }
+
+
+# DATABASE CONEXION A NEON - INFOPILLACA
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'ibafex_bd',
+#         'USER': 'ibafex_bd_owner',
+#         'PASSWORD': 'npg_9iaWAcweIb2o',
+#         'HOST': 'ep-restless-union-a6yj00of-pooler.us-west-2.aws.neon.tech',
+#         'PORT': '5432',
+#         'CONN_MAX_AGE': 600,
+#         'OPTIONS': {
+#             'sslmode': 'require',
+#         },
+#     }
+# }
 
 
 # DATABASE CONEXION A NEON - GHOSTH
