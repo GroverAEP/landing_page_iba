@@ -97,8 +97,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'neondb',
         'USER': 'neondb_owner',
-        'PASSWORD': 'npg_T3A4VFPKEcLi',
-        'HOST': 'ep-damp-meadow-afdzvw41-pooler.c-2.us-west-2.aws.neon.tech',
+        'PASSWORD': 'npg_H5uwhjm9Yqnf',
+        'HOST': 'ep-summer-sunset-afx0445l-pooler.c-2.us-west-2.aws.neon.tech',
         'PORT': '5432',
         'CONN_MAX_AGE': 600,
         'OPTIONS': {
