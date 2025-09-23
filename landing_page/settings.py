@@ -125,15 +125,14 @@ WSGI_APPLICATION = "landing_page.wsgi.application"
 #     }
 # }
 
-
-# DATABASE CONEXION A NEON - GHOSTH
+# DATABASE CONEXION A NEON - INFOPILLACA - ibafex1
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'neondb',
         'USER': 'neondb_owner',
-        'PASSWORD': 'npg_Q5xfMSD2Wdpn',
-        'HOST': 'ep-divine-lake-affqyq3x-pooler.c-2.us-west-2.aws.neon.tech',
+        'PASSWORD': 'npg_cNKSIHpf9v1s',
+        'HOST': 'ep-super-hall-afw1uarg-pooler.c-2.us-west-2.aws.neon.tech',
         'PORT': '5432',
         'CONN_MAX_AGE': 600,
         'OPTIONS': {
@@ -141,6 +140,23 @@ DATABASES = {
         },
     }
 }
+
+
+# DATABASE CONEXION A NEON - GHOSTH
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'neondb',
+#         'USER': 'neondb_owner',
+#         'PASSWORD': 'npg_Q5xfMSD2Wdpn',
+#         'HOST': 'ep-divine-lake-affqyq3x-pooler.c-2.us-west-2.aws.neon.tech',
+#         'PORT': '5432',
+#         'CONN_MAX_AGE': 600,
+#         'OPTIONS': {
+#             'sslmode': 'require',
+#         },
+#     }
+# }
 
 
 
