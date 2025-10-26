@@ -16,6 +16,11 @@ def normalize(text):
     ).lower()
 
 def catalog_products(request):
+    
+    counter, created = VisitCounter.objects.get_or_create(page_name="catalogo")
+    counter.visits += 1
+    counter.save()
+    
     # Obtener todos los productos
     products = Producto.objects.all()
     products_total_count = products.count()
@@ -68,7 +73,7 @@ def catalog_products(request):
         params.pop('page')
 
     querystring = params.urlencode()
-    
+        
     return render(request, "shop-grid.html", {
         "page_obj": page_obj,  # Paginación de productos
         "total_products_filter": len(products),  # Total de productos
@@ -80,9 +85,95 @@ def catalog_products(request):
     })
     
     
-def catalog_products(request):
-    counter, created = VisitCounter.objects.get_or_create(page_name="catalogo")
-    counter.visits += 1
-    counter.save()
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
-    return render(request, 'shop-grid.html')
+
+# AGREGAR MAS ADELANTE CUANDO SE NECESITE
+# from django.shortcuts import render
+# from django.core.paginator import Paginator
+# from .models import Producto, Categoria, VisitCounter
+# import unicodedata
+
+# def normalize(text):
+#     if text is None:
+#         return ""
+#     return ''.join(
+#         c for c in unicodedata.normalize('NFD', text)
+#         if unicodedata.category(c) != 'Mn'
+#     ).lower()
+
+# def catalog_products(request):
+#     # --- 💡 NUEVO BLOQUE: Controlar visitas únicas con cookie ---
+#     cookie_name = "visited_catalogo"
+#     if not request.COOKIES.get(cookie_name):
+#         counter, created = VisitCounter.objects.get_or_create(page_name="catalogo")
+#         counter.visits += 1
+#         counter.save()
+#     # -------------------------------------------------------------
+
+#     products = Producto.objects.all()
+#     products_total_count = products.count()
+#     categories = Categoria.objects.filter(producto__isnull=False).distinct()
+#     query = request.GET.get('q', '').strip()
+
+#     if query:
+#         normalized_query = normalize(query)
+#         filtered_products = []
+#         for product in products:
+#             name = normalize(product.name)
+#             brand = normalize(product.brand)
+#             category = normalize(product.category.name)
+#             if (normalized_query in name or
+#                 normalized_query in brand or
+#                 normalized_query in category):
+#                 filtered_products.append(product)
+#         products = filtered_products
+
+#     selected_category = None
+#     category_id = request.GET.get('category')
+#     if category_id:
+#         products = products.filter(category_id=category_id)
+#         try:
+#             selected_category = Categoria.objects.get(id=category_id)
+#         except Categoria.DoesNotExist:
+#             selected_category = None
+
+#     order_by = request.GET.get('order_by_price')
+#     if order_by == 'barato':
+#         products = products.order_by('bulk_price')
+#     elif order_by == 'caro':
+#         products = products.order_by('-bulk_price')
+
+#     paginator = Paginator(products, 16)
+#     page_number = request.GET.get('page')
+#     page_obj = paginator.get_page(page_number)
+
+#     params = request.GET.copy()
+#     if 'page' in params:
+#         params.pop('page')
+#     querystring = params.urlencode()
+
+#     # --- 💡 NUEVO: responder con cookie si no existía ---
+#     response = render(request, "shop-grid.html", {
+#         "page_obj": page_obj,
+#         "total_products_filter": len(products),
+#         "products_total_count": products_total_count,
+#         "categories": categories,
+#         "query": query,
+#         "querystring": querystring,
+#         "selected_category": selected_category,
+#     })
+
+#     if not request.COOKIES.get(cookie_name):
+#         # La cookie dura 24 horas (puedes cambiarlo)
+#         response.set_cookie(cookie_name, "true", max_age=60*60*24)
+#     return response

@@ -91,11 +91,15 @@ class Producto(models.Model):
     
     
 class VisitCounter(models.Model):
-    page_name = models.CharField(max_length=100, unique=True)
-    visits = models.PositiveIntegerField(default=0)
+    page_name = models.CharField(max_length=255, verbose_name="Página")
+    visits = models.IntegerField(default=0, verbose_name="Visitas")
+
+    class Meta:
+        verbose_name = "Ver visitas"
+        verbose_name_plural = "Ver visitas"
 
     def __str__(self):
-        return f"{self.page_name} - {self.visits} visitas"
+        return f"{self.page_name} ({self.visits} visitas)"
     
     
 # Función que elimina la imagen del producto cuando se elimina el producto
