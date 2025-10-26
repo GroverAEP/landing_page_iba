@@ -89,6 +89,15 @@ class Producto(models.Model):
     def __str__(self):
         return self.name
     
+    
+class VisitCounter(models.Model):
+    page_name = models.CharField(max_length=100, unique=True)
+    visits = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.page_name} - {self.visits} visitas"
+    
+    
 # Función que elimina la imagen del producto cuando se elimina el producto
 # @receiver(post_delete, sender=Producto)
 # def delete_product_image(sender, instance, **kwargs):

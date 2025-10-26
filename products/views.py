@@ -4,6 +4,8 @@ from .models import Producto, Categoria
 # from django.db.models import Q
 import unicodedata
 # Create your views here.
+from .models import VisitCounter
+from django.shortcuts import render
 
 def normalize(text):
     if text is None:
@@ -76,3 +78,11 @@ def catalog_products(request):
         "querystring": querystring,  # <-- Aquí agregamos esta variable
         "selected_category": selected_category,
     })
+    
+    
+def catalog_products(request):
+    counter, created = VisitCounter.objects.get_or_create(page_name="catalogo")
+    counter.visits += 1
+    counter.save()
+
+    return render(request, 'shop-grid.html')
