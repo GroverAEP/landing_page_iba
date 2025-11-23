@@ -1,5 +1,7 @@
 from django.contrib import admin
 from .models import Producto, Categoria, UnidadMedida, VisitCounter
+from django.utils.translation import gettext_lazy as _
+
 
 # Acción personalizada para marcar varios productos como agotados
 def marcar_como_agotados(modeladmin, request, queryset):
@@ -57,23 +59,35 @@ class UnidadMedidadAdmin(admin.ModelAdmin):
     list_dispaly = ('name')
 
 
+class MonthListFilter(admin.SimpleListFilter):
+    title = _('Mes')
+    parameter_name = 'month'
+
+    def lookups(self, request, model_admin):
+        # Devuelve los meses que existen en la tabla
+        months = VisitCounter.objects.dates('date', 'month', order='DESC')
+        return [(m.month, m.strftime('%B %Y')) for m in months]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            month = int(self.value())
+            return queryset.filter(date__month=month)
+        return queryset
+
 @admin.register(VisitCounter)
 class VisitCounterAdmin(admin.ModelAdmin):
-    list_display = ('page_name', 'visits')
-    # Opcional: si no quieres que se pueda hacer clic en la fila
-    readonly_fields = ('page_name', 'visits')
+    list_display = ('page_name', 'date', 'visits')
+    list_filter = (MonthListFilter, 'page_name')  # Filtro por mes y página
+    readonly_fields = ('page_name', 'visits', 'date')
 
-    # 🚫 No permitir añadir nuevos registros
+    # Evitar cambios manuales
     def has_add_permission(self, request):
         return False
-
-    # 🚫 No permitir eliminar registros
     def has_delete_permission(self, request, obj=None):
         return False
-
-    # 🚫 No permitir editar registros existentes
     def has_change_permission(self, request, obj=None):
         return False
+    
     
 # Registro del modelo 'Producto' con la clase 'ProductoAdmin'
 admin.site.register(Producto, ProductoAdmin)

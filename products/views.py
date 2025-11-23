@@ -6,6 +6,7 @@ import unicodedata
 # Create your views here.
 from .models import VisitCounter
 from django.shortcuts import render
+from django.utils import timezone
 
 def normalize(text):
     if text is None:
@@ -17,7 +18,11 @@ def normalize(text):
 
 def catalog_products(request):
     
-    counter, created = VisitCounter.objects.get_or_create(page_name="catalogo")
+    today = timezone.localdate()  # Obtiene la fecha actual sin hora
+    counter, created = VisitCounter.objects.get_or_create(
+        page_name="catalogo",
+        date=today
+    )
     counter.visits += 1
     counter.save()
     

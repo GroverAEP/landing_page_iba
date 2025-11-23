@@ -2,6 +2,7 @@ from django.db import models
 # import unicodedata
 from django.core.validators import MinValueValidator
 from cloudinary.models import CloudinaryField
+from django.utils import timezone
 
 # Crear el modelo de categorías
 class Categoria(models.Model):
@@ -89,18 +90,19 @@ class Producto(models.Model):
     def __str__(self):
         return self.name
     
-    
+
 class VisitCounter(models.Model):
     page_name = models.CharField(max_length=255, verbose_name="Página")
     visits = models.IntegerField(default=0, verbose_name="Visitas")
+    date = models.DateField(default=timezone.now, verbose_name="Fecha")  # Nuevo campo
 
     class Meta:
         verbose_name = "Ver visitas"
         verbose_name_plural = "Ver visitas"
+        unique_together = ('page_name', 'date')  # Evita duplicados por día
 
     def __str__(self):
-        return f"{self.page_name} ({self.visits} visitas)"
-    
+        return f"{self.page_name} ({self.visits} visitas, {self.date})"
     
 # Función que elimina la imagen del producto cuando se elimina el producto
 # @receiver(post_delete, sender=Producto)
