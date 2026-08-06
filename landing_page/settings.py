@@ -96,7 +96,7 @@ WSGI_APPLICATION = "landing_page.wsgi.application"
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
 #         'NAME': 'neondb',
-#         'USER': 'neondb_owner',
+#         'USER': 'neondb',
 #         'PASSWORD': 'npg_cNKSIHpf9v1s',
 #         'HOST': 'ep-super-hall-afw1uarg-pooler.c-2.us-west-2.aws.neon.tech',
 #         'PORT': '5432',
@@ -109,17 +109,34 @@ WSGI_APPLICATION = "landing_page.wsgi.application"
 
 
 # DATABASE CONEXION A NEON - INFOPILLACA - ibafex2
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'neondb',
+#         'USER': 'neondb_owner',
+#         'PASSWORD': 'npg_PbML6quVT7fo',
+#         'HOST': 'ep-summer-paper-afaep138-pooler.c-2.us-west-2.aws.neon.tech',
+#         'PORT': '5432',
+#         'CONN_MAX_AGE': 600,
+#         'OPTIONS': {
+#             'sslmode': 'require',
+#         },
+#     }
+# }
+
+
+# DATABASE CONEXION A SUPABASE - INFOPILLACA - ibafex
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'neondb',
-        'USER': 'neondb_owner',
-        'PASSWORD': 'npg_PbML6quVT7fo',
-        'HOST': 'ep-summer-paper-afaep138-pooler.c-2.us-west-2.aws.neon.tech',
-        'PORT': '5432',
-        'CONN_MAX_AGE': 600,
-        'OPTIONS': {
-            'sslmode': 'require',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "postgres",
+        "USER": "postgres",
+        "PASSWORD": "DNnw9BU32yvafY3c",
+        "HOST": "db.grmryeseuwnlbodielqh.supabase.co",
+        "PORT": "5432",
+        "CONN_MAX_AGE": 600,
+        "OPTIONS": {
+            "sslmode": "require",
         },
     }
 }
