@@ -1,7 +1,14 @@
 db/
 db.sqlite3
+
 # Entornos virtuales
 venv/
 .env/
+
+# Django
+__pycache__/
+*.py[cod]
+
+# Archivos generados
 product/
 media/
