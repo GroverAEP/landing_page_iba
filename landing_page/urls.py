@@ -26,7 +26,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include("products.urls"), name="products")
+    path("", include("products.urls"), name="products"),
+    path('administracion/', include('administracion.urls'),name="administracion"),
 ]
 # Sólo en DEBUG sirve estáticos desde disco (o media)
 if settings.DEBUG:

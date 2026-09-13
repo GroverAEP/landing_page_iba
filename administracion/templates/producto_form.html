@@ -1,0 +1,370 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% if modo == 'crear' %}Nuevo producto{% else %}Editar producto{% endif %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde-principal: #107B12;
+    --verde-oscuro: #0B7A10;
+    --naranja: #F59E0B;
+    --rojo-agotado: #DC3646;
+    --blanco: #FFFFFF;
+    --gris-fondo: #F5F5F5;
+    --gris-borde: #E3E4E1;
+    --texto: #444444;
+    --texto-secundario: #777777;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Inter', sans-serif;
+    color: var(--texto);
+    background: var(--gris-fondo);
+  }
+  .contenedor {
+    max-width: 640px;
+    margin: 48px auto;
+    padding: 0 24px;
+  }
+  .volver {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--texto-secundario);
+    text-decoration: none;
+    margin-bottom: 20px;
+  }
+  .volver:hover { color: var(--verde-principal); }
+
+  .tarjeta {
+    background: var(--blanco);
+    border: 1px solid var(--gris-borde);
+    border-radius: 12px;
+    padding: 32px;
+  }
+
+  h1 {
+    font-family: 'Sora', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 6px;
+  }
+
+  .subtitulo {
+    font-size: 14px;
+    color: var(--texto-secundario);
+    margin: 0 0 28px;
+  }
+
+  .fila-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .campo { margin-bottom: 20px; }
+
+  .campo label {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 7px;
+  }
+
+  .campo input[type="text"],
+  .campo input[type="number"],
+  .campo input[type="file"],
+  .campo select {
+    width: 100%;
+    padding: 11px 13px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    color: var(--texto);
+    background: var(--gris-fondo);
+    border: 1.5px solid var(--gris-borde);
+    border-radius: 8px;
+    outline: none;
+  }
+
+  .campo input:focus, .campo select:focus {
+    border-color: var(--verde-principal);
+    background: var(--blanco);
+  }
+
+  .campo-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .campo-check input { accent-color: var(--verde-principal); width: 17px; height: 17px; }
+  .campo-check label { font-size: 14px; font-weight: 500; margin: 0; }
+
+  .errores {
+    background: #FDEEEF;
+    border: 1px solid var(--rojo-agotado);
+    color: var(--rojo-agotado);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  .imagen-actual {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 12.5px;
+    color: var(--texto-secundario);
+  }
+
+  .imagen-actual img {
+    width: 46px; height: 46px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid var(--gris-borde);
+  }
+
+  .acciones {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .btn-primario {
+    padding: 12px 22px;
+    background: var(--verde-principal);
+    color: var(--blanco);
+    border: none;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-primario:hover { background: var(--verde-oscuro); }
+
+  .btn-secundario {
+    padding: 12px 22px;
+    background: var(--blanco);
+    color: var(--texto);
+    border: 1.5px solid var(--gris-borde);
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+  }
+  .btn-secundario:hover { border-color: var(--texto-secundario); }
+</style>
+</head>
+<body>
+
+<div class="contenedor">
+  <a href="{% url 'panel' %}" class="volver">&larr; Volver al panel</a>
+
+  <div class="tarjeta">
+    <h1>{% if modo == 'crear' %}Nuevo producto{% else %}Editar producto{% endif %}</h1>
+    <p class="subtitulo">
+      {% if modo == 'crear' %}
+        Completa los datos para agregarlo al catálogo.
+      {% else %}
+        Actualiza la información de <strong>{{ producto.name }}</strong>.
+      {% endif %}
+    </p>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="errores">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      {% if modo == 'editar' and producto.image %}
+        <div class="imagen-actual">
+          <img src="{{ producto.image.url }}" alt="{{ producto.name }}">
+          Imagen actual (sube una nueva abajo para reemplazarla)
+        </div>
+      {% endif %}
+
+      <div class="campo">
+        <label for="{{ form.image.id_for_label }}">Imagen del producto</label>
+        {{ form.image }}
+        <div id="vista-previa-imagen" style="display:none; margin-top:10px;">
+          <img id="vista-previa-imagen-tag" src="" alt="Vista previa" style="width:90px; height:90px; object-fit:cover; border-radius:8px; border:1px solid var(--gris-borde);">
+        </div>
+        <div id="error-imagen-js" class="errores" style="display:none;"></div>
+        {% if form.image.errors %}<div class="errores">{{ form.image.errors }}</div>{% endif %}
+      </div>
+
+      <div class="fila-2">
+        <div class="campo">
+          <label for="{{ form.name.id_for_label }}">Nombre</label>
+          {{ form.name }}
+          {% if form.name.errors %}<div class="errores">{{ form.name.errors }}</div>{% endif %}
+        </div>
+        <div class="campo">
+          <label for="{{ form.brand.id_for_label }}">Marca</label>
+          {{ form.brand }}
+          {% if form.brand.errors %}<div class="errores">{{ form.brand.errors }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="{{ form.categoria_texto.id_for_label }}">Categoría</label>
+        {{ form.categoria_texto }}
+        <datalist id="lista-categorias">
+          {% for c in categorias %}
+            <option value="{{ c.name }}">
+          {% endfor %}
+        </datalist>
+        {% if form.categoria_texto.errors %}<div class="errores">{{ form.categoria_texto.errors }}</div>{% endif %}
+      </div>
+
+      <div class="fila-2">
+        <div class="campo">
+          <label for="{{ form.unit_price.id_for_label }}">Precio por unidad (S/)</label>
+          {{ form.unit_price }}
+          {% if form.unit_price.errors %}<div class="errores">{{ form.unit_price.errors }}</div>{% endif %}
+        </div>
+        <div class="campo">
+          <label for="{{ form.unidad_texto.id_for_label }}">Unidad de medida</label>
+          {{ form.unidad_texto }}
+          <datalist id="lista-unidades">
+            {% for u in unidades %}
+              <option value="{{ u.name }}">
+            {% endfor %}
+          </datalist>
+          {% if form.unidad_texto.errors %}<div class="errores">{{ form.unidad_texto.errors }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="fila-2">
+        <div class="campo">
+          <label for="{{ form.bulk_price.id_for_label }}">Precio por paquete (opcional)</label>
+          {{ form.bulk_price }}
+          {% if form.bulk_price.errors %}<div class="errores">{{ form.bulk_price.errors }}</div>{% endif %}
+        </div>
+        <div class="campo">
+          <label for="{{ form.unidad_paquete_texto.id_for_label }}">Unidad de paquete (opcional)</label>
+          {{ form.unidad_paquete_texto }}
+          {% if form.unidad_paquete_texto.errors %}<div class="errores">{{ form.unidad_paquete_texto.errors }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="campo-check">
+        {{ form.product_of_stock }}
+        <label for="{{ form.product_of_stock.id_for_label }}">Producto disponible</label>
+      </div>
+
+      <div class="acciones">
+        <button type="submit" class="btn-primario">
+          {% if modo == 'crear' %}Crear producto{% else %}Guardar cambios{% endif %}
+        </button>
+        <a href="{% url 'panel' %}" class="btn-secundario">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+  (function () {
+    var LIMITE_MB = 10;
+    var LIMITE_BYTES = LIMITE_MB * 1024 * 1024;
+    var EXTENSIONES_PERMITIDAS = ['.png', '.jpg', '.jpeg', '.svg'];
+    var TIPOS_PERMITIDOS = ['image/png', 'image/jpeg', 'image/svg+xml'];
+
+    var inputImagen = document.getElementById('{{ form.image.id_for_label }}');
+    var divError = document.getElementById('error-imagen-js');
+    var divPreview = document.getElementById('vista-previa-imagen');
+    var tagPreview = document.getElementById('vista-previa-imagen-tag');
+    var formulario = document.querySelector('form');
+
+    function mostrarError(mensaje) {
+      divError.textContent = mensaje;
+      divError.style.display = 'block';
+    }
+
+    function ocultarError() {
+      divError.style.display = 'none';
+      divError.textContent = '';
+    }
+
+    function ocultarPreview() {
+      divPreview.style.display = 'none';
+      tagPreview.src = '';
+    }
+
+    function extensionValida(nombreArchivo) {
+      var nombre = nombreArchivo.toLowerCase();
+      return EXTENSIONES_PERMITIDAS.some(function (ext) {
+        return nombre.endsWith(ext);
+      });
+    }
+
+    function tipoValido(archivo) {
+      // Si el navegador no reconoce el MIME type (pasa a veces con SVG), nos apoyamos solo en la extensión.
+      if (!archivo.type) return true;
+      return TIPOS_PERMITIDOS.indexOf(archivo.type) !== -1;
+    }
+
+    function validarArchivo(archivo) {
+      if (!extensionValida(archivo.name) || !tipoValido(archivo)) {
+        mostrarError('Formato no permitido. Solo se aceptan imágenes PNG, JPG o SVG.');
+        return false;
+      }
+      if (archivo.size > LIMITE_BYTES) {
+        var pesoMB = (archivo.size / (1024 * 1024)).toFixed(1);
+        mostrarError('La imagen pesa ' + pesoMB + 'MB. El máximo permitido es ' + LIMITE_MB + 'MB.');
+        return false;
+      }
+      return true;
+    }
+
+    // Valida y muestra vista previa apenas el usuario elige el archivo
+    if (inputImagen) {
+      inputImagen.addEventListener('change', function () {
+        ocultarError();
+        ocultarPreview();
+        var archivo = inputImagen.files[0];
+        if (!archivo) return;
+
+        if (!validarArchivo(archivo)) {
+          inputImagen.value = ''; // limpia el input para que no se pueda enviar
+          return;
+        }
+
+        var lector = new FileReader();
+        lector.onload = function (evento) {
+          tagPreview.src = evento.target.result;
+          divPreview.style.display = 'block';
+        };
+        lector.readAsDataURL(archivo);
+      });
+    }
+
+    // Validación de respaldo al enviar el formulario
+    if (formulario) {
+      formulario.addEventListener('submit', function (evento) {
+        if (inputImagen && inputImagen.files.length > 0) {
+          var archivo = inputImagen.files[0];
+          if (!validarArchivo(archivo)) {
+            evento.preventDefault();
+          }
+        }
+      });
+    }
+  })();
+</script>
+
+</body>
+</html>

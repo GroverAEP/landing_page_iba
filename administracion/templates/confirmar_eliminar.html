@@ -1,0 +1,81 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eliminar producto</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde-principal: #107B12;
+    --rojo-agotado: #DC3646;
+    --blanco: #FFFFFF;
+    --gris-fondo: #F5F5F5;
+    --gris-borde: #E3E4E1;
+    --texto: #444444;
+    --texto-secundario: #777777;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: var(--gris-fondo);
+    color: var(--texto);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  .tarjeta {
+    background: var(--blanco);
+    border: 1px solid var(--gris-borde);
+    border-radius: 12px;
+    padding: 32px;
+    max-width: 420px;
+    width: 90%;
+  }
+  h1 {
+    font-family: 'Sora', sans-serif;
+    font-size: 19px;
+    margin: 0 0 10px;
+  }
+  p { font-size: 14px; color: var(--texto-secundario); line-height: 1.5; margin: 0 0 24px; }
+  strong { color: var(--texto); }
+  .acciones { display: flex; gap: 12px; }
+  .btn-eliminar {
+    padding: 11px 20px;
+    background: var(--rojo-agotado);
+    color: var(--blanco);
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-cancelar {
+    padding: 11px 20px;
+    background: var(--blanco);
+    border: 1.5px solid var(--gris-borde);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--texto);
+  }
+</style>
+</head>
+<body>
+  <div class="tarjeta">
+    <h1>¿Eliminar este producto?</h1>
+    <p>Esta acción no se puede deshacer. Vas a eliminar <strong>{{ producto.name }}</strong> del catálogo.</p>
+    <form method="post">
+      {% csrf_token %}
+      <div class="acciones">
+        <button type="submit" class="btn-eliminar">Sí, eliminar</button>
+        <a href="{% url 'panel' %}" class="btn-cancelar">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

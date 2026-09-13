@@ -1,0 +1,477 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel administrativo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde-principal: #107B12;
+    --verde-oscuro: #0B7A10;
+    --naranja: #F59E0B;
+    --rojo-agotado: #DC3646;
+    --blanco: #FFFFFF;
+    --gris-fondo: #F5F5F5;
+    --gris-borde: #E3E4E1;
+    --texto: #444444;
+    --texto-secundario: #777777;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    color: var(--texto);
+    background: var(--gris-fondo);
+  }
+
+  .layout {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    background: linear-gradient(165deg, var(--verde-principal) 0%, var(--verde-oscuro) 100%);
+    color: var(--blanco);
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .marca {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 8px 28px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.18);
+  }
+
+  .marca-icono {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: var(--blanco);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .marca-icono svg { width: 18px; height: 18px; }
+
+  .marca-nombre {
+    font-family: 'Sora', sans-serif;
+    font-size: 15.5px;
+    font-weight: 700;
+  }
+
+  .nav-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .nav-lista a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-radius: 8px;
+    color: rgba(255,255,255,0.85);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.15s ease;
+  }
+
+  .nav-lista a:hover { background: rgba(255,255,255,0.1); }
+
+  .nav-lista a.activo {
+    background: var(--blanco);
+    color: var(--verde-principal);
+    font-weight: 600;
+  }
+
+  .nav-lista .icono { font-size: 16px; width: 18px; text-align: center; }
+
+  .sidebar-footer {
+    border-top: 1px solid rgba(255,255,255,0.18);
+    padding-top: 16px;
+    margin-top: 16px;
+  }
+
+  .usuario-mini {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+  }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .usuario-datos { overflow: hidden; }
+  .usuario-nombre {
+    font-size: 13.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .usuario-rol { font-size: 12px; color: rgba(255,255,255,0.7); }
+
+  .btn-salir {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    border-radius: 8px;
+    color: var(--blanco);
+    font-size: 13.5px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    justify-content: center;
+    transition: background 0.15s ease;
+  }
+
+  .btn-salir:hover { background: rgba(255,255,255,0.18); }
+
+  /* ---------- Contenido ---------- */
+  .contenido {
+    padding: 32px 40px;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+
+  .topbar h1 {
+    font-family: 'Sora', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+
+  .topbar p {
+    font-size: 14px;
+    color: var(--texto-secundario);
+    margin: 0;
+  }
+
+  .fecha-hoy {
+    font-size: 13px;
+    color: var(--texto-secundario);
+    background: var(--blanco);
+    border: 1px solid var(--gris-borde);
+    padding: 8px 14px;
+    border-radius: 8px;
+  }
+
+  .tarjetas {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 32px;
+  }
+
+  .tarjeta {
+    background: var(--blanco);
+    border: 1px solid var(--gris-borde);
+    border-radius: 10px;
+    padding: 20px;
+  }
+
+  .tarjeta-encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .tarjeta-etiqueta {
+    font-size: 13px;
+    color: var(--texto-secundario);
+    font-weight: 500;
+  }
+
+  .tarjeta-icono {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+  }
+
+  .icono-verde { background: rgba(16,123,18,0.1); color: var(--verde-principal); }
+  .icono-naranja { background: rgba(245,158,11,0.12); color: var(--naranja); }
+  .icono-rojo { background: rgba(220,54,70,0.1); color: var(--rojo-agotado); }
+
+  .tarjeta-valor {
+    font-family: 'Sora', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--texto);
+  }
+
+  .tarjeta-nota {
+    font-size: 12.5px;
+    color: var(--texto-secundario);
+    margin-top: 4px;
+  }
+
+  .panel-tabla {
+    background: var(--blanco);
+    border: 1px solid var(--gris-borde);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .panel-tabla-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--gris-borde);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panel-tabla-header h2 {
+    font-family: 'Sora', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .btn-descargar {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: var(--verde-principal);
+    color: var(--blanco);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.15s ease;
+  }
+
+  .btn-descargar:hover { background: var(--verde-oscuro); }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  th {
+    text-align: left;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--texto-secundario);
+    padding: 12px 22px;
+    background: var(--gris-fondo);
+  }
+
+  td {
+    padding: 14px 22px;
+    font-size: 13.5px;
+    border-top: 1px solid var(--gris-borde);
+  }
+
+  .estado {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .estado-ok { background: rgba(16,123,18,0.1); color: var(--verde-principal); }
+  .estado-bajo { background: rgba(245,158,11,0.14); color: #92600A; }
+  .estado-agotado { background: rgba(220,54,70,0.1); color: var(--rojo-agotado); }
+
+  @media (max-width: 1000px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .tarjetas { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div>
+      <div class="marca">
+        <span class="marca-icono">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L3 6.5V11c0 5.2 3.6 9.7 9 11 5.4-1.3 9-5.8 9-11V6.5L12 2Z" fill="#107B12"/>
+          </svg>
+        </span>
+        <span class="marca-nombre">Panel Administrativo</span>
+      </div>
+
+      <ul class="nav-lista">
+        <!-- <li><a href="{% url 'panel' %}" class="activo"><span class="icono">📊</span> Resumen</a></li> -->
+        <li><a href="{% url 'panel' %}"><span class="icono">📦</span> Inventario</a></li>
+        <!--  <li><a href="#"><span class="icono">🧾</span> Pedidos</a></li>
+        <li><a href="#"><span class="icono">👥</span> Clientes</a></li>
+        <li><a href="#"><span class="icono">⚙️</span> Configuración</a></li> -->
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="usuario-mini">
+        <span class="avatar">{{ request.user.username|slice:":2"|upper }}</span>
+        <div class="usuario-datos">
+          <div class="usuario-nombre">{{ request.user.username }}</div>
+          <div class="usuario-rol">Administrador</div>
+        </div>
+      </div>
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-salir">⎋ Cerrar sesión</button>
+      </form>
+    </div>
+  </aside>
+
+  <!-- Contenido -->
+  <main class="contenido">
+    <div class="topbar">
+      <div>
+        <h1>Hola, {{ request.user.username }} 👋</h1>
+        <p>Esto es lo que está pasando hoy en tu negocio.</p>
+      </div>
+      <span class="fecha-hoy">{% now "l, j \d\e F Y" %}</span>
+    </div>
+
+    <div class="tarjetas">
+      <div class="tarjeta">
+        <div class="tarjeta-encabezado">
+          <span class="tarjeta-etiqueta">Productos disponibles</span>
+          <span class="tarjeta-icono icono-verde">📦</span>
+        </div>
+        <div class="tarjeta-valor">{{ disponibles }}</div>
+        <div class="tarjeta-nota">Marcados como disponibles</div>
+      </div>
+
+      <div class="tarjeta">
+        <div class="tarjeta-encabezado">
+          <span class="tarjeta-etiqueta">Agotados</span>
+          <span class="tarjeta-icono icono-rojo">✕</span>
+        </div>
+        <div class="tarjeta-valor">{{ agotados }}</div>
+        <div class="tarjeta-nota">No disponibles actualmente</div>
+      </div>
+
+      <div class="tarjeta">
+        <div class="tarjeta-encabezado">
+          <span class="tarjeta-etiqueta">Total en catálogo</span>
+          <span class="tarjeta-icono icono-naranja">🗂️</span>
+        </div>
+        <div class="tarjeta-valor">{{ productos|length }}</div>
+        <div class="tarjeta-nota">Productos registrados</div>
+      </div>
+    </div>
+
+    <div class="panel-tabla">
+      <div class="panel-tabla-header">
+        <h2>Inventario de productos</h2>
+        <div style="display:flex; gap:10px;">
+          <a href="{% url 'importar_productos' %}" class="btn-descargar" style="background:var(--blanco); color:var(--verde-principal); border:1.5px solid var(--verde-principal);">⬆ Importar CSV</a>
+          <a href="{% url 'exportar_productos' %}" class="btn-descargar">⬇ Descargar CSV</a>
+          <a href="{% url 'crear_producto' %}" class="btn-descargar">+ Nuevo producto</a>
+        </div>
+      </div>
+
+      {% if productos %}
+      <table>
+        <thead>
+          <tr>
+            <th>Imagen</th>
+            <th>Producto</th>
+            <th>Marca</th>
+            <th>Categoría</th>
+            <th>Precio unitario</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for producto in productos %}
+          <tr>
+            <td>
+              {% if producto.image %}
+                <img src="{{ producto.image.url }}" alt="{{ producto.name }}" style="width:42px;height:42px;object-fit:cover;border-radius:6px;border:1px solid var(--gris-borde);">
+              {% else %}
+                <span style="color:var(--texto-secundario);font-size:12px;">Sin imagen</span>
+              {% endif %}
+            </td>
+            <td>{{ producto.name }}</td>
+            <td>{{ producto.brand }}</td>
+            <td>{{ producto.category.name }}</td>
+            <td>S/ {{ producto.unit_price }}</td>
+            <td>
+              {% if producto.product_of_stock %}
+                <span class="estado estado-ok">Disponible</span>
+              {% else %}
+                <span class="estado estado-agotado">Agotado</span>
+              {% endif %}
+            </td>
+            <td style="white-space:nowrap;">
+              <a href="{% url 'editar_producto' producto.id %}" style="color:var(--verde-principal); font-size:13px; font-weight:600; text-decoration:none; margin-right:12px;">Editar</a>
+              <a href="{% url 'eliminar_producto' producto.id %}" style="color:var(--rojo-agotado); font-size:13px; font-weight:600; text-decoration:none;">Eliminar</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div style="padding: 48px 24px; text-align:center;">
+        <p style="color:var(--texto-secundario); font-size:14px; margin-bottom:16px;">
+          Todavía no hay productos registrados en el catálogo.
+        </p>
+        <a href="{% url 'crear_producto' %}" class="btn-descargar">+ Agregar el primer producto</a>
+      </div>
+      {% endif %}
+    </div>
+  </main>
+
+</div>
+
+</body>
+</html>

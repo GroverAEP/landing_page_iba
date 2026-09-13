@@ -8,6 +8,9 @@ from .models import VisitCounter
 from django.shortcuts import render
 from django.utils import timezone
 
+
+
+
 def normalize(text):
     if text is None:
         return ""

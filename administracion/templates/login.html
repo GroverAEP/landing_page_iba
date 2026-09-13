@@ -1,0 +1,370 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acceso administrativo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde-principal: #107B12;
+    --verde-oscuro: #0B7A10;
+    --naranja: #F59E0B;
+    --rojo-agotado: #DC3646;
+    --blanco: #FFFFFF;
+    --gris-fondo: #F5F5F5;
+    --gris-borde: #E3E4E1;
+    --texto: #444444;
+    --texto-secundario: #777777;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Inter', sans-serif;
+    color: var(--texto);
+    background: var(--gris-fondo);
+  }
+
+  .layout {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+  }
+
+  /* ---------- Panel izquierdo: identidad ---------- */
+  .panel-marca {
+    position: relative;
+    background: linear-gradient(165deg, var(--verde-principal) 0%, var(--verde-oscuro) 100%);
+    color: var(--blanco);
+    padding: 64px 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+
+  .panel-marca::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.08) 1.5px, transparent 1.5px);
+    background-size: 26px 26px;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .marca-encabezado {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .marca-icono {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--blanco);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .marca-icono svg { width: 22px; height: 22px; }
+
+  .marca-nombre {
+    font-family: 'Sora', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+
+  .panel-cuerpo {
+    position: relative;
+    max-width: 420px;
+  }
+
+  .panel-cuerpo h1 {
+    font-family: 'Sora', sans-serif;
+    font-size: 34px;
+    line-height: 1.25;
+    font-weight: 700;
+    margin: 0 0 16px;
+  }
+
+  .panel-cuerpo p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.85);
+    margin: 0;
+  }
+
+  .indicadores {
+    position: relative;
+    display: flex;
+    gap: 28px;
+    padding-top: 32px;
+    margin-top: 32px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .indicador {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .indicador .valor {
+    font-family: 'Sora', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .indicador .etiqueta {
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.8);
+  }
+
+  .dot-naranja { color: var(--naranja); }
+
+  .panel-footer {
+    position: relative;
+    font-size: 13px;
+    color: rgba(255,255,255,0.65);
+  }
+
+  /* ---------- Panel derecho: formulario ---------- */
+  .panel-form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background: var(--blanco);
+  }
+
+  .tarjeta-login {
+    width: 100%;
+    max-width: 380px;
+  }
+
+  .tarjeta-login h2 {
+    font-family: 'Sora', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 6px;
+    color: var(--texto);
+  }
+
+  .tarjeta-login .subtitulo {
+    font-size: 14.5px;
+    color: var(--texto-secundario);
+    margin: 0 0 32px;
+  }
+
+  .alerta-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #FDEEEF;
+    border: 1px solid var(--rojo-agotado);
+    color: var(--rojo-agotado);
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    margin-bottom: 22px;
+  }
+
+  .campo {
+    margin-bottom: 20px;
+  }
+
+  .campo label {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--texto);
+    margin-bottom: 7px;
+  }
+
+  .campo input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 14.5px;
+    font-family: 'Inter', sans-serif;
+    color: var(--texto);
+    background: var(--gris-fondo);
+    border: 1.5px solid var(--gris-borde);
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .campo input::placeholder { color: #A9AAA7; }
+
+  .campo input:focus {
+    border-color: var(--verde-principal);
+    background: var(--blanco);
+  }
+
+  .fila-opciones {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 26px;
+  }
+
+  .recordar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    color: var(--texto-secundario);
+  }
+
+  .recordar input { accent-color: var(--verde-principal); }
+
+  .fila-opciones a {
+    font-size: 13.5px;
+    color: var(--verde-principal);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .fila-opciones a:hover { color: var(--verde-oscuro); text-decoration: underline; }
+
+  .btn-ingresar {
+    width: 100%;
+    padding: 13px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    color: var(--blanco);
+    background: var(--verde-principal);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .btn-ingresar:hover { background: var(--verde-oscuro); }
+
+  .btn-ingresar:focus-visible {
+    outline: 3px solid var(--naranja);
+    outline-offset: 2px;
+  }
+
+  .nota-seguridad {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 28px;
+    font-size: 12.5px;
+    color: var(--texto-secundario);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn-ingresar, .campo input, .fila-opciones a { transition: none; }
+  }
+
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+    .panel-marca { padding: 40px 32px; min-height: 260px; }
+    .panel-cuerpo h1 { font-size: 26px; }
+    .indicadores { display: none; }
+    .panel-form { padding: 32px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- Panel izquierdo -->
+  <aside class="panel-marca">
+    <div class="marca-encabezado">
+      <span class="marca-icono">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L3 6.5V11c0 5.2 3.6 9.7 9 11 5.4-1.3 9-5.8 9-11V6.5L12 2Z" fill="#107B12"/>
+        </svg>
+      </span>
+      <span class="marca-nombre">Panel Administrativo</span>
+    </div>
+
+    <div class="panel-cuerpo">
+      <h1>Gestiona el inventario y las operaciones desde un solo lugar.</h1>
+      <p>Acceso exclusivo para el equipo administrador: control de stock, pedidos y clientes en tiempo real.</p>
+
+      <div class="indicadores">
+        <div class="indicador">
+          <span class="valor">128</span>
+          <span class="etiqueta">Productos activos</span>
+        </div>
+        <div class="indicador">
+          <span class="valor dot-naranja">9</span>
+          <span class="etiqueta">Por reabastecer</span>
+        </div>
+        <div class="indicador">
+          <span class="valor">24/7</span>
+          <span class="etiqueta">Monitoreo</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="panel-footer">&copy; {% now "Y" %} — Uso interno. Acceso restringido.</p>
+  </aside>
+
+  <!-- Panel derecho: formulario -->
+  <main class="panel-form">
+    <div class="tarjeta-login">
+      <h2>Iniciar sesión</h2>
+      <p class="subtitulo">Ingresa tus credenciales de administrador para continuar.</p>
+
+      {% if form.errors %}
+      <div class="alerta-error">
+        Usuario o contraseña incorrectos. Verifica tus datos e intenta de nuevo.
+      </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+
+        <div class="campo">
+          <label for="id_username">Usuario</label>
+          <input type="text" id="id_username" name="username" placeholder="tu.usuario" autocomplete="username" required autofocus>
+        </div>
+
+        <div class="campo">
+          <label for="id_password">Contraseña</label>
+          <input type="password" id="id_password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+        </div>
+
+        <div class="fila-opciones">
+          <label class="recordar">
+            <input type="checkbox" name="recordar">
+            Recordarme
+          </label>
+          <a href="{% url 'recuperar_password' %}">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <input type="hidden" name="next" value="{{ next }}">
+        <button type="submit" class="btn-ingresar">Ingresar</button>
+      </form>
+
+      <div class="nota-seguridad">
+        🔒 Conexión segura. Solo personal autorizado.
+      </div>
+    </div>
+  </main>
+
+</div>
+
+</body>
+</html>

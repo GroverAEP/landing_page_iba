@@ -1,0 +1,228 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Importar productos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde-principal: #107B12;
+    --verde-oscuro: #0B7A10;
+    --naranja: #F59E0B;
+    --rojo-agotado: #DC3646;
+    --blanco: #FFFFFF;
+    --gris-fondo: #F5F5F5;
+    --gris-borde: #E3E4E1;
+    --texto: #444444;
+    --texto-secundario: #777777;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Inter', sans-serif;
+    color: var(--texto);
+    background: var(--gris-fondo);
+  }
+  .contenedor {
+    max-width: 620px;
+    margin: 48px auto;
+    padding: 0 24px;
+  }
+  .volver {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--texto-secundario);
+    text-decoration: none;
+    margin-bottom: 20px;
+  }
+  .volver:hover { color: var(--verde-principal); }
+
+  .tarjeta {
+    background: var(--blanco);
+    border: 1px solid var(--gris-borde);
+    border-radius: 12px;
+    padding: 32px;
+  }
+
+  h1 {
+    font-family: 'Sora', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 6px;
+  }
+
+  .subtitulo {
+    font-size: 14px;
+    color: var(--texto-secundario);
+    margin: 0 0 24px;
+  }
+
+  .aviso-formato {
+    background: #FEF6E7;
+    border: 1px solid var(--naranja);
+    color: #92600A;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .aviso-formato code {
+    background: rgba(0,0,0,0.06);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  .ejemplo-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 12px;
+  }
+  .ejemplo-tabla th, .ejemplo-tabla td {
+    border: 1px solid var(--gris-borde);
+    padding: 5px 8px;
+    text-align: left;
+  }
+  .ejemplo-tabla th { background: var(--gris-fondo); }
+
+  .campo { margin-bottom: 22px; }
+
+  .campo label {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 7px;
+  }
+
+  .campo input[type="file"] {
+    width: 100%;
+    padding: 11px 13px;
+    font-size: 13.5px;
+    background: var(--gris-fondo);
+    border: 1.5px dashed var(--gris-borde);
+    border-radius: 8px;
+  }
+
+  .errores {
+    background: #FDEEEF;
+    border: 1px solid var(--rojo-agotado);
+    color: var(--rojo-agotado);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .mensaje-success {
+    background: #EAF7EC;
+    border: 1px solid var(--verde-principal);
+    color: var(--verde-oscuro);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .mensaje-warning {
+    background: #FEF6E7;
+    border: 1px solid var(--naranja);
+    color: #92600A;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .acciones { display: flex; gap: 12px; }
+
+  .btn-primario {
+    padding: 12px 22px;
+    background: var(--verde-principal);
+    color: var(--blanco);
+    border: none;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-primario:hover { background: var(--verde-oscuro); }
+
+  .btn-secundario {
+    padding: 12px 22px;
+    background: var(--blanco);
+    color: var(--texto);
+    border: 1.5px solid var(--gris-borde);
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="contenedor">
+  <a href="{% url 'panel' %}" class="volver">&larr; Volver al panel</a>
+
+  <div class="tarjeta">
+    <h1>Importar productos por CSV</h1>
+    <p class="subtitulo">Sube un archivo para crear varios productos de una sola vez.</p>
+
+    {% if messages %}
+      {% for mensaje in messages %}
+        <div class="{% if mensaje.tags == 'success' %}mensaje-success{% elif mensaje.tags == 'warning' %}mensaje-warning{% else %}errores{% endif %}">
+          {{ mensaje }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="aviso-formato">
+      El archivo debe tener estas columnas exactas en el encabezado:
+      <code>nombre,marca,categoria,precio,unidad,disponible</code>
+
+      <table class="ejemplo-tabla">
+        <tr>
+          <th>nombre</th><th>marca</th><th>categoria</th><th>precio</th><th>unidad</th><th>disponible</th>
+        </tr>
+        <tr>
+          <td>Camisa básica</td><td>Genérica</td><td>Ropa</td><td>29.90</td><td>Unidad</td><td>si</td>
+        </tr>
+      </table>
+
+      Las categorías y unidades que no existan se crean automáticamente. Las imágenes no se pueden
+      importar por CSV — quedan vacías y se agregan después editando cada producto.
+    </div>
+
+    {% if form.errors %}
+      <div class="errores">Revisa el archivo seleccionado e intenta de nuevo.</div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="campo">
+        <label for="id_archivo_csv">Archivo CSV</label>
+        <input type="file" id="id_archivo_csv" name="archivo_csv" accept=".csv" required>
+      </div>
+
+      <div class="acciones">
+        <button type="submit" class="btn-primario">Importar productos</button>
+        <a href="{% url 'panel' %}" class="btn-secundario">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

@@ -2,6 +2,47 @@ import os
 from pathlib import Path
 import cloudinary
 import dj_database_url
+
+
+
+
+
+# ============================================================
+# CONFIGURACIÓN DE EMAIL (Gmail SMTP) usando .env — settings.py
+# ============================================================
+#
+# INSTALACIÓN (una sola vez):
+#   pip install python-decouple
+#
+# Luego crea, en la RAÍZ del proyecto (junto a manage.py), un archivo
+# llamado ".env" (basándote en .env.example) con tus datos reales:
+#
+#   EMAIL_HOST_USER=tu_correo_real@gmail.com
+#   EMAIL_HOST_PASSWORD=xxxxxxxxxxxxxxxx
+#   DOMINIO_SITIO=http://127.0.0.1:8000
+#
+# Y agrega esta línea a tu archivo .gitignore para que NUNCA se suba a git:
+#   .env
+
+from decouple import config
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+DOMINIO_SITIO = config('DOMINIO_SITIO', default='http://127.0.0.1:8000')
+
+
+
+
+
 # from dotenv import load_dotenv
 # from urllib.parse import urlparse
 
@@ -40,6 +81,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "products",
+    "administracion",
     "cloudinary",  # 👈 añadido para cloudinary
     "cloudinary_storage",  # 👈 añadido para cloudinary
 ]
@@ -75,12 +117,12 @@ TEMPLATES = [
 WSGI_APPLICATION = "landing_page.wsgi.application"
 
 # DATABASE CONEXION LOCAL
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
 
 # DATABASE CONEXION A RENDER
 # DATABASES = {
@@ -126,20 +168,20 @@ WSGI_APPLICATION = "landing_page.wsgi.application"
 
 
 # DATABASE CONEXION A SUPABASE - INFOPILLACA - ibafex
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "postgres",
-        "USER": "postgres.grmryeseuwnlbodielqh",
-        "PASSWORD": "DNnw9BU32yvafY3c",
-        "HOST": "aws-1-us-west-2.pooler.supabase.com",
-        "PORT": "5432",
-        "CONN_MAX_AGE": 600,
-        "OPTIONS": {
-            "sslmode": "require",
-        },
-    }
-}
+#DATABASES = {
+#    "default": {
+#        "ENGINE": "django.db.backends.postgresql",
+#        "NAME": "postgres",
+#        "USER": "postgres.grmryeseuwnlbodielqh",
+#        "PASSWORD": "DNnw9BU32yvafY3c",
+#        "HOST": "aws-1-us-west-2.pooler.supabase.com",
+#        "PORT": "5432",
+#        "CONN_MAX_AGE": 600,
+#        "OPTIONS": {
+#            "sslmode": "require",
+#        },
+#    }
+#}
 
 
 # DATABASE CONEXION A RAILWAY
