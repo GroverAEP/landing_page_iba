@@ -12,7 +12,6 @@ from django.contrib.auth.decorators import login_required
 from django.templatetags.static import static
 from products.models import Producto  # 👈 ajusta el import a tu modelo real
 
-import csv
 import io
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
@@ -22,7 +21,8 @@ from django.contrib.auth.decorators import login_required
 from .form import ProductoForm, ImportarCSVForm
 from products.models import Producto, Categoria, UnidadMedida
 
-
+from django.db.models import Q
+from django.shortcuts import render
 
 
 
@@ -309,16 +309,42 @@ def importar_productos_csv(request):
 
 @user_passes_test(es_administrador, login_url='login')
 def panel_admin(request):
+    query = request.GET.get('q', '').strip()
+    categoria_id = request.GET.get('categoria', '').strip()
+    disponible = request.GET.get('disponible', '').strip()
+
     productos = Producto.objects.select_related('category').all().order_by('-date_added')
+
+    if query:
+        productos = productos.filter(
+            Q(name__icontains=query) |
+            Q(brand__icontains=query) |
+            Q(category__name__icontains=query)
+        )
+
+    if categoria_id:
+        productos = productos.filter(category__id=categoria_id)
+
+    if disponible == '1':
+        productos = productos.filter(product_of_stock=True)
+    elif disponible == '0':
+        productos = productos.filter(product_of_stock=False)
 
     disponibles = productos.filter(product_of_stock=True).count()
     agotados = productos.filter(product_of_stock=False).count()
+    categorias = Categoria.objects.all().order_by('name')
 
     return render(request, 'panel.html', {
         'productos': productos,
         'disponibles': disponibles,
         'agotados': agotados,
+        'query': query,
+        'categoria_id': categoria_id,
+        'disponible': disponible,
+        'categorias': categorias,
     })
+
+
 
 # --- Exportar productos a CSV ---
 @user_passes_test(es_administrador, login_url='login')
@@ -401,3 +427,17 @@ def login_admin(request):
             return redirect('panel')
         return render(request, 'login.html', {'form': {'errors': True}})
     return render(request, 'login.html')
+
+# En administracion/views.py
+from django.db.models import Sum
+from products.models import VisitCounter  # importas desde la otra app
+
+def visitas(request):
+    visitas = VisitCounter.objects.all().order_by('-date')
+    total_visitas = visitas.aggregate(total=Sum('visits'))['total'] or 0
+
+    context = {
+        'visitas': visitas,
+        'total_visitas': total_visitas,
+    }
+    return render(request, 'visitas.html', context)

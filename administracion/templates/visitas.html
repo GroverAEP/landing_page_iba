@@ -1,0 +1,360 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visitas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde-principal: #107B12;
+    --verde-oscuro: #0B7A10;
+    --naranja: #F59E0B;
+    --rojo-agotado: #DC3646;
+    --blanco: #FFFFFF;
+    --gris-fondo: #F5F5F5;
+    --gris-borde: #E3E4E1;
+    --texto: #444444;
+    --texto-secundario: #777777;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    color: var(--texto);
+    background: var(--gris-fondo);
+  }
+
+  .layout {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar {
+    background: linear-gradient(165deg, var(--verde-principal) 0%, var(--verde-oscuro) 100%);
+    color: var(--blanco);
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .marca {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 8px 28px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.18);
+  }
+
+  .marca-icono {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: var(--blanco);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .marca-icono svg { width: 18px; height: 18px; }
+
+  .marca-nombre {
+    font-family: 'Sora', sans-serif;
+    font-size: 15.5px;
+    font-weight: 700;
+  }
+
+  .nav-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .nav-lista a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-radius: 8px;
+    color: rgba(255,255,255,0.85);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.15s ease;
+  }
+
+  .nav-lista a:hover { background: rgba(255,255,255,0.1); }
+
+  .nav-lista a.activo {
+    background: var(--blanco);
+    color: var(--verde-principal);
+    font-weight: 600;
+  }
+
+  .nav-lista .icono { font-size: 16px; width: 18px; text-align: center; }
+
+  .sidebar-footer {
+    border-top: 1px solid rgba(255,255,255,0.18);
+    padding-top: 16px;
+    margin-top: 16px;
+  }
+
+  .usuario-mini {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+  }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .usuario-datos { overflow: hidden; }
+  .usuario-nombre {
+    font-size: 13.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .usuario-rol { font-size: 12px; color: rgba(255,255,255,0.7); }
+
+  .btn-salir {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    border-radius: 8px;
+    color: var(--blanco);
+    font-size: 13.5px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    justify-content: center;
+    transition: background 0.15s ease;
+  }
+
+  .btn-salir:hover { background: rgba(255,255,255,0.18); }
+
+  /* ---------- Contenido ---------- */
+  .contenido {
+    padding: 32px 40px;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+
+  .topbar h1 {
+    font-family: 'Sora', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+
+  .topbar p {
+    font-size: 14px;
+    color: var(--texto-secundario);
+    margin: 0;
+  }
+
+  .fecha-hoy {
+    font-size: 13px;
+    color: var(--texto-secundario);
+    background: var(--blanco);
+    border: 1px solid var(--gris-borde);
+    padding: 8px 14px;
+    border-radius: 8px;
+  }
+
+  .panel-tabla {
+    background: var(--blanco);
+    border: 1px solid var(--gris-borde);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .panel-tabla-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--gris-borde);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panel-tabla-header h2 {
+    font-family: 'Sora', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  th {
+    text-align: left;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--texto-secundario);
+    padding: 12px 22px;
+    background: var(--gris-fondo);
+  }
+
+  td {
+    padding: 14px 22px;
+    font-size: 13.5px;
+    border-top: 1px solid var(--gris-borde);
+  }
+
+  .panel-tabla-footer {
+    padding: 14px 22px;
+    font-size: 13px;
+    color: var(--texto-secundario);
+    border-top: 1px solid var(--gris-borde);
+  }
+
+  .tabla-scroll {
+    max-height: 480px;
+    overflow-y: auto;
+  }
+
+  .tabla-scroll table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  .tabla-scroll::-webkit-scrollbar { width: 8px; }
+  .tabla-scroll::-webkit-scrollbar-thumb {
+    background: var(--gris-borde);
+    border-radius: 8px;
+  }
+
+  @media (max-width: 1000px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div>
+      <div class="marca">
+        <span class="marca-icono">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L3 6.5V11c0 5.2 3.6 9.7 9 11 5.4-1.3 9-5.8 9-11V6.5L12 2Z" fill="#107B12"/>
+          </svg>
+        </span>
+        <span class="marca-nombre">Panel Administrativo</span>
+      </div>
+
+      <ul class="nav-lista">
+        <li><a href="{% url 'panel' %}"><span class="icono">📦</span> Inventario</a></li>
+        <li><a href="{% url 'visitas' %}" class="activo"><span class="icono">🧾</span> Visitas</a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="usuario-mini">
+        <span class="avatar">{{ request.user.username|slice:":2"|upper }}</span>
+        <div class="usuario-datos">
+          <div class="usuario-nombre">{{ request.user.username }}</div>
+          <div class="usuario-rol">Administrador</div>
+        </div>
+      </div>
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-salir">⎋ Cerrar sesión</button>
+      </form>
+    </div>
+  </aside>
+
+  <!-- Contenido -->
+  <main class="contenido">
+    <div class="topbar">
+      <div>
+        <h1>Visitas 🧾</h1>
+        <p>Historial de visitas por página.</p>
+      </div>
+      <span class="fecha-hoy">{% now "l, j \d\e F Y" %}</span>
+    </div>
+
+    <div class="panel-tabla">
+      <div class="panel-tabla-header">
+        <h2>Registro de visitas</h2>
+      </div>
+
+      {% if visitas %}
+      <div class="tabla-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Página</th>
+              <th>Fecha</th>
+              <th>Visitas</th>
+            </tr>
+          </thead>
+          <tbody>
+              {% for visita in visitas %}
+              <tr>
+                <td>{{ visita.page_name }}</td>
+                <td>{{ visita.date|date:"j \d\e F \d\e Y" }}</td>
+                <td>{{ visita.visits }}</td>
+              </tr>
+              {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="panel-tabla-footer">
+        {{ total_visitas }} registro{{ total_visitas|pluralize }} de visitas
+      </div>
+      {% else %}
+      <div style="padding: 48px 24px; text-align:center;">
+        <p style="color:var(--texto-secundario); font-size:14px;">
+          Todavía no hay visitas registradas.
+        </p>
+      </div>
+      {% endif %}
+    </div>
+  </main>
+
+</div>
+
+</body>
+</html>

@@ -16,5 +16,6 @@ path('resetear-password/<uidb64>/<token>/', views.resetear_password, name='reset
     path('producto/<int:producto_id>/eliminar/', views.eliminar_producto, name='eliminar_producto'),
     path('productos/importar/', views.importar_productos_csv, name='importar_productos'),
 
+    path('visitas/', views.visitas, name='visitas'),
 
     ]

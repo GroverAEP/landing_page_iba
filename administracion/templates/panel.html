@@ -327,6 +327,104 @@
     .sidebar { display: none; }
     .tarjetas { grid-template-columns: repeat(2, 1fr); }
   }
+
+  .tabla-scroll {
+    max-height: 480px;      /* alto máximo visible, ajústalo a tu gusto */
+    overflow-y: auto;
+  }
+
+  /* Que el encabezado de la tabla quede fijo al hacer scroll */
+  .tabla-scroll table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  /* Scrollbar más discreto (opcional) */
+  .tabla-scroll::-webkit-scrollbar {
+    width: 8px;
+  }
+  .tabla-scroll::-webkit-scrollbar-thumb {
+    background: var(--gris-borde);
+    border-radius: 8px;
+  }
+
+
+
+  /* ---------- Layout: tabla + filtros ---------- */
+.contenido-grid {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 20px;
+  align-items: start;
+}
+/* ---------- Panel de filtros (mismo color que el panel de productos) ---------- */
+.filtro-panel {
+  background: var(--blanco);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--gris-borde);
+}
+
+.filtro-header {
+  background: var(--gris-fondo);
+  color: var(--texto);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 12px 16px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--gris-borde);
+}
+
+.filtro-body {
+  padding: 14px 16px 20px;
+}
+
+.filtro-limpiar {
+  display: block;
+  font-size: 13px;
+  color: var(--texto-secundario);
+  text-decoration: none;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--gris-borde);
+  margin-bottom: 10px;
+}
+.filtro-limpiar:hover { color: var(--rojo-agotado); }
+
+.filtro-seccion { margin-bottom: 18px; }
+
+.filtro-titulo {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--texto);
+  margin-bottom: 8px;
+}
+
+.filtro-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.filtro-lista li a {
+  display: block;
+  font-size: 13.5px;
+  color: var(--texto-secundario);
+  text-decoration: none;
+  padding: 5px 0;
+}
+
+.filtro-lista li a:hover { color: var(--verde-principal); }
+
+.filtro-lista li a.activo {
+  color: var(--verde-principal);
+  font-weight: 600;
+}
+
+
+
+
 </style>
 </head>
 <body>
@@ -348,8 +446,8 @@
       <ul class="nav-lista">
         <!-- <li><a href="{% url 'panel' %}" class="activo"><span class="icono">📊</span> Resumen</a></li> -->
         <li><a href="{% url 'panel' %}"><span class="icono">📦</span> Inventario</a></li>
-        <!--  <li><a href="#"><span class="icono">🧾</span> Pedidos</a></li>
-        <li><a href="#"><span class="icono">👥</span> Clientes</a></li>
+        <li><a href="{% url 'visitas' %}"><span class="icono">🧾</span> Visitas</a></li>
+        <!--  <li><a href="#"><span class="icono">👥</span> Clientes</a></li>
         <li><a href="#"><span class="icono">⚙️</span> Configuración</a></li> -->
       </ul>
     </div>
@@ -407,20 +505,41 @@
         <div class="tarjeta-nota">Productos registrados</div>
       </div>
     </div>
+    
+    <div class="contenido-grid">
 
-    <div class="panel-tabla">
-      <div class="panel-tabla-header">
-        <h2>Inventario de productos</h2>
-        <div style="display:flex; gap:10px;">
+  <!-- Columna izquierda: tabla de productos -->
+  <div class="panel-tabla">
+    <div class="panel-tabla-header" style="display:block;">
+      <h2 style="margin-bottom:14px;">Inventario de productos</h2>
+
+      <div style="display:flex; gap:10px; align-items:center;">
+        <form method="get" action="{% url 'panel' %}" style="display:flex; align-items:center; flex:1;">
+          <input type="hidden" name="categoria" value="{{ categoria_id }}">
+          <input type="hidden" name="disponible" value="{{ disponible }}">
+          <input
+            type="text"
+            name="q"
+            value="{{ query|default:'' }}"
+            placeholder="Buscar producto, marca o categoría..."
+            style="padding:8px 14px; border:1px solid var(--gris-borde); border-radius:8px; font-size:13px; font-family:'Inter',sans-serif; width:100%; outline:none;"
+          >
+          <button type="submit" style="margin-left:6px; padding:8px 12px; background:var(--verde-principal); color:var(--blanco); border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; flex-shrink:0;">
+            🔍
+          </button>
+        </form>
+
+        <div style="display:flex; gap:10px; flex-shrink:0;">
           <a href="{% url 'importar_productos' %}" class="btn-descargar" style="background:var(--blanco); color:var(--verde-principal); border:1.5px solid var(--verde-principal);">⬆ Importar CSV</a>
           <a href="{% url 'exportar_productos' %}" class="btn-descargar">⬇ Descargar CSV</a>
           <a href="{% url 'descargar_productos_pdf' %}" class="btn-descargar" style="background:var(--rojo-agotado); color:var(--blanco); border:1.5px solid var(--rojo-agotado);">⬇ Descargar PDF</a>
-
           <a href="{% url 'crear_producto' %}" class="btn-descargar">+ Nuevo producto</a>
         </div>
       </div>
+    </div>
 
-      {% if productos %}
+    {% if productos %}
+    <div class="tabla-scroll">
       <table>
         <thead>
           <tr>
@@ -462,15 +581,67 @@
           {% endfor %}
         </tbody>
       </table>
+    </div>
+    {% else %}
+    <div style="padding: 48px 24px; text-align:center;">
+      {% if query or categoria_id or disponible %}
+        <p style="color:var(--texto-secundario); font-size:14px; margin-bottom:16px;">
+          No se encontraron productos con estos filtros.
+        </p>
+        <a href="{% url 'panel' %}" class="btn-descargar">Ver todos los productos</a>
       {% else %}
-      <div style="padding: 48px 24px; text-align:center;">
         <p style="color:var(--texto-secundario); font-size:14px; margin-bottom:16px;">
           Todavía no hay productos registrados en el catálogo.
         </p>
         <a href="{% url 'crear_producto' %}" class="btn-descargar">+ Agregar el primer producto</a>
-      </div>
       {% endif %}
     </div>
+    {% endif %}
+  </div>
+
+  <!-- Columna derecha: panel de filtros -->
+  <aside class="filtro-panel">
+    <div class="filtro-header">Filtro</div>
+    <div class="filtro-body">
+      <a href="{% url 'panel' %}" class="filtro-limpiar">✖ Borrar todos los filtros</a>
+
+      <div class="filtro-seccion">
+        <div class="filtro-titulo">↓ Por Categoría</div>
+        <ul class="filtro-lista">
+          <li>
+            <a href="{% url 'panel' %}?q={{ query|urlencode }}&disponible={{ disponible }}"
+               class="{% if not categoria_id %}activo{% endif %}">Todo</a>
+          </li>
+          {% for cat in categorias %}
+          <li>
+            <a href="{% url 'panel' %}?q={{ query|urlencode }}&disponible={{ disponible }}&categoria={{ cat.id }}"
+               class="{% if categoria_id == cat.id|stringformat:'s' %}activo{% endif %}">{{ cat.name }}</a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="filtro-seccion">
+        <div class="filtro-titulo">↓ Por Disponible</div>
+        <ul class="filtro-lista">
+          <li>
+            <a href="{% url 'panel' %}?q={{ query|urlencode }}&categoria={{ categoria_id }}"
+               class="{% if not disponible %}activo{% endif %}">Todo</a>
+          </li>
+          <li>
+            <a href="{% url 'panel' %}?q={{ query|urlencode }}&categoria={{ categoria_id }}&disponible=1"
+               class="{% if disponible == '1' %}activo{% endif %}">Sí</a>
+          </li>
+          <li>
+            <a href="{% url 'panel' %}?q={{ query|urlencode }}&categoria={{ categoria_id }}&disponible=0"
+               class="{% if disponible == '0' %}activo{% endif %}">No</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+</div>
   </main>
 
 </div>

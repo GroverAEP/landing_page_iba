@@ -1,7 +1,9 @@
 from django.contrib import admin
 from .models import Producto, Categoria, UnidadMedida, VisitCounter
 from django.utils.translation import gettext_lazy as _
-
+from .utils import generar_pdf_productos
+from django.http import HttpResponse
+from django.utils import timezone
 
 # Acción personalizada para marcar varios productos como agotados
 def marcar_como_agotados(modeladmin, request, queryset):
@@ -12,6 +14,18 @@ def marcar_como_agotados(modeladmin, request, queryset):
 def marcar_como_disponibles(modeladmin, request, queryset):
     queryset.update(product_of_stock=True)
     modeladmin.message_user(request, "Los productos seleccionados han sido marcados como disponibles.")
+
+def descargar_pdf_productos(modeladmin, request, queryset):
+    buffer = generar_pdf_productos(
+        queryset,
+        logo_url=None,
+        fecha_generacion=timezone.now()
+    )
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="productos.pdf"'
+    return response
+descargar_pdf_productos.short_description = "Descargar PDF de productos seleccionados"
+
 
 # Personalización de la interfaz de administración para 'Producto'
 class ProductoAdmin(admin.ModelAdmin):
@@ -48,7 +62,7 @@ class ProductoAdmin(admin.ModelAdmin):
     num_product.admin_order_field = 'pk'  # Ordenar por el campo 'pk' (ID del producto)
 
     # Acciones personalizadas en lote
-    actions = [marcar_como_agotados, marcar_como_disponibles]  # Agregar las acciones aquí
+    actions = [marcar_como_agotados, marcar_como_disponibles,descargar_pdf_productos]  # Agregar las acciones aquí
     
 # Registrar los modelos 'Producto' y 'Categoria' en el admin
 class CategoriaAdmin(admin.ModelAdmin):
@@ -87,9 +101,10 @@ class VisitCounterAdmin(admin.ModelAdmin):
         return False
     def has_change_permission(self, request, obj=None):
         return False
-    
+
     
 # Registro del modelo 'Producto' con la clase 'ProductoAdmin'
 admin.site.register(Producto, ProductoAdmin)
 admin.site.register(Categoria, CategoriaAdmin)
 admin.site.register(UnidadMedida, UnidadMedidadAdmin)
+
