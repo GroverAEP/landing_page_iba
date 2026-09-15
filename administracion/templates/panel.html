@@ -414,6 +414,8 @@
         <div style="display:flex; gap:10px;">
           <a href="{% url 'importar_productos' %}" class="btn-descargar" style="background:var(--blanco); color:var(--verde-principal); border:1.5px solid var(--verde-principal);">⬆ Importar CSV</a>
           <a href="{% url 'exportar_productos' %}" class="btn-descargar">⬇ Descargar CSV</a>
+          <a href="{% url 'descargar_productos_pdf' %}" class="btn-descargar" style="background:var(--rojo-agotado); color:var(--blanco); border:1.5px solid var(--rojo-agotado);">⬇ Descargar PDF</a>
+
           <a href="{% url 'crear_producto' %}" class="btn-descargar">+ Nuevo producto</a>
         </div>
       </div>

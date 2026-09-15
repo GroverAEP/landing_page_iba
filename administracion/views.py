@@ -4,11 +4,12 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import user_passes_test
+
 import csv
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-
+from django.templatetags.static import static
 from products.models import Producto  # 👈 ajusta el import a tu modelo real
 
 import csv
@@ -324,6 +325,7 @@ def panel_admin(request):
 def exportar_productos(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="productos.csv"'
+    
 
     writer = csv.writer(response)
     writer.writerow([
@@ -347,6 +349,37 @@ def exportar_productos(request):
         ])
 
     return response
+
+
+
+
+
+
+
+from django.http import HttpResponse
+from django.utils import timezone
+
+from products.models import Producto  # 👈 ajusta el import a tu modelo real
+from .utils import generar_pdf_productos  # 👈 ajusta la ruta si lo guardas en otro lado
+
+
+ 
+# --- Descargar catálogo de productos en PDF ---
+@user_passes_test(es_administrador, login_url='login')
+def descargar_productos_pdf(request):
+    logo_url = static("img/logo.png")
+    
+    productos = Producto.objects.select_related(
+        'category', 'unit_of_measure', 'bulk_unit_of_measure'
+    ).all()
+ 
+    buffer = generar_pdf_productos(productos,logo_url=logo_url if logo_url else None, fecha_generacion=timezone.now())
+ 
+    response = HttpResponse(buffer.read(), content_type='application/pdf')
+    nombre_archivo = f"catalogo_productos_{timezone.now().strftime('%Y%m%d_%H%M')}.pdf"
+    response['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
+    return response
+
 
 
 def logout_admin(request):

@@ -8,6 +8,7 @@ urlpatterns = [
     path('logout/', views.logout_admin, name='logout'),
     path('recuperar-password/', views.recuperar_password, name='recuperar_password'),
     path('panel/exportar/', views.exportar_productos, name='exportar_productos'),
+    path('panel/descargar-producto-pdf/', views.descargar_productos_pdf, name= 'descargar_productos_pdf' ),
 path('resetear-password/<uidb64>/<token>/', views.resetear_password, name='resetear_password'),  # 👈 esta es la que falta
 
     path('producto/nuevo/', views.crear_producto, name='crear_producto'),
