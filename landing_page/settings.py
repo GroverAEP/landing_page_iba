@@ -117,12 +117,12 @@ TEMPLATES = [
 WSGI_APPLICATION = "landing_page.wsgi.application"
 
 # DATABASE CONEXION LOCAL
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+#DATABASES = {
+#    "default": {
+#        "ENGINE": "django.db.backends.sqlite3",
+#        "NAME": BASE_DIR / "db.sqlite3",
+#    }
+#}
 
 # DATABASE CONEXION A RENDER
 # DATABASES = {
@@ -151,20 +151,20 @@ DATABASES = {
 
 
 # DATABASE CONEXION A NEON - INFOPILLACA - ibafex2
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'neondb',
-#         'USER': 'neondb_owner',
-#         'PASSWORD': 'npg_PbML6quVT7fo',
-#         'HOST': 'ep-summer-paper-afaep138-pooler.c-2.us-west-2.aws.neon.tech',
-#         'PORT': '5432',
-#         'CONN_MAX_AGE': 600,
-#         'OPTIONS': {
-#             'sslmode': 'require',
-#         },
-#     }
-# }
+DATABASES = {
+     'default': {
+         'ENGINE': 'django.db.backends.postgresql',
+         'NAME': 'neondb',
+         'USER': 'neondb_owner',
+         'PASSWORD': 'npg_PbML6quVT7fo',
+         'HOST': 'ep-summer-paper-afaep138-pooler.c-2.us-west-2.aws.neon.tech',
+         'PORT': '5432',
+        'CONN_MAX_AGE': 600,
+         'OPTIONS': {
+            'sslmode': 'require',
+         },
+     }
+ }
 
 
 # DATABASE CONEXION A SUPABASE - INFOPILLACA - ibafex
