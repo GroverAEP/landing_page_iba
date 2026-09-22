@@ -81,6 +81,7 @@ function startCatalogHistory() {
   init();
 
   function init() {
+    safe('nav activo', () => window.utils.initCommonLayout('reports'));
     safe('listeners', setupEventListeners);
     safe('vista inicial', () => applyViewMode(currentViewMode));
     safe('filtro inicial', applyFilters);
