@@ -26,7 +26,7 @@ const STORAGE_KEYS = {
 const PRODUCTS_SCHEMA_VERSION = 2;
 
 // Base de la API de Django. Ajusta si tu app no está montada en la raíz del sitio.
-const API_BASE = '/testing/api';
+const API_BASE = '/administracion/api';
 
 /* Seed Data (se conserva tal cual; ya no se usa para poblar productos, solo como referencia) */
 const DEFAULT_PRODUCTS = [

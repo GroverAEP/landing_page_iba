@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const monthlyTableBody = document.getElementById('monthlyTableBody');
   const chartCanvas = document.getElementById('monthlyVisitsChart');
 
-  const API_URL = '/testing/api/visitas/resumen/';
+  const API_URL = '/administracion/api/visitas/resumen/';
 
   // Init
   init();
