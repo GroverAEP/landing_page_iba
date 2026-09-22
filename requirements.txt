@@ -5,11 +5,13 @@ cloudinary==1.44.0
 dj-database-url==2.3.0
 Django==5.2
 django-cloudinary-storage==0.3.0
+djangorestframework==3.18.1
 gunicorn==23.0.0
 idna==3.10
 packaging==25.0
 pillow==11.2.1
 psycopg2-binary==2.9.10
+pypdf==6.18.1
 python-decouple==3.8
 reportlab==5.0.1
 requests==2.32.3
