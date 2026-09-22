@@ -1,0 +1,29 @@
+{% comment %}
+Generic modal shell. Include this inside a page and fill the two blocks
+below via Django template inheritance is not applicable to includes, so
+in practice each page defines its own modal body but reuses these classes:
+  .overlay-backdrop > .overlay-panel > header / body / footer
+This file documents the expected markup and is used directly for pages
+that need one simple modal without extra parametrization.
+{% endcomment %}
+<div class="overlay-backdrop" id="{{ modal_id|default:'genericModal' }}" role="dialog" aria-modal="true" aria-labelledby="{{ modal_id|default:'genericModal' }}Title">
+  <div class="overlay-panel" style="max-width: {{ modal_max_width|default:'480px' }};">
+
+    <div class="flex items-center justify-between px-6 py-4 border-b border-[color:var(--color-line-soft)]">
+      <h2 class="font-display font-bold text-base" id="{{ modal_id|default:'genericModal' }}Title">{{ modal_title|default:"Título" }}</h2>
+      <button type="button" class="btn-icon modal-close-btn" aria-label="Cerrar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="px-6 py-5">
+      {{ modal_body|default:"" }}
+    </div>
+
+    <div class="flex items-center justify-end gap-2 px-6 py-4 border-t border-[color:var(--color-line-soft)]">
+      <button type="button" class="btn btn-secondary modal-close-btn">Cancel</button>
+      <button type="button" class="btn btn-primary">Save</button>
+    </div>
+
+  </div>
+</div>

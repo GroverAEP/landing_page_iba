@@ -1,0 +1,175 @@
+{% extends 'django_app/base.html' %}
+{% load static %}
+
+{% block title %}Visitas y Métricas - Ibafex Panel Administrativo{% endblock %}
+
+{% block extra_css %}
+  <!-- Page Specific Style -->
+  <link rel="stylesheet" href="{% static 'django_app/css/views.css' %}">
+{% endblock %}
+
+{% block page_title %}Métricas y Análisis de Visitas{% endblock %}
+{% block page_subtitle %}Monitoreo de tráfico, páginas de productos más consultadas y tendencias de visitas{% endblock %}
+
+{% block content %}
+  <main class="page-body">
+    <!-- Filter Bar for Period Selection -->
+    <div class="views-filter-bar">
+      <div class="filter-bar-left">
+        <span class="filter-bar-label"><i class="fa-solid fa-sliders"></i> Periodo analizado:</span>
+        <select id="periodFilter" class="form-select filter-select-period" aria-label="Seleccionar periodo">
+          <option value="year-2026" selected>Año 2026 (En curso)</option>
+          <option value="last-6-months">Últimos 6 meses</option>
+          <option value="year-2025">Año 2025 (Histórico completo)</option>
+        </select>
+      </div>
+
+      <div class="filter-bar-right">
+        <button type="button" class="btn btn-outline btn-sm" id="btnRefreshStats">
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span>Actualizar datos</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 4 KPI Summary Cards -->
+    <section class="kpi-grid">
+      <!-- KPI 1: Visitas Totales -->
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <h4>Visitas Totales</h4>
+          <div class="kpi-value" id="kpiTotalVisits">0</div>
+          <div class="kpi-trend trend-up">
+            <i class="fa-solid fa-arrow-trend-up"></i>
+            <span id="kpiTotalVisitsSub">Tráfico acumulado</span>
+          </div>
+        </div>
+        <div class="kpi-icon-wrap">
+          <i class="fa-solid fa-eye"></i>
+        </div>
+      </div>
+
+      <!-- KPI 2: Visitas del Mes Actual -->
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <h4>Visitas Mes Actual</h4>
+          <div class="kpi-value" id="kpiCurrentMonthVisits">0</div>
+          <div class="kpi-trend trend-up">
+            <i class="fa-regular fa-calendar-check"></i>
+            <span>Mes en curso</span>
+          </div>
+        </div>
+        <div class="kpi-icon-wrap">
+          <i class="fa-solid fa-calendar-day"></i>
+        </div>
+      </div>
+
+      <!-- KPI 3: Crecimiento vs. Mes Anterior -->
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <h4>Crecimiento Mensual</h4>
+          <div class="kpi-value" id="kpiGrowthRate">+0.0%</div>
+          <div class="kpi-trend trend-up" id="kpiGrowthTrend">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>vs. mes anterior</span>
+          </div>
+        </div>
+        <div class="kpi-icon-wrap">
+          <i class="fa-solid fa-arrow-trend-up"></i>
+        </div>
+      </div>
+
+      <!-- KPI 4: Promedio Diario -->
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <h4>Promedio Diario</h4>
+          <div class="kpi-value" id="kpiDailyAvg">0</div>
+          <div class="kpi-trend">
+            <i class="fa-solid fa-users-rays"></i>
+            <span>Visitas / día</span>
+          </div>
+        </div>
+        <div class="kpi-icon-wrap">
+          <i class="fa-solid fa-chart-simple"></i>
+        </div>
+      </div>
+    </section>
+
+    <!-- Monthly Visits Chart Card (Chart.js) -->
+    <section class="card chart-card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">
+            <i class="fa-solid fa-chart-area" style="color: var(--primary-color);"></i>
+            <span>Evolución Mensual de Visitas</span>
+          </h2>
+          <p class="card-subtitle">Comparativa entre visitas totales y visitantes únicos</p>
+        </div>
+        <div class="chart-legend-custom">
+          <span class="legend-item"><span class="legend-dot dot-primary"></span> Visitas Totales</span>
+          <span class="legend-item"><span class="legend-dot dot-secondary"></span> Visitantes Únicos</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="chart-container" style="position: relative; height: 340px; width: 100%;">
+          <canvas id="monthlyVisitsChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Detail Breakdown Section: 2 Columns (Top Pages & Monthly Detail) -->
+    <div class="views-detail-grid">
+      <!-- Card 1: Páginas Más Visitadas -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fa-solid fa-layer-group" style="color: var(--primary-color);"></i>
+            <span>Páginas Más Visitadas</span>
+          </h3>
+          <span class="badge badge-neutral">Top 5</span>
+        </div>
+        <div class="card-body" style="padding: 1rem 1.5rem;">
+          <ul class="top-pages-list" id="topPagesList">
+            <!-- Populated via JS -->
+          </ul>
+        </div>
+      </div>
+
+      <!-- Card 2: Desglose Mensual Detallado -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fa-solid fa-table" style="color: var(--primary-color);"></i>
+            <span>Rendimiento por Mes</span>
+          </h3>
+          <span class="badge badge-success">Detalle histórico</span>
+        </div>
+        <div class="card-body" style="padding: 0;">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Mes</th>
+                  <th>Visitas</th>
+                  <th>Únicos</th>
+                  <th>Páginas Vistas</th>
+                </tr>
+              </thead>
+              <tbody id="monthlyTableBody">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+{% endblock content %}
+
+{% block extra_js %}
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Page Specific Script -->
+  <script src="{% static 'django_app/js/views.js' %}"></script>
+{% endblock %}

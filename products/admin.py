@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Producto, Categoria, UnidadMedida, VisitCounter
+from .models import Producto, Categoria, UnidadMedida, VisitCounter,PDFGenerationJob,CatalogoPDF
 from django.utils.translation import gettext_lazy as _
 from .utils import generar_pdf_productos
 from django.http import HttpResponse
@@ -108,3 +108,66 @@ admin.site.register(Producto, ProductoAdmin)
 admin.site.register(Categoria, CategoriaAdmin)
 admin.site.register(UnidadMedida, UnidadMedidadAdmin)
 
+
+
+@admin.register(PDFGenerationJob)
+class PDFGenerationJobAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'status',
+        'progress',
+        'processed_products',
+        'total_products',
+        'tamano_legible',
+        'created_at',
+        'completed_at',
+    )
+    list_filter = ('status', 'created_at')
+    readonly_fields = (
+        'status',
+        'total_products',
+        'processed_products',
+        'progress',
+        'file',
+        'tamano_bytes',
+        'error_message',
+        'created_at',
+        'started_at',
+        'completed_at',
+    )
+    ordering = ('-created_at',)
+
+    # Es un registro histórico generado por el sistema: no se crea ni edita a mano
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+@admin.register(CatalogoPDF)
+class CatalogoPDFAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'productos_hash',
+        'total_productos',
+        'generado_en',
+    )
+    readonly_fields = (
+        'archivo',
+        'productos_hash',
+        'total_productos',
+        'generado_en',
+    )
+    ordering = ('-generado_en',)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

@@ -89,6 +89,8 @@ class Producto(models.Model):
     
     def __str__(self):
         return self.name
+
+
     
 
 class VisitCounter(models.Model):
@@ -103,7 +105,38 @@ class VisitCounter(models.Model):
 
     def __str__(self):
         return f"{self.page_name} ({self.visits} visitas, {self.date})"
-    
+
+
+ 
+ 
+class CatalogoPDF(models.Model):
+    """
+    Guarda el último PDF de catálogo generado, para no reconstruirlo
+    en cada request si ya hay uno vigente (ningún producto cambió
+    desde la última generación).
+ 
+    Se espera UN solo registro vigente por catálogo (por eso las vistas
+    de ejemplo más abajo usan get_or_create / el más reciente). Si en
+    tu caso necesitas varios catálogos (por ejemplo, uno por sucursal),
+    agrega un campo que los distinga y ajusta el filtro en la vista.
+    """
+    archivo = models.FileField(upload_to="catalogos_pdf/")
+    productos_hash = models.CharField(max_length=64, db_index=True)
+    total_productos = models.PositiveIntegerField(default=0)
+    generado_en = models.DateTimeField(auto_now=True)
+ 
+    class Meta:
+        verbose_name = "Catálogo PDF"
+        verbose_name_plural = "Catálogos PDF"
+ 
+    def __str__(self):
+        return f"Catálogo PDF ({self.total_productos} productos) - {self.generado_en:%d/%m/%Y %H:%M}"
+ 
+
+
+
+
+
 # Función que elimina la imagen del producto cuando se elimina el producto
 # @receiver(post_delete, sender=Producto)
 # def delete_product_image(sender, instance, **kwargs):
@@ -112,3 +145,73 @@ class VisitCounter(models.Model):
 #         if os.path.isfile(instance.image.path):
 #             os.remove(instance.image.path)
 
+
+
+"""
+Agregar esto a tu models.py (o a un archivo aparte, p.ej. pdf_jobs/models.py,
+e importarlo donde corresponda).
+
+Este modelo NO reemplaza a CatalogoPDF: son complementarios.
+
+- PDFGenerationJob  -> registra el PROCESO de una generación (mientras corre):
+                       estado, cuántos productos van, cuándo empezó/terminó, error.
+- CatalogoPDF       -> registra el RESULTADO final vigente (el archivo ya listo,
+                       con su hash, tamaño, fecha y cantidad de productos).
+
+Cuando un Job termina en 'completed', se crea (o actualiza) el CatalogoPDF
+correspondiente a partir de ese resultado.
+"""
+
+from django.db import models
+
+
+class PDFGenerationJob(models.Model):
+
+    class Estado(models.TextChoices):
+        PENDING = "pending", "Pendiente"
+        PROCESSING = "processing", "Procesando"
+        COMPLETED = "completed", "Completado"
+        FAILED = "failed", "Fallido"
+
+    status = models.CharField(
+        max_length=20,
+        choices=Estado.choices,
+        default=Estado.PENDING,
+        db_index=True,
+    )
+
+    total_products = models.PositiveIntegerField(default=0)
+    processed_products = models.PositiveIntegerField(default=0)
+    progress = models.PositiveSmallIntegerField(default=0)  # 0-100
+
+    file = models.FileField(upload_to="catalogos_pdf/jobs/", null=True, blank=True)
+    tamano_bytes = models.PositiveIntegerField(null=True, blank=True)
+
+    error_message = models.TextField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Trabajo de generación de PDF"
+        verbose_name_plural = "Trabajos de generación de PDF"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Job {self.id} ({self.status}) - {self.processed_products}/{self.total_products}"
+
+    @property
+    def tamano_legible(self):
+        """Ej: 3.4 MB — para mostrar en el historial sin abrir el archivo."""
+        if not self.tamano_bytes:
+            return "-"
+        mb = self.tamano_bytes / (1024 * 1024)
+        return f"{mb:.1f} MB" if mb >= 1 else f"{self.tamano_bytes / 1024:.0f} KB"
+
+    def actualizar_progreso(self, procesados: int, total: int):
+        """Actualiza processed_products y recalcula progress (%)."""
+        self.processed_products = procesados
+        self.total_products = total
+        self.progress = int((procesados / total) * 100) if total else 0
+        self.save(update_fields=["processed_products", "total_products", "progress"])

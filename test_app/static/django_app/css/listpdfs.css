@@ -1,0 +1,153 @@
+/* ===========================================================
+   Agregar estas reglas al final de tu lista_generaciones.css
+   real (el que ya se enlaza en el template con {% static %}).
+   Están escritas con especificidad normal, así que una vez que
+   estén aquí puedes borrar el bloque <style> de fallback del
+   template si quieres, sin perder nada.
+   =========================================================== */
+
+/* --- Modal de confirmación de eliminación --- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.55);
+  padding: 1rem;
+}
+
+.modal-box {
+  background: var(--surface-color, #fff);
+  border-radius: 14px;
+  max-width: 380px;
+  width: 100%;
+  padding: 1.5rem;
+  text-align: center;
+  animation: modal-pop 0.18s ease-out;
+}
+
+@keyframes modal-pop {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modal-icon-wrap {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  font-size: 1.4rem;
+}
+
+.modal-title {
+  margin: 0 0 0.4rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.modal-text {
+  margin: 0 0 0.85rem;
+  color: var(--text-muted, #64748b);
+  font-size: 0.9rem;
+}
+
+.modal-details {
+  list-style: none;
+  margin: 0 0 0.85rem;
+  padding: 0.75rem;
+  background: var(--surface-muted, #f8fafc);
+  border-radius: 10px;
+  display: grid;
+  gap: 0.35rem;
+  text-align: left;
+  font-size: 0.82rem;
+}
+
+.modal-details li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.modal-details span {
+  color: var(--text-muted, #64748b);
+}
+
+.modal-warning {
+  margin: 0 0 1.1rem;
+  color: #ef4444;
+  font-size: 0.78rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+.modal-actions .btn {
+  flex: 1;
+  justify-content: center;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: #fff;
+  border: 1px solid #ef4444;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+.btn-danger:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* --- Toasts (reemplazan los alert()) --- */
+.toast-stack {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.toast {
+  min-width: 240px;
+  max-width: 320px;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  background: var(--surface-color, #fff);
+  border-left: 4px solid #64748b;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  font-size: 0.85rem;
+  animation: toast-in 0.2s ease-out;
+}
+
+.toast-success {
+  border-left-color: #22c55e;
+}
+
+.toast-error {
+  border-left-color: #ef4444;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

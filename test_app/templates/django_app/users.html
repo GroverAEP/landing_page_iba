@@ -1,0 +1,283 @@
+{% extends 'django_app/base.html' %}
+{% load static %}
+
+{% block title %}Usuarios - Ibafex Panel Administrativo{% endblock %}
+
+{% block extra_css %}
+  <!-- Page Specific Style -->
+  <link rel="stylesheet" href="{% static 'django_app/css/users.css' %}">
+{% endblock %}
+
+{% block page_title %}Control de Usuarios y Roles{% endblock %}
+{% block page_subtitle %}Gestiona accesos, permisos y perfiles del personal de Ibafex{% endblock %}
+
+{% block content %}
+  <main class="page-body">
+    <!-- KPI Cards for Users -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <h4>Total Usuarios</h4>
+          <div class="kpi-value" id="kpiTotalUsers">0</div>
+          <div class="kpi-trend trend-up">
+            <i class="fa-solid fa-users"></i>
+            <span>En plataforma</span>
+          </div>
+        </div>
+        <div class="kpi-icon-wrap">
+          <i class="fa-solid fa-user-group"></i>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <h4>Usuarios Activos</h4>
+          <div class="kpi-value" id="kpiActiveUsers">0</div>
+          <div class="kpi-trend trend-up">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Con acceso vigente</span>
+          </div>
+        </div>
+        <div class="kpi-icon-wrap">
+          <i class="fa-solid fa-user-check"></i>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <h4>Administradores</h4>
+          <div class="kpi-value" id="kpiAdminCount">0</div>
+          <div class="kpi-trend">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Permisos totales</span>
+          </div>
+        </div>
+        <div class="kpi-icon-wrap">
+          <i class="fa-solid fa-crown"></i>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <h4>Supervisores / Operadores</h4>
+          <div class="kpi-value" id="kpiStaffCount">0</div>
+          <div class="kpi-trend trend-up">
+            <i class="fa-solid fa-user-gear"></i>
+            <span>Operaciones</span>
+          </div>
+        </div>
+        <div class="kpi-icon-wrap">
+          <i class="fa-solid fa-briefcase"></i>
+        </div>
+      </div>
+    </section>
+
+    <!-- Users Table & Card Container -->
+    <section class="card">
+      <div class="card-body">
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <!-- Search Input -->
+            <div class="search-input-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="userSearchInput" class="form-control" placeholder="Buscar por nombre o correo...">
+              <button type="button" class="search-clear-btn" id="userSearchClearBtn" aria-label="Limpiar">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <!-- Filter: Role -->
+            <select id="userFilterRole" class="form-select filter-select" aria-label="Filtrar por rol">
+              <option value="">Todos los roles</option>
+              <option value="Administrador">Administrador</option>
+              <option value="Supervisor">Supervisor</option>
+              <option value="Editor">Editor</option>
+              <option value="Operador">Operador</option>
+            </select>
+
+            <!-- Filter: Status -->
+            <select id="userFilterStatus" class="form-select filter-select" aria-label="Filtrar por estado">
+              <option value="">Todos los estados</option>
+              <option value="Activo">Activo</option>
+              <option value="Inactivo">Inactivo</option>
+              <option value="Suspendido">Suspendido</option>
+            </select>
+
+            <button type="button" class="btn btn-secondary btn-sm" id="btnResetUserFilters" title="Restablecer filtros">
+              <i class="fa-solid fa-arrow-rotate-left"></i>
+              <span>Limpiar</span>
+            </button>
+          </div>
+
+          <div class="toolbar-right">
+            <!-- View Toggle: Grid vs List -->
+            <div class="view-toggle">
+              <button type="button" class="view-btn active" id="btnUserGridView" title="Vista en cuadrícula">
+                <i class="fa-solid fa-grip"></i>
+              </button>
+              <button type="button" class="view-btn" id="btnUserListView" title="Vista en lista">
+                <i class="fa-solid fa-list"></i>
+              </button>
+            </div>
+
+            <!-- New User Button -->
+            <button type="button" class="btn btn-primary" id="btnOpenAddUser">
+              <i class="fa-solid fa-user-plus"></i>
+              <span>Nuevo usuario</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Grid View (User Cards) -->
+        <div class="users-grid" id="userGridContainer">
+          <!-- Dynamically populated -->
+        </div>
+
+        <!-- List View (User Table) -->
+        <div class="table-responsive" id="userListContainer" style="display: none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Correo electrónico</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Fecha de registro</th>
+                <th style="text-align: right;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="userEmptyState" style="display: none;">
+          <div class="empty-state-icon">
+            <i class="fa-solid fa-users-slash"></i>
+          </div>
+          <h3 class="empty-state-title">No se encontraron usuarios</h3>
+          <p class="empty-state-text">
+            No hay ningún usuario que coincida con tus criterios de búsqueda o filtros.
+          </p>
+          <button type="button" class="btn btn-secondary" id="btnEmptyUserReset">
+            <i class="fa-solid fa-arrow-rotate-left"></i>
+            <span>Restablecer búsqueda</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+{% endblock content %}
+
+{% block modals %}
+  <!-- Add / Edit User Modal -->
+  <div class="modal-overlay" id="userModal" role="dialog" aria-modal="true" aria-labelledby="userModalTitle">
+    <div class="modal" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="userModalTitle">
+          <i class="fa-solid fa-user-plus" style="color: var(--primary-color);"></i>
+          <span>Nuevo usuario</span>
+        </h3>
+        <button type="button" class="modal-close" data-modal-close="userModal" aria-label="Cerrar modal">&times;</button>
+      </div>
+
+      <form id="userForm" novalidate>
+        <input type="hidden" id="modalUserId">
+
+        <div class="modal-body">
+          <!-- Full Name -->
+          <div class="form-group">
+            <label for="modalUserName" class="form-label">
+              <span>Nombre completo</span>
+              <span class="required-star">*</span>
+            </label>
+            <input type="text" id="modalUserName" class="form-control" placeholder="Ej. Mariana Gómez" required>
+            <div class="form-error" id="modalUserNameError">Ingresa el nombre completo (mínimo 3 caracteres).</div>
+          </div>
+
+          <!-- Email -->
+          <div class="form-group">
+            <label for="modalUserEmail" class="form-label">
+              <span>Correo electrónico</span>
+              <span class="required-star">*</span>
+            </label>
+            <input type="email" id="modalUserEmail" class="form-control" placeholder="correo@ibafex.com" required>
+            <div class="form-error" id="modalUserEmailError">Ingresa un correo corporativo válido.</div>
+          </div>
+
+          <!-- Password -->
+          <div class="form-group">
+            <label for="modalUserPassword" class="form-label">
+              <span>Contraseña</span>
+              <span class="required-star" id="modalUserPasswordRequiredStar">*</span>
+            </label>
+            <div class="password-input-wrap">
+              <input
+                type="password"
+                id="modalUserPassword"
+                class="form-control"
+                placeholder="Dejar en blanco para no cambiarla"
+                autocomplete="new-password"
+              >
+              <button
+                type="button"
+                class="password-toggle-btn"
+                id="btnTogglePassword"
+                aria-label="Mostrar contraseña"
+                title="Mostrar contraseña"
+              >
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+            <div class="form-error" id="modalUserPasswordError">Ingresa una contraseña de al menos 6 caracteres.</div>
+          </div>
+
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <!-- Role -->
+            <div class="form-group">
+              <label for="modalUserRole" class="form-label">
+                <span>Rol asignado</span>
+                <span class="required-star">*</span>
+              </label>
+              <select id="modalUserRole" class="form-select" required>
+                <option value="Administrador">Administrador</option>
+                <option value="Supervisor">Supervisor</option>
+                <option value="Editor">Editor</option>
+                <option value="Operador">Operador</option>
+              </select>
+            </div>
+
+            <!-- Status -->
+            <div class="form-group">
+              <label for="modalUserStatus" class="form-label">
+                <span>Estado de la cuenta</span>
+                <span class="required-star">*</span>
+              </label>
+              <select id="modalUserStatus" class="form-select" required>
+                <option value="Activo">Activo</option>
+                <option value="Inactivo">Inactivo</option>
+                <option value="Suspendido">Suspendido</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-modal-close="userModal">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveUser">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Guardar usuario</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock modals %}
+
+{% block extra_js %}
+  <!-- Page Specific Script -->
+  <script src="{% static 'django_app/js/users.js' %}"></script>
+{% endblock %}

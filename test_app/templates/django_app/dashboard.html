@@ -1,0 +1,573 @@
+{% extends 'django_app/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Ibafex Panel Administrativo{% endblock %}
+
+{% block extra_css %}
+  <!-- Page Specific Style -->
+  <link rel="stylesheet" href="{% static 'django_app/css/dashboard.css' %}">
+
+  <!-- Scroll del modal de producto (en línea para que no dependa de la caché de archivos estáticos) -->
+  <style>
+    /* --- Modal de producto: el cuerpo hace scroll, el encabezado y los botones quedan fijos --- */
+    #productModal .modal {
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh;
+      max-height: 90dvh;
+      overflow: hidden;
+    }
+
+    #productModal .modal-header,
+    #productModal .modal-footer {
+      flex-shrink: 0;
+    }
+
+    #productModal form {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      min-height: 0; /* permite que el cuerpo se encoja y haga scroll */
+    }
+
+    #productModal .modal-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+
+    /* --- Filtro A-Z: estilos base de respaldo ---
+       Usan :where() (especificidad 0): si dashboard.css ya define estas clases,
+       las reglas de ese archivo ganan y esto no cambia nada. */
+    :where(.alphabet-filter-container) {
+      margin: 0.75rem 0 1rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 10px;
+    }
+    :where(.alphabet-filter-header) {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+      font-size: var(--font-size-sm, 0.875rem);
+      color: var(--text-muted, #64748b);
+    }
+    :where(.alphabet-label),
+    :where(.alphabet-current) {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    :where(.alphabet-label) { font-weight: 600; }
+    :where(.alphabet-clear-mini) {
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      padding: 0.15rem 0.35rem;
+      border-radius: 6px;
+    }
+    :where(.alphabet-nav) {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+    :where(.alphabet-btn) {
+      min-width: 2rem;
+      padding: 0.3rem 0.55rem;
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 8px;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    :where(.alphabet-btn:hover) { border-color: var(--primary-color, #059669); }
+    :where(.alphabet-btn:focus-visible) { outline: 2px solid var(--primary-color, #059669); outline-offset: 2px; }
+    :where(.alphabet-btn.no-products) { opacity: 0.4; }
+    :where(.alphabet-btn.active) {
+      background: var(--primary-color, #059669);
+      border-color: var(--primary-color, #059669);
+      color: #fff;
+      opacity: 1;
+    }
+  </style>
+{% endblock %}
+
+{% block page_title %}Gestión de Productos{% endblock %}
+{% block page_subtitle %}Supervisa el catálogo, los precios y la disponibilidad de los productos de Ibafex{% endblock %}
+
+{% block header_actions %}
+  <!-- <button class="btn btn-primary" id="btnOpenAddModal">
+    <i class="fa-solid fa-plus"></i>
+    <span>Nuevo Producto</span> -->
+  <!-- </button> -->
+{% endblock %}
+
+{% block content %}
+  <!-- Page Body -->
+  <main class="page-body">
+    <!-- KPI Summary Cards -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <h4>Total Productos</h4>
+          <div class="kpi-value" id="kpiTotalProducts">0</div>
+          <div class="kpi-trend trend-up">
+            <i class="fa-solid fa-arrow-up"></i>
+            <span>En catálogo</span>
+          </div>
+        </div>
+        <div class="kpi-icon-wrap">
+          <i class="fa-solid fa-boxes-stacked"></i>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <h4>Marcas Asociadas</h4>
+          <div class="kpi-value" id="kpiTotalBrands">0</div>
+          <div class="kpi-trend trend-up">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Marcas distintas</span>
+          </div>
+        </div>
+        <div class="kpi-icon-wrap">
+          <i class="fa-solid fa-handshake"></i>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <h4>Productos Disponibles</h4>
+          <div class="kpi-value" id="kpiAvailableProducts">0</div>
+          <div class="kpi-trend" id="kpiStockTrend">
+            <i class="fa-solid fa-warehouse"></i>
+            <span>Marcados como disponibles</span>
+          </div>
+        </div>
+        <div class="kpi-icon-wrap">
+          <i class="fa-solid fa-cubes"></i>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <h4>Precio Promedio</h4>
+          <div class="kpi-value" id="kpiAvgPrice">$0.00</div>
+          <div class="kpi-trend trend-up">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Por unidad</span>
+          </div>
+        </div>
+        <div class="kpi-icon-wrap">
+          <i class="fa-solid fa-dollar-sign"></i>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Card with Toolbar, Filters and Views -->
+    <section class="card">
+      <div class="card-body">
+        <!-- Action Toolbar: Search, Filters, View Toggles & Add Button -->
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <!-- Real-time Search Input -->
+            <div class="search-input-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input
+                type="text"
+                id="searchInput"
+                class="form-control"
+                placeholder="Buscar por nombre, marca o categoría..."
+              >
+              <button type="button" class="search-clear-btn" id="searchClearBtn" aria-label="Limpiar búsqueda">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <!-- Filter: Category -->
+          <select id="filterCategory" class="form-select filter-select" aria-label="Filtrar por categoría">
+            <!-- Opciones generadas por JS (PRODUCT_CATEGORIES en dashboard.js) -->
+          </select>
+
+            <!-- Filter: Availability (product_of_stock) -->
+            <select id="filterAvailability" class="form-select filter-select" aria-label="Filtrar por disponibilidad">
+              <option value="">Toda disponibilidad</option>
+              <option value="true">Disponible</option>
+              <option value="false">No disponible</option>
+            </select>
+
+            <!-- Filter: Price Range Toggle/Select -->
+            <select id="filterPriceRange" class="form-select filter-select" aria-label="Filtrar por rango de precio">
+              <option value="">Cualquier precio</option>
+              <option value="0-15">Menos de $15</option>
+              <option value="15-30">$15 - $30</option>
+              <option value="30-50">$30 - $50</option>
+              <option value="50+">Más de $50</option>
+            </select>
+
+            <!-- Filter: Alphabet (A-Z), synced with the letter bar below -->
+            <select id="filterLetter" class="form-select filter-select" aria-label="Filtrar por abecedario (A-Z)">
+              <option value="">Abecedario (A-Z)</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+              <option value="E">E</option>
+              <option value="F">F</option>
+              <option value="G">G</option>
+              <option value="H">H</option>
+              <option value="I">I</option>
+              <option value="J">J</option>
+              <option value="K">K</option>
+              <option value="L">L</option>
+              <option value="M">M</option>
+              <option value="N">N</option>
+              <option value="Ñ">Ñ</option>
+              <option value="O">O</option>
+              <option value="P">P</option>
+              <option value="Q">Q</option>
+              <option value="R">R</option>
+              <option value="S">S</option>
+              <option value="T">T</option>
+              <option value="U">U</option>
+              <option value="V">V</option>
+              <option value="W">W</option>
+              <option value="X">X</option>
+              <option value="Y">Y</option>
+              <option value="Z">Z</option>
+            </select>
+
+            <!-- Reset Filters Button -->
+            <button type="button" class="btn btn-secondary btn-sm" id="btnResetFilters" title="Restablecer filtros">
+              <i class="fa-solid fa-arrow-rotate-left"></i>
+              <span>Limpiar</span>
+            </button>
+          </div>
+
+          <div class="toolbar-right">
+            <!-- Select All (todos los productos filtrados, no solo la página) -->
+            <button type="button" class="btn btn-outline" id="btnSelectAllFiltered" title="Seleccionar todos los productos filtrados">
+              <i class="fa-solid fa-square-check"></i>
+              <span id="btnSelectAllFilteredLabel">Seleccionar todo</span>
+            </button>
+            <!-- View Mode Toggle (Card vs Table) -->
+            <div class="view-toggle">
+              <button type="button" class="view-btn active" id="btnCardView" title="Vista en tarjetas" aria-label="Vista en tarjetas">
+                <i class="fa-solid fa-grip"></i>
+              </button>
+              <button type="button" class="view-btn" id="btnTableView" title="Vista en tabla" aria-label="Vista en tabla">
+                <i class="fa-solid fa-table-list"></i>
+              </button>
+            </div>
+
+            <!-- Export PDF Button -->
+            <button type="button" class="btn btn-outline" id="btnExportPdf" title="Exportar reporte en PDF">
+              <i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i>
+              <span>Descargar PDF</span>
+            </button>
+
+            <!-- Add Product Button (its own id: the header button already uses btnOpenAddModal) -->
+            <button type="button" class="btn btn-primary" id="btnAddProductToolbar">
+              <i class="fa-solid fa-plus"></i>
+              <span>Agregar producto</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Alphabetical Filter Bar (A-Z) -->
+        <div class="alphabet-filter-container">
+          <div class="alphabet-filter-header">
+            <span class="alphabet-label">
+              <i class="fa-solid fa-arrow-down-a-z"></i>
+              <span>Filtrar por letra:</span>
+            </span>
+            <span class="alphabet-current" id="alphabetCurrentFilter" style="display: none;">
+              <span>Mostrando: Letra <strong id="alphabetCurrentLetter"></strong></span>
+              <button type="button" class="alphabet-clear-mini" id="btnClearLetterFilter" title="Quitar filtro de letra" aria-label="Quitar filtro de letra">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </span>
+          </div>
+          <div class="alphabet-nav" id="alphabetNav" role="toolbar" aria-label="Abecedario de la A a la Z">
+            <button type="button" class="alphabet-btn active" data-letter="" title="Mostrar todos los productos">Todos</button>
+            <button type="button" class="alphabet-btn" data-letter="A">A</button>
+            <button type="button" class="alphabet-btn" data-letter="B">B</button>
+            <button type="button" class="alphabet-btn" data-letter="C">C</button>
+            <button type="button" class="alphabet-btn" data-letter="D">D</button>
+            <button type="button" class="alphabet-btn" data-letter="E">E</button>
+            <button type="button" class="alphabet-btn" data-letter="F">F</button>
+            <button type="button" class="alphabet-btn" data-letter="G">G</button>
+            <button type="button" class="alphabet-btn" data-letter="H">H</button>
+            <button type="button" class="alphabet-btn" data-letter="I">I</button>
+            <button type="button" class="alphabet-btn" data-letter="J">J</button>
+            <button type="button" class="alphabet-btn" data-letter="K">K</button>
+            <button type="button" class="alphabet-btn" data-letter="L">L</button>
+            <button type="button" class="alphabet-btn" data-letter="M">M</button>
+            <button type="button" class="alphabet-btn" data-letter="N">N</button>
+            <button type="button" class="alphabet-btn" data-letter="Ñ">Ñ</button>
+            <button type="button" class="alphabet-btn" data-letter="O">O</button>
+            <button type="button" class="alphabet-btn" data-letter="P">P</button>
+            <button type="button" class="alphabet-btn" data-letter="Q">Q</button>
+            <button type="button" class="alphabet-btn" data-letter="R">R</button>
+            <button type="button" class="alphabet-btn" data-letter="S">S</button>
+            <button type="button" class="alphabet-btn" data-letter="T">T</button>
+            <button type="button" class="alphabet-btn" data-letter="U">U</button>
+            <button type="button" class="alphabet-btn" data-letter="V">V</button>
+            <button type="button" class="alphabet-btn" data-letter="W">W</button>
+            <button type="button" class="alphabet-btn" data-letter="X">X</button>
+            <button type="button" class="alphabet-btn" data-letter="Y">Y</button>
+            <button type="button" class="alphabet-btn" data-letter="Z">Z</button>
+          </div>
+        </div>
+
+        <!-- Bulk Selection Actions Bar -->
+        <div class="bulk-bar" id="bulkActionsBar">
+          <div class="bulk-info">
+            <i class="fa-solid fa-check-double"></i>
+            <span id="bulkSelectedCount">0 productos seleccionados</span>
+          </div>
+          <div class="bulk-buttons">
+            <button type="button" class="btn btn-sm btn-danger" id="btnBulkDelete">
+              <i class="fa-solid fa-trash-can"></i>
+              <span>Eliminar seleccionados</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Card View Container -->
+        <div class="products-card-grid" id="cardViewContainer">
+          <!-- Rendered via JS -->
+        </div>
+
+        <!-- Table View Container -->
+        <div class="table-responsive" id="tableViewContainer" style="display: none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="th-checkbox">
+                  <input type="checkbox" id="selectAllCheckbox" aria-label="Seleccionar todo">
+                </th>
+                <th>Fecha</th>
+                <th>Producto</th>
+                <th>Marca</th>
+                <th>Categoría</th>
+                <th>Precio por unidad</th>
+                <th>Precio por paquete</th>
+                <th>Disponible</th>
+                <th style="text-align: right;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="productTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+          <div class="empty-state-icon">
+            <i class="fa-solid fa-box-open"></i>
+          </div>
+          <h3 class="empty-state-title">No se encontraron productos</h3>
+          <p class="empty-state-text">
+            No hay resultados para los términos o filtros seleccionados. Intenta cambiar los criterios de búsqueda.
+          </p>
+          <button type="button" class="btn btn-secondary" id="btnEmptyReset">
+            <i class="fa-solid fa-arrow-rotate-left"></i>
+            <span>Limpiar filtros</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+{% endblock content %}
+
+{% block modals %}
+  <!-- Add / Edit Product Modal -->
+  <div class="modal-overlay" id="productModal" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
+    <div class="modal" style="max-width: 620px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="productModalTitle">
+          <i class="fa-solid fa-leaf" style="color: var(--primary-color);"></i>
+          <span>Agregar producto</span>
+        </h3>
+        <button type="button" class="modal-close" data-modal-close="productModal" aria-label="Cerrar modal">&times;</button>
+      </div>
+
+      <form id="productForm" novalidate>
+        <input type="hidden" id="productId">
+
+        <div class="modal-body">
+          <!-- Product Image Upload Section -->
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label">
+              <span>Fotografía del producto</span>
+              <span style="font-size: var(--font-size-xs); color: var(--text-muted); font-weight: normal;">(Sube un archivo o pega un enlace)</span>
+            </label>
+            <div class="image-upload-zone" id="imageUploadZone">
+              <input type="file" id="productImageFile" accept="image/png, image/jpeg, image/webp, image/jpg" style="display: none;">
+              <input type="hidden" id="productImage">
+              <div class="upload-placeholder" id="uploadPlaceholder">
+                <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                <div class="upload-text">
+                  <strong>Arrastra una imagen aquí o haz clic para subir</strong>
+                  <span>Formatos: PNG, JPG, WEBP (Hasta 5MB)</span>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" id="btnBrowseImage">
+                  <i class="fa-solid fa-folder-open"></i>
+                  <span>Seleccionar archivo</span>
+                </button>
+              </div>
+              <div class="upload-preview-wrap" id="uploadPreviewWrap" style="display: none;">
+                <img id="uploadPreviewImg" src="" alt="Vista previa" class="upload-preview-img">
+                <div class="preview-actions">
+                  <button type="button" class="btn btn-secondary btn-sm" id="btnChangeImage" title="Cambiar imagen">
+                    <i class="fa-solid fa-arrow-rotate-right"></i>
+                    <span>Cambiar</span>
+                  </button>
+                  <button type="button" class="btn btn-danger btn-sm" id="btnRemoveImage" title="Quitar imagen">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>Eliminar</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="image-url-row" style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
+              <input type="url" id="productImageUrl" class="form-control" style="font-size: var(--font-size-xs); padding: 0.45rem 0.75rem;" placeholder="O pega un enlace web (https://...)">
+              <button type="button" class="btn btn-secondary btn-sm" id="btnApplyImageUrl" style="white-space: nowrap;">
+                <i class="fa-solid fa-link"></i>
+                <span>Cargar URL</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Product Name (max 55 characters, as in the model) -->
+          <div class="form-group">
+            <label for="productName" class="form-label">
+              <span>Nombre del producto</span>
+              <span class="required-star">*</span>
+            </label>
+            <input type="text" id="productName" class="form-control" maxlength="55" placeholder="Ej. Café Gourmet Huila" required>
+            <div class="form-error" id="productNameError">Ingresa el nombre del producto (máximo 55 caracteres).</div>
+          </div>
+
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <!-- Brand -->
+            <div class="form-group">
+              <label for="productBrand" class="form-label">
+                <span>Marca del producto</span>
+                <span class="required-star">*</span>
+              </label>
+              <input type="text" id="productBrand" class="form-control" placeholder="Ej. Finca El Roble" required>
+              <div class="form-error" id="productBrandError">Indica la marca.</div>
+            </div>
+
+            <!-- Category -->
+            <div class="form-group">
+              <label for="productCategory" class="form-label">
+                <span>Categoría</span>
+                <span class="required-star">*</span>
+              </label>
+              <select id="productCategory" class="form-select" required>
+              <!-- Opciones generadas por JS (PRODUCT_CATEGORIES en dashboard.js) -->
+            </select>
+              <div class="form-error" id="productCategoryError">Selecciona una categoría.</div>
+            </div>
+          </div>
+
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <!-- Unit price -->
+            <div class="form-group">
+              <label for="productPrice" class="form-label">
+                <span>Precio por unidad ($)</span>
+                <span class="required-star">*</span>
+              </label>
+              <input type="number" step="0.01" min="0" id="productPrice" class="form-control" placeholder="0.00" required>
+              <div class="form-error" id="productPriceError">Precio válido requerido.</div>
+            </div>
+
+            <!-- Unit of measure -->
+            <div class="form-group">
+              <label for="productUnit" class="form-label">
+                <span>Unidad de medida</span>
+                <span class="required-star">*</span>
+              </label>
+              <select id="productUnit" class="form-select" required>
+                <option value="kg">kg</option>
+                <option value="L">Litros (L)</option>
+                <option value="caja">Caja</option>
+                <option value="qq">Quintal (qq)</option>
+                <option value="ton">Tonelada (ton)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <!-- Bulk (package) price - optional -->
+            <div class="form-group">
+              <label for="productBulkPrice" class="form-label">
+                <span>Precio por paquete ($)</span>
+                <span style="font-size: var(--font-size-xs); color: var(--text-muted); font-weight: normal;">(opcional)</span>
+              </label>
+              <input type="number" step="0.01" min="0" id="productBulkPrice" class="form-control" placeholder="0.00">
+            </div>
+
+            <!-- Bulk (package) unit - optional -->
+            <div class="form-group">
+              <label for="productBulkUnit" class="form-label">
+                <span>Unidad de paquete</span>
+                <span style="font-size: var(--font-size-xs); color: var(--text-muted); font-weight: normal;">(opcional)</span>
+              </label>
+              <select id="productBulkUnit" class="form-select">
+              <!-- Opciones generadas por JS (PACKAGE_UNITS en dashboard.js) -->
+            </select>
+            </div>
+          </div>
+
+          <!-- Availability (product_of_stock) -->
+          <div class="form-group">
+            <label for="productAvailable" class="form-label">
+              <span>Disponibilidad</span>
+              <span class="required-star">*</span>
+            </label>
+            <select id="productAvailable" class="form-select" required>
+              <option value="true">Disponible</option>
+              <option value="false">No disponible</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-modal-close="productModal">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveProduct">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Guardar producto</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock modals %}
+
+{% block extra_js %}
+  <!-- PDF Export Libraries CDN (jsPDF & AutoTable) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+  <script>
+    window.PDF_GENERATE_URL = "{% url 'django_app:generar_catalogo_pdf' %}";
+    // Usamos 0 como placeholder de job_id, y lo reemplazamos en JS con .replace('0', jobId)
+    window.PDF_STATUS_URL_TEMPLATE = "{% url 'django_app:estado_catalogo_pdf' job_id=0 %}";
+  </script>
+  <!-- Page Specific Script -->
+  <script src="{% static 'django_app/js/dashboard.js' %}"></script>
+
+{% endblock %}

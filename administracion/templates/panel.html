@@ -422,11 +422,162 @@
   font-weight: 600;
 }
 
+.toast-pdf {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #1f2937;
+  color: var(--blanco);
+  padding: 14px 18px;
+  border-radius: 10px;
+  width: 270px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  z-index: 999;
+}
+.toast-pdf__barra-fondo {
+  background: #374151;
+  border-radius: 4px;
+  height: 6px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+.toast-pdf__barra {
+  background: var(--verde-principal);
+  height: 100%;
+  transition: width 0.3s ease;
+}
+/* ---------- Toolbar de acciones (más prolija que botones sueltos) ---------- */
+.toolbar-acciones {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
 
+.toolbar-busqueda {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 220px;
+}
 
+.input-busqueda {
+  padding: 8px 14px;
+  border: 1px solid var(--gris-borde);
+  border-radius: 8px 0 0 8px;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  width: 100%;
+  outline: none;
+  border-right: none;
+}
+
+.btn-buscar {
+  padding: 8px 14px;
+  background: var(--verde-principal);
+  color: var(--blanco);
+  border: none;
+  border-radius: 0 8px 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.toolbar-botones {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn-toolbar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 8px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+.btn-toolbar:active { transform: translateY(1px); }
+
+.btn-toolbar--primario {
+  background: var(--verde-principal);
+  color: var(--blanco);
+}
+.btn-toolbar--primario:hover { background: var(--verde-oscuro); }
+
+.btn-toolbar--secundario {
+  background: var(--gris-fondo);
+  color: var(--texto);
+  border-color: var(--gris-borde);
+}
+.btn-toolbar--secundario:hover { background: #eceeec; }
+
+.btn-toolbar--outline {
+  background: var(--blanco);
+  color: var(--verde-principal);
+  border-color: var(--verde-principal);
+}
+.btn-toolbar--outline:hover { background: rgba(16,123,18,0.06); }
+
+.btn-toolbar--peligro {
+  background: var(--blanco);
+  color: var(--rojo-agotado);
+  border-color: var(--rojo-agotado);
+}
+.btn-toolbar--peligro:hover { background: rgba(220,54,70,0.06); }
+
+/* ---------- Selección múltiple / eliminación en lote ---------- */
+.barra-acciones {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 13px;
+  color: var(--texto-secundario);
+}
+
+.btn-eliminar-lote {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  background: var(--rojo-agotado);
+  color: var(--blanco);
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-eliminar-lote:hover { background: #c22d3d; }
+
+.mensaje-flash {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13.5px;
+}
+.mensaje-success { background: rgba(16,123,18,0.1); color: var(--verde-principal); border: 1px solid rgba(16,123,18,0.25); }
+.mensaje-warning { background: rgba(245,158,11,0.12); color: #92600A; border: 1px solid rgba(245,158,11,0.3); }
+
+input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--verde-principal); }
 
 </style>
 </head>
+
+  <div id="toast-pdf" class="toast-pdf" style="display:none;">
+  <div class="toast-pdf__texto">Generando catálogo...</div>
+  <div class="toast-pdf__barra-fondo">
+    <div id="toast-pdf-barra" class="toast-pdf__barra" style="width:0%;"></div>
+  </div>
+</div>
 <body>
 
 <div class="layout">
@@ -447,8 +598,7 @@
         <!-- <li><a href="{% url 'panel' %}" class="activo"><span class="icono">📊</span> Resumen</a></li> -->
         <li><a href="{% url 'panel' %}"><span class="icono">📦</span> Inventario</a></li>
         <li><a href="{% url 'visitas' %}"><span class="icono">🧾</span> Visitas</a></li>
-        <!--  <li><a href="#"><span class="icono">👥</span> Clientes</a></li>
-        <li><a href="#"><span class="icono">⚙️</span> Configuración</a></li> -->
+        <li><a href="{% url 'lista_generaciones'%}"><span class="icono">👥</span> Generacion</a></li>
       </ul>
     </div>
 
@@ -510,94 +660,101 @@
 
   <!-- Columna izquierda: tabla de productos -->
   <div class="panel-tabla">
-    <div class="panel-tabla-header" style="display:block;">
-      <h2 style="margin-bottom:14px;">Inventario de productos</h2>
-
-      <div style="display:flex; gap:10px; align-items:center;">
-        <form method="get" action="{% url 'panel' %}" style="display:flex; align-items:center; flex:1;">
-          <input type="hidden" name="categoria" value="{{ categoria_id }}">
-          <input type="hidden" name="disponible" value="{{ disponible }}">
-          <input
-            type="text"
-            name="q"
-            value="{{ query|default:'' }}"
-            placeholder="Buscar producto, marca o categoría..."
-            style="padding:8px 14px; border:1px solid var(--gris-borde); border-radius:8px; font-size:13px; font-family:'Inter',sans-serif; width:100%; outline:none;"
-          >
-          <button type="submit" style="margin-left:6px; padding:8px 12px; background:var(--verde-principal); color:var(--blanco); border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; flex-shrink:0;">
-            🔍
-          </button>
-        </form>
-
-        <div style="display:flex; gap:10px; flex-shrink:0;">
-          <a href="{% url 'importar_productos' %}" class="btn-descargar" style="background:var(--blanco); color:var(--verde-principal); border:1.5px solid var(--verde-principal);">⬆ Importar CSV</a>
-          <a href="{% url 'exportar_productos' %}" class="btn-descargar">⬇ Descargar CSV</a>
-          <a href="{% url 'descargar_productos_pdf' %}" class="btn-descargar" style="background:var(--rojo-agotado); color:var(--blanco); border:1.5px solid var(--rojo-agotado);">⬇ Descargar PDF</a>
-          <a href="{% url 'crear_producto' %}" class="btn-descargar">+ Nuevo producto</a>
-        </div>
+  <div class="panel-tabla-header" style="display:block;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+      <h2 style="margin:0;">Inventario de productos</h2>
+      <div id="barra-acciones-productos" class="barra-acciones" style="display:none;">
+        <span id="contador-seleccionados-productos">0 seleccionados</span>
+        <button type="button" id="btn-pdf-seleccionados" class="btn-pdf-seleccion">
+          ⬇ Descargar PDF con seleccionados
+        </button>
       </div>
     </div>
 
-    {% if productos %}
-    <div class="tabla-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th>Imagen</th>
-            <th>Producto</th>
-            <th>Marca</th>
-            <th>Categoría</th>
-            <th>Precio unitario</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for producto in productos %}
-          <tr>
-            <td>
-              {% if producto.image %}
-                <img src="{{ producto.image.url }}" alt="{{ producto.name }}" style="width:42px;height:42px;object-fit:cover;border-radius:6px;border:1px solid var(--gris-borde);">
-              {% else %}
-                <span style="color:var(--texto-secundario);font-size:12px;">Sin imagen</span>
-              {% endif %}
-            </td>
-            <td>{{ producto.name }}</td>
-            <td>{{ producto.brand }}</td>
-            <td>{{ producto.category.name }}</td>
-            <td>S/ {{ producto.unit_price }}</td>
-            <td>
-              {% if producto.product_of_stock %}
-                <span class="estado estado-ok">Disponible</span>
-              {% else %}
-                <span class="estado estado-agotado">Agotado</span>
-              {% endif %}
-            </td>
-            <td style="white-space:nowrap;">
-              <a href="{% url 'editar_producto' producto.id %}" style="color:var(--verde-principal); font-size:13px; font-weight:600; text-decoration:none; margin-right:12px;">Editar</a>
-              <a href="{% url 'eliminar_producto' producto.id %}" style="color:var(--rojo-agotado); font-size:13px; font-weight:600; text-decoration:none;">Eliminar</a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="toolbar-acciones">
+      <form method="get" action="{% url 'panel' %}" class="toolbar-busqueda">
+        <input type="hidden" name="categoria" value="{{ categoria_id }}">
+        <input type="hidden" name="disponible" value="{{ disponible }}">
+        <input
+          type="text"
+          name="q"
+          value="{{ query|default:'' }}"
+          placeholder="Buscar producto, marca o categoría..."
+          class="input-busqueda"
+        >
+        <button type="submit" class="btn-buscar">🔍</button>
+      </form>
+
+      <div class="toolbar-botones">
+        <!-- <a href="{% url 'importar_productos' %}" class="btn-toolbar btn-toolbar--outline">⬆ Importar CSV</a> -->
+        <!-- <a href="{% url 'exportar_productos' %}" class="btn-toolbar btn-toolbar--secundario">⬇ Descargar CSV</a> -->
+        <button id="btn-generar-pdf" type="button" class="btn-toolbar btn-toolbar--peligro">⬇ Descargar PDF (todo)</button>
+        <a href="{% url 'crear_producto' %}" class="btn-toolbar btn-toolbar--primario">+ Nuevo producto</a>
+      </div>
     </div>
+  </div>
+
+  {% if productos %}
+  <div class="tabla-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:36px;"><input type="checkbox" id="chk-seleccionar-todos-productos"></th>
+          <th>Imagen</th>
+          <th>Producto</th>
+          <th>Marca</th>
+          <th>Categoría</th>
+          <th>Precio unitario</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for producto in productos %}
+        <tr>
+          <td><input type="checkbox" name="seleccionados" value="{{ producto.id }}" class="chk-fila-producto"></td>
+          <td>
+            {% if producto.image %}
+              <img src="{{ producto.image.url }}" alt="{{ producto.name }}" style="width:42px;height:42px;object-fit:cover;border-radius:6px;border:1px solid var(--gris-borde);">
+            {% else %}
+              <span style="color:var(--texto-secundario);font-size:12px;">Sin imagen</span>
+            {% endif %}
+          </td>
+          <td>{{ producto.name }}</td>
+          <td>{{ producto.brand }}</td>
+          <td>{{ producto.category.name }}</td>
+          <td>S/ {{ producto.unit_price }}</td>
+          <td>
+            {% if producto.product_of_stock %}
+              <span class="estado estado-ok">Disponible</span>
+            {% else %}
+              <span class="estado estado-agotado">Agotado</span>
+            {% endif %}
+          </td>
+          <td style="white-space:nowrap;">
+            <a href="{% url 'editar_producto' producto.id %}" style="color:var(--verde-principal); font-size:13px; font-weight:600; text-decoration:none;">Editar</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="padding: 48px 24px; text-align:center;">
+    {% if query or categoria_id or disponible %}
+      <p style="color:var(--texto-secundario); font-size:14px; margin-bottom:16px;">
+        No se encontraron productos con estos filtros.
+      </p>
+      <a href="{% url 'panel' %}" class="btn-descargar">Ver todos los productos</a>
     {% else %}
-    <div style="padding: 48px 24px; text-align:center;">
-      {% if query or categoria_id or disponible %}
-        <p style="color:var(--texto-secundario); font-size:14px; margin-bottom:16px;">
-          No se encontraron productos con estos filtros.
-        </p>
-        <a href="{% url 'panel' %}" class="btn-descargar">Ver todos los productos</a>
-      {% else %}
-        <p style="color:var(--texto-secundario); font-size:14px; margin-bottom:16px;">
-          Todavía no hay productos registrados en el catálogo.
-        </p>
-        <a href="{% url 'crear_producto' %}" class="btn-descargar">+ Agregar el primer producto</a>
-      {% endif %}
-    </div>
+      <p style="color:var(--texto-secundario); font-size:14px; margin-bottom:16px;">
+        Todavía no hay productos registrados en el catálogo.
+      </p>
+      <a href="{% url 'crear_producto' %}" class="btn-descargar">+ Agregar el primer producto</a>
     {% endif %}
   </div>
+  {% endif %}
+</div>
 
   <!-- Columna derecha: panel de filtros -->
   <aside class="filtro-panel">
@@ -630,11 +787,11 @@
           </li>
           <li>
             <a href="{% url 'panel' %}?q={{ query|urlencode }}&categoria={{ categoria_id }}&disponible=1"
-               class="{% if disponible == '1' %}activo{% endif %}">Sí</a>
+               class="{% if disponible == '1' %}activo{% endif %}">Disponible</a>
           </li>
           <li>
             <a href="{% url 'panel' %}?q={{ query|urlencode }}&categoria={{ categoria_id }}&disponible=0"
-               class="{% if disponible == '0' %}activo{% endif %}">No</a>
+               class="{% if disponible == '0' %}activo{% endif %}">Agotado</a>
           </li>
         </ul>
       </div>
@@ -645,6 +802,78 @@
   </main>
 
 </div>
+<script>
+(function () {
+  const chkTodos = document.getElementById("chk-seleccionar-todos-productos");
+  const chksFila = document.querySelectorAll(".chk-fila-producto");
+  const barraAcciones = document.getElementById("barra-acciones-productos");
+  const contador = document.getElementById("contador-seleccionados-productos");
 
+  function actualizarBarra() {
+    const seleccionados = document.querySelectorAll(".chk-fila-producto:checked").length;
+    if (seleccionados > 0) {
+      barraAcciones.style.display = "flex";
+      contador.textContent = `${seleccionados} seleccionado${seleccionados > 1 ? "s" : ""}`;
+    } else {
+      barraAcciones.style.display = "none";
+    }
+
+    if (chkTodos) {
+      chkTodos.checked = seleccionados === chksFila.length && chksFila.length > 0;
+      chkTodos.indeterminate = seleccionados > 0 && seleccionados < chksFila.length;
+    }
+  }
+
+  if (chkTodos) {
+    chkTodos.addEventListener("change", function () {
+      chksFila.forEach((chk) => { chk.checked = chkTodos.checked; });
+      actualizarBarra();
+    });
+  }
+
+  chksFila.forEach((chk) => chk.addEventListener("change", actualizarBarra));
+})();
+</script>
+<script>
+document.getElementById("btn-generar-pdf").addEventListener("click", async () => {
+  const toast = document.getElementById("toast-pdf");
+  const barra = document.getElementById("toast-pdf-barra");
+  const texto = toast.querySelector(".toast-pdf__texto");
+
+  toast.style.display = "block";
+  barra.style.background = "var(--verde-principal)";
+  texto.textContent = "Iniciando generación...";
+  barra.style.width = "0%";
+
+  try {
+    const respuestaInicio = await fetch("{% url 'iniciar_generacion_pdf' %}");
+    const { job_id } = await respuestaInicio.json();
+
+    const intervalo = setInterval(async () => {
+      const resp = await fetch(`/administracion/panel/pdf-job/${job_id}/estado/`);
+      const data = await resp.json();
+
+      barra.style.width = `${data.progress}%`;
+      texto.textContent = `Generando catálogo... ${data.progress}%`;
+
+      if (data.status === "completed") {
+        clearInterval(intervalo);
+        texto.textContent = "¡Listo! Descargando...";
+        window.location.href = data.download_url;
+        setTimeout(() => { toast.style.display = "none"; }, 2000);
+      }
+
+      if (data.status === "failed") {
+        clearInterval(intervalo);
+        texto.textContent = `Error: ${data.error || "no se pudo generar el PDF"}`;
+        barra.style.background = "var(--rojo-agotado)";
+      }
+    }, 1500);
+  } catch (err) {
+    texto.textContent = "Error al iniciar la generación.";
+    barra.style.background = "var(--rojo-agotado)";
+  }
+});
+</script>
 </body>
 </html>

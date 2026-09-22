@@ -1,0 +1,149 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Ibafex Panel Administrativo{% endblock %}</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="{% static 'django_app/img/logo.png' %}">
+
+  <!-- Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Global Styles -->
+  <link rel="stylesheet" href="{% static 'django_app/css/variables.css' %}">
+  <link rel="stylesheet" href="{% static 'django_app/css/components.css' %}">
+  {% block layout_css %}
+  <link rel="stylesheet" href="{% static 'django_app/css/layout.css' %}">
+  {% endblock layout_css %}
+
+  <!-- Page Specific Style -->
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+  {% block layout %}
+  <div class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="appSidebar">
+      <div class="sidebar-brand">
+        <a href="{% url 'django_app:dashboard' %}" class="brand-logo-link">
+        <img src="{% static 'django_app/img/logo.png' %}" alt="Ibafex Logo" class="brand-logo-img" id="sidebarLogo" data-default-src="{% static 'django_app/img/logo.png' %}">        </a>
+        <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Cerrar menú">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-section-label">Navegación</span>
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a href="{% url 'django_app:dashboard' %}" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" data-page="dashboard">
+              <i class="fa-solid fa-chart-pie nav-icon"></i>
+              <span class="nav-label">Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'django_app:users' %}" class="nav-link {% if active_page == 'users' %}active{% endif %}" data-page="users">
+              <i class="fa-solid fa-users nav-icon"></i>
+              <span class="nav-label">Usuarios</span>
+              <span class="nav-badge" id="navUserBadge">6</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'django_app:views' %}" class="nav-link {% if active_page == 'views' %}active{% endif %}" data-page="views">
+              <i class="fa-solid fa-chart-line nav-icon"></i>
+              <span class="nav-label">Visitas</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'django_app:reports' %}" class="nav-link {% if active_page == 'reports' %}active{% endif %}" data-page="reports">
+              <i class="fa-solid fa-file-lines nav-icon"></i>
+              <span class="nav-label">Reportes</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'django_app:settings' %}" class="nav-link {% if active_page == 'settings' %}active{% endif %}" data-page="settings">
+              <i class="fa-solid fa-gear nav-icon"></i>
+              <span class="nav-label">Configuración</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Sidebar User Profile Footer -->
+      <div class="sidebar-footer">
+        <div class="user-snippet">
+          {# Iniciales calculadas en el servidor a partir del nombre real #}
+          <div class="user-avatar">{{ request.user.get_full_name|default:request.user.username|slice:":2"|upper }}</div>
+          <div class="user-info">
+            <div class="user-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+            <div class="user-role">{{ request.user.perfil.get_role_display|default:"Administrador" }}</div>
+          </div>
+        </div>
+        <button class="btn-logout" id="btnLogout" title="Cerrar sesión" aria-label="Cerrar sesión">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        </button>
+        <!-- Formulario oculto: el logout real es un POST a Django (con CSRF).
+             utils.js hace logoutForm.submit() cuando el usuario confirma. -->
+        <form id="logoutForm" action="{% url 'django_app:logout' %}" method="post" style="display:none;">
+          {% csrf_token %}
+        </form>
+      </div>
+    </aside>
+
+    <!-- Mobile Backdrop -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="header-left">
+          <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menú">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div class="header-titles">
+            <h1>{% block page_title %}{% endblock %}</h1>
+            <p>{% block page_subtitle %}{% endblock %}</p>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <div class="header-date-badge">
+            <i class="fa-regular fa-calendar"></i>
+            <span>Cargando fecha...</span>
+          </div>
+          {% block header_actions %}{% endblock %}
+        </div>
+      </header>
+
+      <!-- Page Body Content -->
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+  {% endblock layout %}
+
+  {% block modals %}{% endblock %}
+
+  <!-- Datos del usuario autenticado, expuestos para utils.js
+       (getCurrentUser / renderCurrentUser). Fuente real: request.user -->
+  <script>
+    window.AUTH_USER = {
+      name: "{{ request.user.get_full_name|default:request.user.username|escapejs }}",
+      role: "{{ request.user.perfil.get_role_display|default:'Administrador'|escapejs }}"
+    };
+  </script>
+
+  <!-- Global Shared Services -->
+  <script src="{% static 'django_app/js/storage.js' %}"></script>
+  <script src="{% static 'django_app/js/utils.js' %}"></script>
+  <script>
+    window.SIGNIN_URL = "{% url 'django_app:signin' %}";
+    window.DASHBOARD_URL = "{% url 'django_app:dashboard' %}";
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

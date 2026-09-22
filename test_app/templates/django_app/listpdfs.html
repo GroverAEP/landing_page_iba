@@ -1,0 +1,458 @@
+{% extends 'django_app/base.html' %}
+{% load static %}
+
+{% block title %}Historial de Catálogos PDF - Ibafex Panel Administrativo{% endblock %}
+
+{% block extra_css %}
+  <!-- Page Specific Style -->
+  <link rel="stylesheet" href="{% static 'django_app/css/lista_generaciones.css' %}">
+
+  <!-- Fallback styles: usan :where() (especificidad 0), así que si el archivo
+       de arriba ya define estas clases, esas reglas ganan y esto no cambia nada. -->
+  <style>
+    :where(.catalog-card-grid) {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+    :where(.catalog-card) {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--surface-color, #fff);
+    }
+    :where(.catalog-card-header) {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 1.1rem 1.1rem 0.85rem;
+    }
+    :where(.catalog-icon-wrap) {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 46px;
+      height: 46px;
+      flex-shrink: 0;
+      border-radius: 10px;
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      font-size: 1.15rem;
+    }
+    :where(.catalog-title-block) { min-width: 0; }
+    :where(.catalog-title) {
+      margin: 0;
+      font-size: var(--font-size-md, 0.95rem);
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    :where(.catalog-subdate) {
+      margin: 0.15rem 0 0;
+      font-size: var(--font-size-xs, 0.75rem);
+      color: var(--text-muted, #64748b);
+    }
+    :where(.catalog-card-body) {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      padding: 0 1.1rem 1.1rem;
+    }
+    :where(.catalog-metric-label) {
+      display: block;
+      font-size: var(--font-size-xs, 0.75rem);
+      color: var(--text-muted, #64748b);
+      margin-bottom: 0.15rem;
+    }
+    :where(.catalog-metric-value) {
+      font-size: var(--font-size-md, 0.95rem);
+      font-weight: 700;
+    }
+    :where(.catalog-card-footer) {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.85rem 1.1rem;
+      border-top: 1px solid var(--border-color, #e2e8f0);
+      background: var(--surface-muted, #f8fafc);
+    }
+    :where(.catalog-hash) {
+      font-family: monospace;
+      font-size: var(--font-size-xs, 0.7rem);
+      color: var(--text-muted, #64748b);
+    }
+
+    /* --- Modal de confirmación de eliminación --- */
+    :where(.modal-overlay) {
+      position: fixed; inset: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(15, 23, 42, 0.55);
+      padding: 1rem;
+    }
+    :where(.modal-box) {
+      background: var(--surface-color, #fff);
+      border-radius: 14px;
+      max-width: 380px; width: 100%;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    :where(.modal-icon-wrap) {
+      width: 52px; height: 52px; margin: 0 auto 0.75rem;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.12); color: #ef4444; font-size: 1.4rem;
+    }
+    :where(.modal-title) { margin: 0 0 0.4rem; font-size: 1.05rem; font-weight: 700; }
+    :where(.modal-text) { margin: 0 0 0.85rem; color: var(--text-muted, #64748b); font-size: 0.9rem; }
+    :where(.modal-details) {
+      list-style: none; margin: 0 0 0.85rem; padding: 0.75rem;
+      background: var(--surface-muted, #f8fafc); border-radius: 10px;
+      display: grid; gap: 0.35rem; text-align: left; font-size: 0.82rem;
+    }
+    :where(.modal-details li) { display: flex; justify-content: space-between; gap: 0.5rem; }
+    :where(.modal-details span) { color: var(--text-muted, #64748b); }
+    :where(.modal-warning) { margin: 0 0 1.1rem; color: #ef4444; font-size: 0.78rem; }
+    :where(.modal-actions) { display: flex; gap: 0.6rem; justify-content: center; }
+    :where(.modal-actions .btn) { flex: 1; justify-content: center; }
+    :where(.btn-danger) {
+      background: #ef4444; color: #fff; border: 1px solid #ef4444;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+    }
+    :where(.btn-danger:disabled) { opacity: 0.65; cursor: not-allowed; }
+
+    /* --- Toasts --- */
+    :where(.toast-stack) {
+      position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 1100;
+      display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    :where(.toast) {
+      min-width: 240px; max-width: 320px;
+      padding: 0.75rem 1rem; border-radius: 10px;
+      background: var(--surface-color, #fff);
+      border-left: 4px solid #64748b;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      font-size: 0.85rem;
+      animation: toast-in 0.2s ease-out;
+    }
+    :where(.toast-success) { border-left-color: #22c55e; }
+    :where(.toast-error) { border-left-color: #ef4444; }
+    @keyframes toast-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+{% endblock %}
+
+{% block page_title %}Historial de Catálogos PDF{% endblock %}
+{% block page_subtitle %}Consulta, descarga y verifica los catálogos en PDF generados previamente{% endblock %}
+
+{% block header_actions %}
+  <button type="button" class="btn btn-secondary" id="btnRefreshList" title="Actualizar lista">
+    <i class="fa-solid fa-arrow-rotate-right"></i>
+    <span>Actualizar</span>
+  </button>
+  <button type="button" class="btn btn-primary" id="btnGenerateNewPdf">
+    <i class="fa-solid fa-file-circle-plus"></i>
+    <span>Generar nuevo catálogo</span>
+  </button>
+{% endblock %}
+
+{% block content %}
+  <main
+    class="page-body"
+    id="catalogPageBody"
+    data-generate-url="{% url 'django_app:generar_catalogo_pdf' %}"
+    data-status-url-template="{% url 'django_app:estado_catalogo_pdf' 0 %}"
+    data-delete-url-template="{% url 'django_app:eliminar_catalogo_pdf' 0 %}"
+  >
+    <!-- KPI Summary Cards -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <h4>Catálogos Generados</h4>
+          <div class="kpi-value">{{ jobs|length }}</div>
+          <div class="kpi-trend trend-up">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>Historial completo</span>
+          </div>
+        </div>
+        <div class="kpi-icon-wrap">
+          <i class="fa-solid fa-file-pdf"></i>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <h4>Última Generación</h4>
+          <div class="kpi-value" style="font-size: var(--font-size-lg, 1.35rem);">
+            {{ jobs.first.completed_at|date:"d M, H:i"|default:"—" }}
+          </div>
+          <div class="kpi-trend trend-up">
+            <i class="fa-solid fa-calendar-check"></i>
+            <span>Fecha más reciente</span>
+          </div>
+        </div>
+        <div class="kpi-icon-wrap">
+          <i class="fa-solid fa-clock"></i>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <h4>Espacio Total Ocupado</h4>
+          <div class="kpi-value">{{ tamano_total_legible|default:"—" }}</div>
+          <div class="kpi-trend" id="kpiStorageTrend">
+            <i class="fa-solid fa-database"></i>
+            <span>Suma de archivos guardados</span>
+          </div>
+        </div>
+        <div class="kpi-icon-wrap">
+          <i class="fa-solid fa-server"></i>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-info">
+          <h4>Productos Promedio</h4>
+          <div class="kpi-value">{{ promedio_productos|default:"—" }}</div>
+          <div class="kpi-trend trend-up">
+            <i class="fa-solid fa-boxes-stacked"></i>
+            <span>Por catálogo generado</span>
+          </div>
+        </div>
+        <div class="kpi-icon-wrap">
+          <i class="fa-solid fa-chart-simple"></i>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Card -->
+    <section class="card">
+      <div class="card-body">
+        <!-- Toolbar: Search, Sort & View Toggle -->
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div class="search-input-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input
+                type="text"
+                id="searchInput"
+                class="form-control"
+                placeholder="Buscar por ID de catálogo o fecha..."
+              >
+              <button type="button" class="search-clear-btn" id="searchClearBtn" aria-label="Limpiar búsqueda">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <select id="filterSort" class="form-select filter-select" aria-label="Ordenar por">
+              <option value="recent">Más recientes primero</option>
+              <option value="oldest">Más antiguos primero</option>
+              <option value="largest">Mayor tamaño</option>
+              <option value="most_products">Más productos</option>
+            </select>
+
+            <button type="button" class="btn btn-secondary btn-sm" id="btnResetFilters" title="Restablecer filtros">
+              <i class="fa-solid fa-arrow-rotate-left"></i>
+              <span>Limpiar</span>
+            </button>
+          </div>
+
+          <div class="toolbar-right">
+            <div class="view-toggle">
+              <button type="button" class="view-btn active" id="btnCardView" title="Vista en tarjetas" aria-label="Vista en tarjetas">
+                <i class="fa-solid fa-grip"></i>
+              </button>
+              <button type="button" class="view-btn" id="btnTableView" title="Vista en tabla" aria-label="Vista en tabla">
+                <i class="fa-solid fa-table-list"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card View -->
+        <div class="catalog-card-grid" id="cardViewContainer">
+          {% for job in jobs %}
+            <article
+              class="catalog-card"
+              data-id="{{ job.id }}"
+              data-search="{{ job.id }} {{ job.completed_at|date:'d/m/Y' }} {{ job.completed_at|date:'Y-m-d' }}"
+              data-timestamp="{{ job.completed_at|date:'U' }}"
+              data-bytes="{{ job.tamano_bytes|default:0 }}"
+              data-products="{{ job.total_products|default:0 }}"
+            >
+              <div class="catalog-card-header">
+                <div class="catalog-icon-wrap">
+                  <i class="fa-solid fa-file-pdf"></i>
+                </div>
+                <div class="catalog-title-block">
+                  <h3 class="catalog-title" title="Catálogo #{{ job.id }}">Catálogo #{{ job.id }}</h3>
+                  <p class="catalog-subdate">{{ job.completed_at|date:"d \d\e F \d\e Y, H:i" }}</p>
+                </div>
+              </div>
+
+              <div class="catalog-card-body">
+                <div>
+                  <span class="catalog-metric-label">Productos incluidos</span>
+                  <span class="catalog-metric-value">{{ job.total_products }}</span>
+                </div>
+                <div>
+                  <span class="catalog-metric-label">Tamaño del archivo</span>
+                  <span class="catalog-metric-value">{{ job.tamano_legible }}</span>
+                </div>
+                <div>
+                  <span class="catalog-metric-label">Estado</span>
+                  <span class="badge {% if job.status == 'completed' %}badge-success{% elif job.status == 'failed' %}badge-danger{% elif job.status == 'processing' %}badge-warning{% else %}badge-neutral{% endif %}">
+                    <span class="badge-dot"></span>{{ job.get_status_display }}
+                  </span>
+                </div>
+                <div>
+                  <span class="catalog-metric-label">Iniciado</span>
+                  <span class="catalog-metric-value" style="font-size: var(--font-size-sm, 0.85rem); font-weight: 500;">
+                    {{ job.started_at|date:"d M, H:i"|default:"—" }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="catalog-card-footer">
+                {% if job.file %}
+                  <a href="{{ job.file.url }}" class="btn btn-secondary btn-sm" download title="Descargar PDF">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Descargar</span>
+                  </a>
+                {% else %}
+                  <button type="button" class="btn btn-secondary btn-sm" disabled title="Archivo no disponible">
+                    <i class="fa-solid fa-ban"></i>
+                    <span>No disponible</span>
+                  </button>
+                {% endif %}
+                <button type="button" class="btn-icon btn-icon-danger btn-delete-catalog" data-id="{{ job.id }}" title="Eliminar del historial">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+
+        <!-- Table View -->
+        <div class="table-responsive" id="tableViewContainer" style="display: none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Fecha de generación</th>
+                <th>Productos</th>
+                <th>Tamaño</th>
+                <th>Estado</th>
+                <th style="text-align: right;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="catalogTableBody">
+              {% for job in jobs %}
+                <tr
+                  data-id="{{ job.id }}"
+                  data-search="{{ job.id }} {{ job.completed_at|date:'d/m/Y' }} {{ job.completed_at|date:'Y-m-d' }}"
+                  data-timestamp="{{ job.completed_at|date:'U' }}"
+                  data-bytes="{{ job.tamano_bytes|default:0 }}"
+                  data-products="{{ job.total_products|default:0 }}"
+                >
+                  <td><span class="pcard-sku">#{{ job.id }}</span></td>
+                  <td>{{ job.completed_at|date:"d M Y, H:i" }}</td>
+                  <td>{{ job.total_products }}</td>
+                  <td>{{ job.tamano_legible }}</td>
+                  <td>
+                    <span class="badge {% if job.status == 'completed' %}badge-success{% elif job.status == 'failed' %}badge-danger{% elif job.status == 'processing' %}badge-warning{% else %}badge-neutral{% endif %}">
+                      <span class="badge-dot"></span>{{ job.get_status_display }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="table-actions">
+                      {% if job.file %}
+                        <a href="{{ job.file.url }}" class="btn-icon btn-sm" download title="Descargar">
+                          <i class="fa-solid fa-download"></i>
+                        </a>
+                      {% else %}
+                        <button type="button" class="btn-icon btn-sm" disabled title="Archivo no disponible">
+                          <i class="fa-solid fa-ban"></i>
+                        </button>
+                      {% endif %}
+                      <button type="button" class="btn-icon btn-sm btn-icon-danger btn-delete-catalog" data-id="{{ job.id }}" title="Eliminar">
+                        <i class="fa-solid fa-trash-can"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State (real: no jobs at all) -->
+        {% if not jobs %}
+          <div class="empty-state" id="emptyStateReal">
+            <div class="empty-state-icon">
+              <i class="fa-solid fa-file-circle-xmark"></i>
+            </div>
+            <h3 class="empty-state-title">Aún no hay catálogos generados</h3>
+            <p class="empty-state-text">
+              Cuando generes un catálogo en PDF desde el listado de productos, aparecerá aquí junto con su fecha, tamaño y enlace de descarga.
+            </p>
+          </div>
+        {% endif %}
+
+        <!-- Empty State (filtered: search/sort left nothing visible) -->
+        <div class="empty-state" id="emptyStateFiltered" style="display: none;">
+          <div class="empty-state-icon">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </div>
+          <h3 class="empty-state-title">No se encontraron catálogos</h3>
+          <p class="empty-state-text">
+            No hay resultados para los términos de búsqueda. Intenta cambiar los criterios.
+          </p>
+          <button type="button" class="btn btn-secondary" id="btnEmptyReset">
+            <i class="fa-solid fa-arrow-rotate-left"></i>
+            <span>Limpiar filtros</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModalOverlay" style="display: none;">
+      <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+        <div class="modal-icon-wrap">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h3 class="modal-title" id="deleteModalTitle">Eliminar catálogo</h3>
+        <p class="modal-text">
+          ¿Seguro que quieres eliminar el <strong id="deleteModalCatalogName">Catálogo #—</strong> del historial?
+        </p>
+        <ul class="modal-details">
+          <li><span>Productos:</span> <strong id="deleteModalProducts">—</strong></li>
+          <li><span>Tamaño:</span> <strong id="deleteModalSize">—</strong></li>
+          <li><span>Fecha:</span> <strong id="deleteModalDate">—</strong></li>
+        </ul>
+        <p class="modal-warning">Esta acción no se puede deshacer.</p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="btnModalCancel">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="btnModalConfirm">
+            <i class="fa-solid fa-trash-can"></i>
+            <span>Sí, eliminar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast stack: notificaciones no bloqueantes en vez de alert() -->
+    <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+  </main>
+{% endblock content %}
+
+{% block extra_js %}
+  <!-- Page Specific Script -->
+  <script src="{% static 'django_app/js/listpdfs.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,551 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde-principal: #107B12;
+    --verde-oscuro: #0B7A10;
+    --naranja: #F59E0B;
+    --rojo-agotado: #DC3646;
+    --blanco: #FFFFFF;
+    --gris-fondo: #F5F5F5;
+    --gris-borde: #E3E4E1;
+    --texto: #444444;
+    --texto-secundario: #777777;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    color: var(--texto);
+    background: var(--gris-fondo);
+  }
+
+  .layout {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+  }
+
+  .sidebar {
+    background: linear-gradient(165deg, var(--verde-principal) 0%, var(--verde-oscuro) 100%);
+    color: var(--blanco);
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .marca {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 8px 28px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.18);
+  }
+
+  .marca-icono {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: var(--blanco);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .marca-icono svg { width: 18px; height: 18px; }
+
+  .marca-nombre {
+    font-family: 'Sora', sans-serif;
+    font-size: 15.5px;
+    font-weight: 700;
+  }
+
+  .nav-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .nav-lista a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-radius: 8px;
+    color: rgba(255,255,255,0.85);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.15s ease;
+  }
+
+  .nav-lista a:hover { background: rgba(255,255,255,0.1); }
+
+  .nav-lista a.activo {
+    background: var(--blanco);
+    color: var(--verde-principal);
+    font-weight: 600;
+  }
+
+  .nav-lista .icono { font-size: 16px; width: 18px; text-align: center; }
+
+  .sidebar-footer {
+    border-top: 1px solid rgba(255,255,255,0.18);
+    padding-top: 16px;
+    margin-top: 16px;
+  }
+
+  .usuario-mini {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+  }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .usuario-datos { overflow: hidden; }
+  .usuario-nombre {
+    font-size: 13.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .usuario-rol { font-size: 12px; color: rgba(255,255,255,0.7); }
+
+  .btn-salir {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    border-radius: 8px;
+    color: var(--blanco);
+    font-size: 13.5px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    justify-content: center;
+    transition: background 0.15s ease;
+  }
+
+  .btn-salir:hover { background: rgba(255,255,255,0.18); }
+
+  .contenido-grid {
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    gap: 20px;
+    align-items: start;
+  }
+
+  .filtro-panel {
+    background: var(--blanco);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--gris-borde);
+  }
+  .filtro-header {
+    background: var(--gris-fondo);
+    color: var(--texto);
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 12px 16px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--gris-borde);
+  }
+  .filtro-body { padding: 14px 16px 20px; }
+  .filtro-limpiar {
+    display: block;
+    font-size: 13px;
+    color: var(--texto-secundario);
+    text-decoration: none;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--gris-borde);
+    margin-bottom: 10px;
+  }
+  .filtro-limpiar:hover { color: var(--rojo-agotado); }
+  .filtro-seccion { margin-bottom: 18px; }
+  .filtro-titulo {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--texto);
+    margin-bottom: 8px;
+  }
+  .filtro-lista { list-style: none; margin: 0; padding: 0; }
+  .filtro-lista li a {
+    display: block;
+    font-size: 13.5px;
+    color: var(--texto-secundario);
+    text-decoration: none;
+    padding: 5px 0;
+  }
+  .filtro-lista li a:hover { color: var(--verde-principal); }
+  .filtro-lista li a.activo { color: var(--verde-principal); font-weight: 600; }
+
+  .tabla-scroll { max-height: 520px; overflow-y: auto; }
+  .tabla-scroll table thead th { position: sticky; top: 0; z-index: 1; }
+
+  .barra-acciones {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 13px;
+    color: var(--texto-secundario);
+  }
+  .btn-eliminar-lote {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    background: var(--rojo-agotado);
+    color: var(--blanco);
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-eliminar-lote:hover { background: #c22d3d; }
+
+  .mensaje-flash {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    margin-bottom: 18px;
+  }
+  .mensaje-success { background: rgba(16,123,18,0.1); color: var(--verde-principal); border: 1px solid rgba(16,123,18,0.25); }
+  .mensaje-warning { background: rgba(245,158,11,0.12); color: #92600A; border: 1px solid rgba(245,158,11,0.3); }
+
+  input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--verde-principal); }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+
+  .topbar h1 {
+    font-family: 'Sora', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+
+  .topbar p {
+    font-size: 14px;
+    color: var(--texto-secundario);
+    margin: 0;
+  }
+
+  .btn-generar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 18px;
+    background: var(--verde-principal);
+    border: none;
+    border-radius: 8px;
+    color: var(--blanco);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .btn-generar:hover { background: var(--verde-oscuro); }
+  .btn-generar:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .panel-tabla {
+    background: var(--blanco);
+    border: 1px solid var(--gris-borde);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .panel-tabla-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--gris-borde);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panel-tabla-header h2 {
+    font-family: 'Sora', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  th {
+    text-align: left;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--texto-secundario);
+    padding: 12px 22px;
+    background: var(--gris-fondo);
+  }
+
+  td {
+    padding: 14px 22px;
+    font-size: 13.5px;
+    border-top: 1px solid var(--gris-borde);
+  }
+
+  .link-descargar {
+    color: var(--verde-principal);
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 13px;
+  }
+
+  .link-descargar:hover { text-decoration: underline; }
+
+  .error-mensaje {
+    display: none;
+    background: #FDE2E4;
+    border: 1px solid #F7B9BE;
+    color: var(--rojo-agotado);
+    font-size: 13.5px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 18px;
+  }
+
+  @media (max-width: 1000px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <div>
+      <div class="marca">
+        <span class="marca-icono">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L3 6.5V11c0 5.2 3.6 9.7 9 11 5.4-1.3 9-5.8 9-11V6.5L12 2Z" fill="#107B12"/>
+          </svg>
+        </span>
+        <span class="marca-nombre">Panel Administrativo</span>
+      </div>
+
+      <ul class="nav-lista">
+        <li><a href="{% url 'panel' %}"><span class="icono">📦</span> Inventario</a></li>
+        <li><a href="{% url 'visitas' %}"><span class="icono">🧾</span> Visitas</a></li>
+        <li><a href="{% url 'lista_generaciones' %}" class="activo"><span class="icono">🖨️</span> Generación</a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="usuario-mini">
+        <span class="avatar">{{ request.user.username|slice:":2"|upper }}</span>
+        <div class="usuario-datos">
+          <div class="usuario-nombre">{{ request.user.username }}</div>
+          <div class="usuario-rol">Administrador</div>
+        </div>
+      </div>
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-salir">⎋ Cerrar sesión</button>
+      </form>
+    </div>
+  </aside>
+<main class="contenido">
+  <div class="topbar">
+    <div>
+      <h1>Generación 🖨️</h1>
+      <p>Historial de catálogos en PDF generados.</p>
+    </div>
+    <button class="btn-generar" id="btn-generar">⚡ Generar nuevo PDF</button>
+  </div>
+
+  <div class="error-mensaje" id="error-mensaje"></div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="mensaje-flash {% if message.tags %}mensaje-{{ message.tags }}{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="contenido-grid">
+
+    <!-- Columna izquierda: tabla + acciones en lote -->
+    <div class="panel-tabla">
+      <div class="panel-tabla-header">
+        <h2>PDFs generados</h2>
+        <div id="barra-acciones" class="barra-acciones" style="display:none;">
+          <span id="contador-seleccionados">0 seleccionados</span>
+          <button type="submit" form="form-eliminar" class="btn-eliminar-lote"
+                  onclick="return confirm('¿Eliminar los PDFs seleccionados? Esta acción no se puede deshacer.');">
+            🗑 Eliminar seleccionados
+          </button>
+        </div>
+      </div>
+
+      {% if jobs %}
+      <form id="form-eliminar" method="post" action="{% url 'eliminar_pdfs_generados' %}">
+        {% csrf_token %}
+        <div class="tabla-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:36px;">
+                  <input type="checkbox" id="chk-seleccionar-todos">
+                </th>
+                <th>Fecha de creación</th>
+                <th>Cantidad de productos</th>
+                <th>Tamaño</th>
+                <th>Descarga</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for job in jobs %}
+              <tr>
+                <td>
+                  <input type="checkbox" name="seleccionados" value="{{ job.id }}" class="chk-fila">
+                </td>
+                <td>{{ job.completed_at|date:"j \d\e F \d\e Y, H:i" }}</td>
+                <td>{{ job.total_products }}</td>
+                <td>{{ job.tamano_legible }}</td>
+                <td><a class="link-descargar" href="{% url 'descargar_pdf' job.id %}">⬇ Descargar</a></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </form>
+      {% else %}
+      <div style="padding: 48px 24px; text-align:center;">
+        <p style="color:var(--texto-secundario); font-size:14px;">
+          {% if dia_seleccionado or mes_seleccionado %}
+            No hay PDFs generados con este filtro.
+          {% else %}
+            Todavía no se ha generado ningún PDF.
+          {% endif %}
+        </p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Columna derecha: panel de filtros -->
+    <aside class="filtro-panel">
+      <div class="filtro-header">Filtro</div>
+      <div class="filtro-body">
+        <a href="{% url 'lista_generaciones' %}" class="filtro-limpiar">✖ Borrar todos los filtros</a>
+
+        <div class="filtro-seccion">
+          <div class="filtro-titulo">↓ Por día exacto</div>
+          <form method="get" action="{% url 'lista_generaciones' %}" style="display:flex; gap:6px;">
+            <input type="date" name="dia" value="{{ dia_seleccionado }}"
+                   style="flex:1; padding:7px 8px; border:1px solid var(--gris-borde); border-radius:6px; font-size:13px; font-family:'Inter',sans-serif;">
+            <button type="submit"
+                    style="padding:7px 12px; background:var(--verde-principal); color:var(--blanco); border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">
+              Ir
+            </button>
+          </form>
+        </div>
+
+        <div class="filtro-seccion">
+          <div class="filtro-titulo">↓ Por mes</div>
+          <ul class="filtro-lista">
+            <li>
+              <a href="{% url 'lista_generaciones' %}"
+                 class="{% if not mes_seleccionado %}activo{% endif %}">Todos</a>
+            </li>
+            {% for fecha_mes in meses_disponibles %}
+            <li>
+              <a href="{% url 'lista_generaciones' %}?mes={{ fecha_mes|date:'Y-m' }}"
+                 class="{% if mes_seleccionado == fecha_mes|date:'Y-m' %}activo{% endif %}">
+                {{ fecha_mes|date:"F Y"|capfirst }}
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+  </main>
+
+</div>
+
+<script>
+(function () {
+  const chkTodos = document.getElementById("chk-seleccionar-todos");
+  const chksFila = document.querySelectorAll(".chk-fila");
+  const barraAcciones = document.getElementById("barra-acciones");
+  const contador = document.getElementById("contador-seleccionados");
+
+  function actualizarBarra() {
+    const seleccionados = document.querySelectorAll(".chk-fila:checked").length;
+    if (seleccionados > 0) {
+      barraAcciones.style.display = "flex";
+      contador.textContent = `${seleccionados} seleccionado${seleccionados > 1 ? "s" : ""}`;
+    } else {
+      barraAcciones.style.display = "none";
+    }
+
+    if (chkTodos) {
+      chkTodos.checked = seleccionados === chksFila.length && chksFila.length > 0;
+      chkTodos.indeterminate = seleccionados > 0 && seleccionados < chksFila.length;
+    }
+  }
+
+  if (chkTodos) {
+    chkTodos.addEventListener("change", function () {
+      chksFila.forEach((chk) => { chk.checked = chkTodos.checked; });
+      actualizarBarra();
+    });
+  }
+
+  chksFila.forEach((chk) => chk.addEventListener("change", actualizarBarra));
+})();
+</script>
+
+</body>
+</html>

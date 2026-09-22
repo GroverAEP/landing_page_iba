@@ -1,0 +1,254 @@
+{% extends 'django_app/base.html' %}
+{% load static %}
+
+{% block title %}Iniciar Sesión - Ibafex Panel Administrativo{% endblock %}
+
+{% block layout_css %}{% endblock layout_css %}
+
+{% block extra_css %}
+  <!-- Page Specific Style -->
+  <link rel="stylesheet" href="{% static 'django_app/css/singin.css' %}">
+{% endblock %}
+
+{% block body_class %}signin-body{% endblock %}
+
+{% block layout %}
+  <!-- Theme Toggle in Top Bar -->
+  <div class="top-nav-controls">
+    <button class="theme-toggle-btn" id="themeToggleBtn" type="button" aria-label="Cambiar tema claro/oscuro" title="Cambiar tema">
+      <i class="fa-solid fa-moon icon-moon"></i>
+      <i class="fa-solid fa-sun icon-sun"></i>
+      <span class="theme-label" id="themeLabelText">Tema</span>
+    </button>
+  </div>
+
+  <div class="signin-wrapper">
+    <!-- Ambient Background Elements -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+    <div class="ambient-glow glow-3"></div>
+
+    <div class="signin-card">
+      <!-- Left Hero Column (Branding & Value Proposition) -->
+      <div class="signin-hero">
+        <div class="hero-header">
+          <div class="hero-logo-box">
+            <img src="{% static 'django_app/img/logo.svg' %}" alt="Ibafex Logo" class="hero-logo">
+          </div>
+          <span class="hero-badge">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Portal Seguro</span>
+          </span>
+        </div>
+
+        <div class="hero-content">
+          <span class="hero-category">Agrocomercio &amp; Exportación</span>
+          <h1 class="hero-title">Conectando el campo con los mercados globales</h1>
+          <p class="hero-description">
+            Plataforma centralizada para la supervisión de catálogos agrícolas, trazabilidad de productores certificados y control operativo en tiempo real.
+          </p>
+
+          <ul class="hero-features">
+            <li class="feature-item">
+              <div class="feature-icon">
+                <i class="fa-solid fa-leaf"></i>
+              </div>
+              <div class="feature-text">
+                <strong>Trazabilidad y Calidad</strong>
+                <span>Monitoreo de cosechas, lotes y certificaciones de origen.</span>
+              </div>
+            </li>
+            <li class="feature-item">
+              <div class="feature-icon">
+                <i class="fa-solid fa-chart-line"></i>
+              </div>
+              <div class="feature-text">
+                <strong>Control de Inventarios</strong>
+                <span>Gestión de existencias, variaciones de precios y exportación.</span>
+              </div>
+            </li>
+            <li class="feature-item">
+              <div class="feature-icon">
+                <i class="fa-solid fa-users-gear"></i>
+              </div>
+              <div class="feature-text">
+                <strong>Roles y Seguridad</strong>
+                <span>Acceso por niveles y auditoría de operaciones del sistema.</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="hero-footer">
+          <div class="stat-pill">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Sistema 100% Operativo</span>
+          </div>
+          <span class="hero-version">Ibafex v2.4</span>
+        </div>
+      </div>
+
+      <!-- Right Form Column (Sign In Form) -->
+      <div class="signin-form-pane">
+        <!-- Mobile Header (Visible on small screens) -->
+        <div class="mobile-brand">
+          <img src="{% static 'django_app/img/logo.svg' %}" alt="Ibafex Logo" class="mobile-logo">
+          <span class="mobile-tag">Panel Administrativo</span>
+        </div>
+
+        <div class="form-header">
+          <span class="form-kicker">Acceso al Sistema</span>
+          <h2 class="form-title">Iniciar Sesión</h2>
+          <p class="form-subtitle">Ingresa tus credenciales autorizadas para continuar.</p>
+        </div>
+
+        <!-- Alert Notification Box: la rellena Django (messages), tanto errores como éxitos (ej: logout) -->
+        <div class="signin-alert {% for message in messages %}{% if forloop.first %}{% if message.tags == 'error' %}alert-danger visible{% else %}alert-{{ message.tags }} visible{% endif %}{% endif %}{% endfor %}" id="signinAlert" role="alert" aria-live="polite">
+          <i class="fa-solid fa-triangle-exclamation alert-icon"></i>
+          <span class="alert-message" id="alertMessage">
+            {% for message in messages %}{{ message }}{% endfor %}
+          </span>
+        </div>
+
+        <!-- Login Form: POST real a la vista 'signin' de Django -->
+        <form class="signin-form" id="signinForm" method="post" action="{% url 'django_app:signin' %}" novalidate autocomplete="on">
+          {% csrf_token %}
+
+          <!-- Username Input -->
+          <div class="form-group">
+            <label for="signinUsername" class="form-label">
+              <span>Usuario</span>
+              <span class="required-star">*</span>
+            </label>
+            <div class="input-group">
+              <i class="fa-regular fa-user input-icon"></i>
+              <input 
+                type="text" 
+                id="signinUsername" 
+                name="username" 
+                class="form-control has-icon-left has-icon-right" 
+                placeholder="nombre.usuario" 
+                value="{{ username_value|default:'' }}"
+                required 
+                autocomplete="username"
+                aria-describedby="usernameError">
+              <button type="button" class="btn-input-icon btn-clear-input" id="btnClearUsername" aria-label="Limpiar campo" title="Limpiar campo" style="display: none;">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div class="form-error" id="usernameError">
+              <i class="fa-solid fa-circle-exclamation"></i>
+              <span id="usernameErrorText">Ingresa un usuario válido</span>
+            </div>
+          </div>
+
+          <!-- Password Input -->
+          <div class="form-group">
+            <div class="form-label">
+              <label for="signinPassword">
+                <span>Contraseña</span>
+                <span class="required-star">*</span>
+              </label>
+              <button type="button" class="link-forgot" id="btnForgotPwd">¿Olvidaste tu contraseña?</button>
+            </div>
+            <div class="input-group">
+              <i class="fa-solid fa-lock input-icon"></i>
+              <input 
+                type="password" 
+                id="signinPassword" 
+                name="password" 
+                class="form-control has-icon-left has-icon-right" 
+                placeholder="Ingresa tu contraseña" 
+                required 
+                autocomplete="current-password"
+                aria-describedby="passwordError">
+              <button type="button" class="btn-input-icon btn-toggle-pwd" id="btnTogglePwd" aria-label="Mostrar u ocultar contraseña" title="Mostrar contraseña">
+                <i class="fa-regular fa-eye" id="togglePwdIcon"></i>
+              </button>
+            </div>
+            <div class="form-error" id="passwordError">
+              <i class="fa-solid fa-circle-exclamation"></i>
+              <span id="passwordErrorText">Ingresa tu contraseña para continuar</span>
+            </div>
+          </div>
+
+          <!-- Options Row (Remember Me) -->
+          <div class="form-options">
+            <label class="form-check" for="rememberMe">
+              <input type="checkbox" id="rememberMe" name="rememberMe" checked>
+              <span>Recordar sesión en este equipo</span>
+            </label>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn btn-primary btn-submit" id="btnSubmit">
+            <span class="btn-text">Ingresar al Panel</span>
+            <i class="fa-solid fa-arrow-right btn-arrow"></i>
+            <span class="spinner-border" id="btnSpinner" style="display: none;"></span>
+          </button>
+        </form>
+
+        <div class="form-footer-meta">
+          <div class="security-indicator">
+            <i class="fa-solid fa-lock"></i>
+            <span>Conexión encriptada SSL de 256 bits</span>
+          </div>
+          <p class="copyright-text">Ibafex S.A.S. &copy; 2026 &middot; Todos los derechos reservados</p>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock layout %}
+
+{% block modals %}
+  <!-- Password Recovery Modal (esta sigue siendo por correo) -->
+  <div class="modal-overlay" id="recoveryModal" role="dialog" aria-modal="true" aria-labelledby="recoveryModalTitle">
+    <div class="modal recovery-modal">
+      <div class="modal-header">
+        <div class="modal-title" id="recoveryModalTitle">
+          <i class="fa-solid fa-key" style="color: var(--primary-color);"></i>
+          <span>Recuperar Contraseña</span>
+        </div>
+        <button class="modal-close" type="button" id="btnRecoveryClose" aria-label="Cerrar modal">&times;</button>
+      </div>
+      <form id="recoveryForm" novalidate>
+        <div class="modal-body">
+          <p class="recovery-text">
+            Ingresa la dirección de correo electrónico vinculada a tu cuenta de Ibafex. Te enviaremos un enlace seguro para restablecer tu contraseña.
+          </p>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="recoveryEmail" class="form-label">
+              <span>Correo Electrónico</span>
+              <span class="required-star">*</span>
+            </label>
+            <div class="input-group">
+              <i class="fa-regular fa-envelope input-icon"></i>
+              <input 
+                type="email" 
+                id="recoveryEmail" 
+                class="form-control has-icon-left" 
+                placeholder="ejemplo@ibafex.com" 
+                required>
+            </div>
+            <div class="form-error" id="recoveryEmailError">
+              <i class="fa-solid fa-circle-exclamation"></i>
+              <span>Por favor ingresa un correo electrónico válido</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnRecoveryCancel">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btnRecoverySubmit">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span>Enviar enlace</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock modals %}
+
+{% block extra_js %}
+  <!-- Login Logic Script -->
+  <script src="{% static 'django_app/js/singin.js' %}"></script>
+{% endblock %}

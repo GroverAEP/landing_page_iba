@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Users{% endblock %}
+{% block page_title %}Users{% endblock %}
+
+{% block content %}
+<div data-users-page>
+  <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:1.25rem;">
+    <div>
+      <h2 style="margin:0 0 .25rem; font-size:1.125rem; font-weight:600; color:var(--ink-950);">Users</h2>
+      <p style="margin:0; font-size:.875rem; color:var(--ink-600);">Administra las cuentas y los roles del equipo IBafex.</p>
+    </div>
+    <button type="button" class="btn btn-primary" data-add-user><i data-lucide="user-plus"></i>Add User</button>
+  </div>
+
+  <div class="card" style="margin-bottom:1rem; padding:1rem;">
+    <div style="display:flex; gap:.75rem; flex-wrap:wrap; align-items:flex-end;">
+      <div class="field" style="flex:1; min-width:220px; margin:0;">
+        <div style="position:relative;">
+          <i data-lucide="search" width="16" height="16" style="position:absolute; left:.7rem; top:50%; transform:translateY(-50%); color:var(--ink-400);"></i>
+          <input type="text" class="field-input" data-search-input placeholder="Search users..." style="padding-left:2.1rem; padding-right:2.1rem;">
+          <button type="button" data-clear-search aria-label="Limpiar búsqueda" style="display:none; position:absolute; right:.5rem; top:50%; transform:translateY(-50%); background:transparent; border:none; color:var(--ink-400); cursor:pointer;">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="field" style="margin:0; min-width:150px;">
+        <select class="field-select" data-filter="role">
+          <option value="">Role</option>
+          <option>Administrator</option><option>Manager</option><option>Staff</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0; min-width:150px;">
+        <select class="field-select" data-filter="status">
+          <option value="">Status</option>
+          <option>Active</option><option>Disabled</option>
+        </select>
+      </div>
+      <button type="button" class="btn btn-ghost btn-sm" data-clear-filters>Clear filters</button>
+    </div>
+  </div>
+
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:.625rem;">
+    <span data-results-count style="font-size:.8125rem; color:var(--ink-600);"></span>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>User ID</th><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th>Created date</th><th>Last access</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody data-users-tbody></tbody>
+    </table>
+  </div>
+  <div data-pagination class="pagination"></div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/users.js' %}"></script>
+{% endblock %}

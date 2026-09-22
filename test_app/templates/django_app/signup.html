@@ -1,0 +1,18 @@
+{% extends 'django_app/base.html' %}
+{% load static %}
+
+{% block title %}Redirigiendo a Iniciar Sesión...{% endblock %}
+
+{% block layout_css %}{% endblock layout_css %}
+
+{% block extra_css %}
+<script>
+  window.location.replace("{% url 'django_app:signin' %}");
+</script>
+{% endblock %}
+
+{% block layout %}
+  <div style="text-align: center; padding: 3rem;">
+    <p>Redirigiendo a <a href="{% url 'django_app:signin' %}">Iniciar Sesión</a>...</p>
+  </div>
+{% endblock layout %}

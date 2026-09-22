@@ -1,0 +1,233 @@
+{% extends 'django_app/base.html' %}
+{% load static %}
+
+{% block title %}Configuración - Ibafex Panel Administrativo{% endblock %}
+
+{% block extra_css %}
+  <!-- Page Specific Style -->
+  <link rel="stylesheet" href="{% static 'django_app/css/settings.css' %}">
+{% endblock %}
+
+{% block page_title %}Configuración del Sistema{% endblock %}
+{% block page_subtitle %}Personaliza la apariencia, identidad de la empresa y credenciales de acceso{% endblock %}
+
+{% block content %}
+  <main class="page-body">
+    <form id="settingsForm" novalidate>
+      <div class="settings-grid">
+        
+        <!-- Column 1: Configuración General del Panel y Marca -->
+        <div class="settings-column">
+          <!-- Panel & Brand Settings Card -->
+          <section class="card settings-card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <i class="fa-solid fa-sliders" style="color: var(--primary-color);"></i>
+                <span>Identidad y Preferencias del Panel</span>
+              </h2>
+            </div>
+            <div class="card-body">
+              <!-- Company Name -->
+              <div class="form-group">
+                <label for="settingCompanyName" class="form-label">
+                  <span>Nombre de la empresa</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="input-group">
+                  <i class="fa-solid fa-building input-icon"></i>
+                  <input type="text" id="settingCompanyName" class="form-control has-icon-left" value="Ibafex" required>
+                </div>
+              </div>
+
+              <!-- Logo Upload & Preview -->
+              <div class="form-group">
+                <label class="form-label">Logo de la empresa</label>
+                <div class="logo-uploader-box">
+                  <div class="logo-preview-wrapper" id="logoPreviewWrap">
+                    <img src="{% static 'django_app/img/logo.svg' %}" alt="Vista previa del Logo" id="logoPreviewImg" data-default-src="{% static 'django_app/img/logo.svg' %}">
+                  </div>
+                  <div class="logo-uploader-actions">
+                    <label for="settingLogoInput" class="btn btn-outline btn-sm" style="cursor: pointer;">
+                      <i class="fa-solid fa-cloud-arrow-up"></i>
+                      <span>Subir nuevo logo</span>
+                    </label>
+                    <input type="file" id="settingLogoInput" accept="image/*" style="display: none;">
+                    <button type="button" class="btn btn-sm btn-secondary" id="btnRestoreDefaultLogo">
+                      Restaurar por defecto
+                    </button>
+                    <span class="upload-hint">Formatos: SVG, PNG o JPG (Máx. 2MB).</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Theme Mode Selector (Light / Dark) -->
+              <div class="form-group">
+                <label class="form-label">Tema visual de la interfaz</label>
+                <div class="theme-picker-group">
+                  <label class="theme-option" id="themeOptionLight">
+                    <input type="radio" name="themeChoice" value="light" checked>
+                    <div class="theme-card-preview">
+                      <i class="fa-solid fa-sun" style="color: #f59e0b;"></i>
+                      <span>Modo Claro</span>
+                    </div>
+                  </label>
+                  <label class="theme-option" id="themeOptionDark">
+                    <input type="radio" name="themeChoice" value="dark">
+                    <div class="theme-card-preview">
+                      <i class="fa-solid fa-moon" style="color: #60a5fa;"></i>
+                      <span>Modo Oscuro</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Accent Color Swatches & Picker -->
+              <div class="form-group">
+                <label class="form-label">Color de acento principal</label>
+                <div class="accent-swatches">
+                  <button type="button" class="color-swatch active" data-color="#059669" style="background-color: #059669;" title="Esmeralda Ibafex"></button>
+                  <button type="button" class="color-swatch" data-color="#10b981" style="background-color: #10b981;" title="Verde Menta"></button>
+                  <button type="button" class="color-swatch" data-color="#047857" style="background-color: #047857;" title="Verde Bosque Profundo"></button>
+                  <button type="button" class="color-swatch" data-color="#0d9488" style="background-color: #0d9488;" title="Verde Jade Teal"></button>
+                  <button type="button" class="color-swatch" data-color="#16a34a" style="background-color: #16a34a;" title="Verde Hoja"></button>
+                  <div class="custom-color-input-wrap">
+                    <input type="color" id="settingAccentColor" value="#059669" title="Color personalizado">
+                    <span class="custom-color-label" id="customColorCode">#059669</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Language & Date Format Row -->
+              <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                  <label for="settingLanguage" class="form-label">Idioma</label>
+                  <select id="settingLanguage" class="form-select">
+                    <option value="es" selected>Español (ES)</option>
+                    <option value="en">English (US)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="settingDateFormat" class="form-label">Formato de fecha</label>
+                  <select id="settingDateFormat" class="form-select">
+                    <option value="DD/MM/YYYY" selected>DD/MM/YYYY (19/09/2026)</option>
+                    <option value="YYYY-MM-DD">YYYY-MM-DD (2026-09-19)</option>
+                    <option value="DD de MMMM de YYYY">19 de septiembre de 2026</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Column 2: Perfil del Administrador y Seguridad -->
+        <div class="settings-column">
+          <!-- Admin Profile Card -->
+          <section class="card settings-card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <i class="fa-solid fa-user-shield" style="color: var(--primary-color);"></i>
+                <span>Perfil del Administrador</span>
+              </h2>
+            </div>
+            <div class="card-body">
+              <!-- Admin Name -->
+              <div class="form-group">
+                <label for="settingAdminName" class="form-label">
+                  <span>Nombre del administrador</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="input-group">
+                  <i class="fa-solid fa-user-tag input-icon"></i>
+                  <input type="text" id="settingAdminName" class="form-control has-icon-left" required>
+                </div>
+              </div>
+
+              <!-- Admin Email -->
+              <div class="form-group">
+                <label for="settingAdminEmail" class="form-label">
+                  <span>Correo corporativo</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="input-group">
+                  <i class="fa-solid fa-envelope input-icon"></i>
+                  <input type="email" id="settingAdminEmail" class="form-control has-icon-left" required>
+                </div>
+              </div>
+
+              <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <!-- Job Position -->
+                <div class="form-group">
+                  <label for="settingAdminRole" class="form-label">Cargo o Posición</label>
+                  <input type="text" id="settingAdminRole" class="form-control" placeholder="Director de Operaciones">
+                </div>
+
+                <!-- Phone -->
+                <div class="form-group">
+                  <label for="settingAdminPhone" class="form-label">Teléfono de contacto</label>
+                  <input type="tel" id="settingAdminPhone" class="form-control" placeholder="+57 312 456 7890">
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Password Change Card -->
+          <section class="card settings-card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <i class="fa-solid fa-lock" style="color: var(--primary-color);"></i>
+                <span>Cambiar Contraseña</span>
+              </h2>
+              <span class="badge badge-neutral">Opcional</span>
+            </div>
+            <div class="card-body">
+              <!-- Current Password -->
+              <div class="form-group">
+                <label for="settingCurrentPassword" class="form-label">Contraseña actual</label>
+                <div class="input-group">
+                  <i class="fa-solid fa-key input-icon"></i>
+                  <input type="password" id="settingCurrentPassword" class="form-control has-icon-left" placeholder="Ingresa contraseña actual">
+                </div>
+              </div>
+
+              <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <!-- New Password -->
+                <div class="form-group">
+                  <label for="settingNewPassword" class="form-label">Nueva contraseña</label>
+                  <input type="password" id="settingNewPassword" class="form-control" placeholder="Mínimo 8 caracteres">
+                </div>
+
+                <!-- Confirm New Password -->
+                <div class="form-group">
+                  <label for="settingConfirmPassword" class="form-label">Confirmar nueva contraseña</label>
+                  <input type="password" id="settingConfirmPassword" class="form-control" placeholder="Repite contraseña">
+                </div>
+              </div>
+              <div class="form-error" id="settingsPasswordError">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>Las contraseñas no coinciden o no cumplen con la longitud mínima de 8 caracteres.</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- Bottom Action Bar (Save Button) -->
+      <div class="settings-bottom-bar">
+        <div class="bottom-bar-hint">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>Los cambios se guardan localmente en tu navegador y se aplican en todo el panel.</span>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg" id="btnSaveSettings">
+          <i class="fa-solid fa-floppy-disk"></i>
+          <span>Guardar cambios</span>
+        </button>
+      </div>
+    </form>
+  </main>
+{% endblock content %}
+
+{% block extra_js %}
+  <!-- Page Specific Script -->
+  <script src="{% static 'django_app/js/settings.js' %}"></script>
+{% endblock %}

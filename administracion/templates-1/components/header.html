@@ -1,0 +1,48 @@
+<header class="app-header">
+
+  <div class="flex items-center gap-3 min-w-0">
+    <button type="button" class="btn-icon lg:hidden" id="mobileMenuBtn" aria-label="Abrir menú" aria-expanded="false">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="min-w-0">
+      <h1 class="font-display font-bold text-lg text-[color:var(--color-ink)] truncate">{% block page_title %}{{ page_title|default:"Dashboard" }}{% endblock %}</h1>
+      <p class="text-xs text-[color:var(--color-slate)] hidden sm:block" id="headerDate"></p>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-2 md:gap-4 flex-shrink-0">
+
+    <button type="button" class="btn-icon relative" aria-label="Notificaciones">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </button>
+
+    <div class="relative">
+      <button type="button" class="flex items-center gap-2 pl-1 pr-2 py-1 rounded-[var(--radius-control)] hover:bg-[color:var(--color-line-soft)] transition-colors" id="userMenuBtn" aria-haspopup="true" aria-expanded="false">
+        <div class="avatar">{{ user_initials|default:"AV" }}</div>
+        <div class="hidden md:block text-left">
+          <p class="text-sm font-semibold leading-tight">{{ user_display_name|default:"Ana Vargas" }}</p>
+          <p class="text-xs text-[color:var(--color-slate)] leading-tight">{{ user_role_display|default:"Administrador" }}</p>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[color:var(--color-slate)] hidden md:block"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+
+      <div class="user-menu-panel hidden absolute right-0 mt-2 w-56 surface-card shadow-lg py-1.5 z-40" id="userMenuPanel" role="menu">
+        <a href="#" class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-[color:var(--color-ink)] hover:bg-[color:var(--color-line-soft)]" role="menuitem">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+          Mi perfil
+        </a>
+        <a href="{% url 'settings' %}" class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-[color:var(--color-ink)] hover:bg-[color:var(--color-line-soft)]" role="menuitem">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Configuración
+        </a>
+        <hr class="divider my-1.5">
+        <button type="button" class="flex items-center gap-2.5 px-3.5 py-2 text-sm text-[color:var(--color-danger)] hover:bg-[color:var(--color-danger-bg)] w-full text-left" id="logoutBtnHeader" role="menuitem">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+</header>

@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}IBafex{% endblock %}</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          brand: {
+            DEFAULT: '#107B12',
+            dark: '#0C5F0E',
+            light: '#E7F3E7',
+          },
+        },
+      },
+    },
+  }
+</script>
+
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+{% block extra_head %}{% endblock %}
+</head>
+<body class="antialiased">
+
+<div class="app-shell" id="appShell">
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  {% include "components/sidebar.html" %}
+
+  <div class="flex flex-col min-h-screen min-w-0">
+    {% include "components/header.html" %}
+
+    <main class="flex-1 p-4 md:p-6 lg:p-8 min-w-0">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+</div>
+
+{% include "components/toast.html" %}
+{% include "components/confirmation_modal.html" %}
+
+<script src="{% static 'js/notifications.js' %}"></script>
+<script src="{% static 'js/api.js' %}"></script>
+<script src="{% static 'js/validation.js' %}"></script>
+<script src="{% static 'js/modal.js' %}"></script>
+<script src="{% static 'js/pagination.js' %}"></script>
+<script src="{% static 'js/app.js' %}"></script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

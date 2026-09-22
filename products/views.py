@@ -185,3 +185,4 @@ def catalog_products(request):
 #         # La cookie dura 24 horas (puedes cambiarlo)
 #         response.set_cookie(cookie_name, "true", max_age=60*60*24)
 #     return response
+

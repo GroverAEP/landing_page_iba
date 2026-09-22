@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Visits{% endblock %}
+{% block page_title %}Visits{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div data-visits-page>
+  <div style="margin-bottom:1.25rem;">
+    <h2 style="margin:0 0 .25rem; font-size:1.125rem; font-weight:600; color:var(--ink-950);">Visits</h2>
+    <p style="margin:0; font-size:.875rem; color:var(--ink-600);">Controla las visitas realizadas al catálogo público de IBafex.</p>
+  </div>
+
+  <div data-visits-cards style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; margin-bottom:1.5rem;"></div>
+
+  <div class="card" style="margin-bottom:1.5rem;">
+    <h3 style="margin:0 0 1rem; font-size:.9375rem; font-weight:600; color:var(--ink-950);">Visits over time</h3>
+    <div style="height:260px;">
+      <canvas id="visits-chart"></canvas>
+    </div>
+  </div>
+
+  <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.75rem; margin-bottom:.75rem;">
+    <h3 style="margin:0; font-size:.9375rem; font-weight:600; color:var(--ink-950);">Detalle de visitas</h3>
+    <div style="display:flex; gap:.625rem; flex-wrap:wrap;">
+      <select class="field-select" data-filter="device" style="width:auto;">
+        <option value="">Device</option>
+        <option>Desktop</option><option>Mobile</option><option>Tablet</option>
+      </select>
+      <select class="field-select" data-filter="source" style="width:auto;">
+        <option value="">Source</option>
+        <option>Directo</option><option>Google</option><option>Facebook</option><option>Instagram</option><option>WhatsApp</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Date</th><th>Time</th><th>Visits</th><th>Unique Visitors</th><th>Device</th><th>Browser</th><th>Operating System</th><th>Source</th>
+        </tr>
+      </thead>
+      <tbody data-visits-tbody></tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/visits.js' %}"></script>
+{% endblock %}

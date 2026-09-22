@@ -1,0 +1,101 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iniciar sesión · IBafex</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { theme: { extend: { colors: { brand: { DEFAULT: '#107B12', dark: '#0C5F0E', light: '#E7F3E7' } } } } }
+</script>
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body class="antialiased" style="background: var(--color-canvas);">
+
+<div class="min-h-screen grid lg:grid-cols-2">
+
+  <!-- Brand panel -->
+  <div class="hidden lg:flex flex-col justify-between p-12 relative overflow-hidden" style="background: var(--color-ink);">
+    <div class="absolute inset-0 opacity-[0.06]" style="background-image: radial-gradient(circle at 1.5px 1.5px, white 1.5px, transparent 0); background-size: 28px 28px;"></div>
+
+    <div class="relative flex items-center gap-3">
+      <div class="sidebar-brand-mark" style="width:40px;height:40px;font-size:17px;">IB</div>
+      <span class="font-display font-bold text-xl text-white">IBafex</span>
+    </div>
+
+    <div class="relative max-w-md">
+      <p class="text-[color:var(--color-brand-light)] font-display font-bold text-3xl leading-tight mb-4">
+        Gestiona tu catálogo, tus visitas y tu equipo desde un solo lugar.
+      </p>
+      <p class="text-[#B9C0B6] text-sm leading-relaxed">
+        El panel administrativo de IBafex reúne productos, visitas comerciales y usuarios en una sola herramienta, pensada para el trabajo diario de tu equipo.
+      </p>
+    </div>
+
+    <p class="relative text-xs text-[#7A8177]">© {{ current_year|default:"2026" }} IBafex. Todos los derechos reservados.</p>
+  </div>
+
+  <!-- Form panel -->
+  <div class="flex items-center justify-center p-6 sm:p-10">
+    <div class="w-full max-w-sm">
+
+      <div class="lg:hidden flex items-center gap-3 mb-10 justify-center">
+        <div class="sidebar-brand-mark">IB</div>
+        <span class="font-display font-bold text-lg">IBafex</span>
+      </div>
+
+      <h1 class="font-display font-bold text-2xl mb-1.5">Iniciar sesión</h1>
+      <p class="text-sm text-[color:var(--color-slate)] mb-8">Ingresa tus credenciales para acceder al panel.</p>
+
+      <div class="hidden mb-5 items-start gap-2.5 p-3.5 rounded-[var(--radius-control)]" style="background: var(--color-danger-bg);" id="loginErrorBanner" role="alert">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[color:var(--color-danger)] flex-shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <p class="text-sm text-[color:var(--color-danger)]" id="loginErrorText">Las credenciales ingresadas no son válidas.</p>
+      </div>
+
+      <form id="loginForm" novalidate>
+        <div class="mb-5">
+          <label for="username" class="field-label field-required">Usuario</label>
+          <input type="text" id="username" name="username" class="field-input" placeholder="tu.usuario" autocomplete="username" required>
+          <p class="field-error-msg" data-error-for="username">Este campo es obligatorio.</p>
+        </div>
+
+        <div class="mb-4">
+          <label for="password" class="field-label field-required">Contraseña</label>
+          <div class="relative">
+            <input type="password" id="password" name="password" class="field-input pr-10" placeholder="••••••••" autocomplete="current-password" required>
+            <button type="button" class="absolute right-0 top-0 h-full px-3 text-[color:var(--color-slate)] hover:text-[color:var(--color-ink)]" id="togglePasswordBtn" aria-label="Mostrar contraseña" aria-pressed="false">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="togglePasswordIcon"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <p class="field-error-msg" data-error-for="password">Este campo es obligatorio.</p>
+        </div>
+
+        <div class="flex items-center justify-between mb-7">
+          <label class="flex items-center gap-2 text-sm text-[color:var(--color-ink-soft)] cursor-pointer">
+            <input type="checkbox" class="checkbox" id="rememberMe">
+            Recordarme
+          </label>
+          <a href="{% url 'recuperar_password' %}" class="text-sm font-medium text-[color:var(--color-brand-dark)] hover:underline">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-full !py-2.5" id="loginSubmitBtn">
+          <span class="btn-spinner hidden" id="loginSpinner"></span>
+          <span id="loginSubmitLabel">Sign in</span>
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+</div>
+
+<script src="{% static 'js/notifications.js' %}"></script>
+<script src="{% static 'js/api.js' %}"></script>
+<script src="{% static 'js/validation.js' %}"></script>
+<script src="{% static 'js/auth.js' %}"></script>
+</body>
+</html>

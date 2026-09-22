@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Products{% endblock %}
+{% block page_title %}Products{% endblock %}
+
+{% block content %}
+<div data-products-page>
+
+  <!-- Header de módulo -->
+  <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:1.25rem;">
+    <div>
+      <h2 style="margin:0 0 .25rem; font-size:1.125rem; font-weight:600; color:var(--ink-950);">Products</h2>
+      <p style="margin:0; font-size:.875rem; color:var(--ink-600);">Administra el catálogo, la disponibilidad y la visibilidad de tus productos.</p>
+    </div>
+    <div style="display:flex; gap:.625rem; flex-wrap:wrap;">
+      <button type="button" class="btn btn-secondary" data-download-catalog>
+        <i data-lucide="download"></i>Download Catalog
+      </button>
+      <button type="button" class="btn btn-primary" data-add-product>
+        <i data-lucide="plus"></i>Add Product
+      </button>
+    </div>
+  </div>
+
+  <!-- Toolbar: búsqueda + filtros + selector de vista -->
+  <div class="card" style="margin-bottom:1rem; padding:1rem;">
+    <div style="display:flex; gap:.75rem; flex-wrap:wrap; align-items:flex-end;">
+      <div class="field" style="flex:1; min-width:220px; margin:0;">
+        <div style="position:relative;">
+          <i data-lucide="search" width="16" height="16" style="position:absolute; left:.7rem; top:50%; transform:translateY(-50%); color:var(--ink-400);"></i>
+          <input type="text" class="field-input" data-search-input placeholder="Search products..." style="padding-left:2.1rem; padding-right:2.1rem;">
+          <button type="button" data-clear-search aria-label="Limpiar búsqueda" style="display:none; position:absolute; right:.5rem; top:50%; transform:translateY(-50%); background:transparent; border:none; color:var(--ink-400); cursor:pointer;">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="field" style="margin:0; min-width:150px;" data-filter-field>
+        <select class="field-select" data-filter="category">
+          <option value="">Category</option>
+          {% for c in categories %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field" style="margin:0; min-width:150px;">
+        <select class="field-select" data-filter="availability">
+          <option value="">Availability</option>
+          <option value="available">Available</option>
+          <option value="unavailable">Out of stock</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0; min-width:150px;">
+        <select class="field-select" data-filter="visibility">
+          <option value="">Visibility</option>
+          <option value="visible">Visible</option>
+          <option value="hidden">Hidden</option>
+        </select>
+      </div>
+      <button type="button" class="btn btn-ghost btn-sm" data-clear-filters>Clear filters</button>
+
+      <div style="display:flex; gap:.25rem; margin-left:auto; background:var(--ink-100); padding:.25rem; border-radius:10px;">
+        <button type="button" class="btn btn-sm" data-view-btn="list" aria-label="List view"><i data-lucide="list"></i></button>
+        <button type="button" class="btn btn-sm" data-view-btn="card" aria-label="Card view"><i data-lucide="layout-grid"></i></button>
+      </div>
+    </div>
+
+    <div data-active-filters style="display:none; gap:.5rem; margin-top:.75rem; flex-wrap:wrap;"></div>
+  </div>
+
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:.625rem;">
+    <span data-results-count style="font-size:.8125rem; color:var(--ink-600);"></span>
+    <select class="field-select" data-page-size style="width:auto; padding:.35rem .5rem; font-size:.8125rem;">
+      <option value="10">10 / página</option>
+      <option value="25">25 / página</option>
+      <option value="50">50 / página</option>
+      <option value="100">100 / página</option>
+    </select>
+  </div>
+
+  <!-- ============================== LIST VIEW ============================== -->
+  <div data-view-list>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th><input type="checkbox" data-select-all aria-label="Seleccionar todos"></th>
+            <th>Image</th>
+            <th class="sortable" data-sort="id">ID <span data-sort-icon></span></th>
+            <th class="sortable" data-sort="name">Product <span data-sort-icon></span></th>
+            <th>Brand</th>
+            <th>Category</th>
+            <th class="sortable" data-sort="unitPrice">Unit Price <span data-sort-icon></span></th>
+            <th>Availability</th>
+            <th>Visibility</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody data-products-tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============================== CARD VIEW ============================== -->
+  <div data-view-card style="display:none;">
+    <div data-products-cardgrid style="display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:1rem;"></div>
+  </div>
+
+  <div data-pagination class="pagination"></div>
+  <div data-bulk-bar class="bulk-bar" style="display:none;"></div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/products.js' %}"></script>
+{% endblock %}

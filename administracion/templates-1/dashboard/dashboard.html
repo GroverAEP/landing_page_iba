@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:1.5rem;">
+  <h2 style="margin:0 0 .25rem; font-size:1.125rem; font-weight:600; color:var(--ink-950);">Resumen general</h2>
+  <p style="margin:0; font-size:.875rem; color:var(--ink-600);">Vista general del catálogo y la actividad de IBafex.</p>
+</div>
+
+<div data-dashboard-cards style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; margin-bottom:1.75rem;"></div>
+
+<div class="card">
+  <h3 style="margin:0 0 1rem; font-size:.9375rem; font-weight:600; color:var(--ink-950);">Actividad reciente</h3>
+  <ul data-recent-activity style="list-style:none; margin:0; padding:0;"></ul>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}
