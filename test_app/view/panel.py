@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 
 
 def index_view(request):
@@ -22,6 +23,7 @@ def signup_view(request):
     return redirect('django_app:signin')
 
 
+@login_required(login_url='django_app:signin')
 def dashboard_view(request):
     """
     Vista principal del panel de administración (Dashboard).
@@ -29,6 +31,7 @@ def dashboard_view(request):
     return render(request, 'django_app/dashboard.html', {'active_page': 'dashboard'})
 
 
+@login_required(login_url='django_app:signin')
 def users_view(request):
     """
     Vista para gestión y administración de usuarios.
@@ -36,6 +39,7 @@ def users_view(request):
     return render(request, 'django_app/users.html', {'active_page': 'users'})
 
 
+@login_required(login_url='django_app:signin')
 def views_view(request):
     """
     Vista para análisis de métricas y visitas.
@@ -43,6 +47,7 @@ def views_view(request):
     return render(request, 'django_app/views.html', {'active_page': 'views'})
 
 
+@login_required(login_url='django_app:signin')
 def settings_view(request):
     """
     Vista para configuración del sistema y preferencias del panel.

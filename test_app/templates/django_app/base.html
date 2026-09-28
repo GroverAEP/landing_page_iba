@@ -45,13 +45,15 @@
               <span class="nav-label">Dashboard</span>
             </a>
           </li>
-          <li class="nav-item">
-            <a href="{% url 'django_app:users' %}" class="nav-link {% if active_page == 'users' %}active{% endif %}" data-page="users">
-              <i class="fa-solid fa-users nav-icon"></i>
-              <span class="nav-label">Usuarios</span>
-              <span class="nav-badge" id="navUserBadge">6</span>
-            </a>
-          </li>
+        {% if request.user.perfil.get_role_display != 'Operador' %}
+        <li class="nav-item">
+          <a href="{% url 'django_app:users' %}" class="nav-link {% if active_page == 'users' %}active{% endif %}" data-page="users">
+            <i class="fa-solid fa-users nav-icon"></i>
+            <span class="nav-label">Usuarios</span>
+            <span class="nav-badge" id="navUserBadge">6</span>
+          </a>
+        </li>
+        {% endif %}
           <li class="nav-item">
             <a href="{% url 'django_app:views' %}" class="nav-link {% if active_page == 'views' %}active{% endif %}" data-page="views">
               <i class="fa-solid fa-chart-line nav-icon"></i>

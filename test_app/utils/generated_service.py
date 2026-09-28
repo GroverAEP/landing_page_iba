@@ -86,11 +86,14 @@ class PDFGeneradorService:
             fecha_generacion=timezone.now(),
             logo_url=os.path.join(settings.BASE_DIR, "static", "img", "logo.png"),
             on_batch=reportar_avance,
-            batch_size=10,  # actualiza cada 10 productos; ajustalo según qué tan fluida la querés
+            batch_size=10,
         )
 
-        self.job.file.save("catalogo.pdf", ContentFile(buffer.getvalue()), save=False)
-        self.job.tamano_bytes = self.job.file.size
+        contenido = buffer.getvalue()
+        tamano = len(contenido)  # 👈 calculado en memoria, no depende de Cloudinary
+
+        self.job.file.save("catalogo.pdf", ContentFile(contenido), save=False)
+        self.job.tamano_bytes = tamano
         self.job.status = PDFGenerationJob.Estado.COMPLETED
         self.job.completed_at = timezone.now()
         self.job.progress = 100
@@ -99,13 +102,23 @@ class PDFGeneradorService:
 
         if catalogo is None:
             catalogo = CatalogoPDF()
-        catalogo.archivo.save("catalogo.pdf", ContentFile(buffer.getvalue()), save=False)
+        catalogo.archivo.save("catalogo.pdf", ContentFile(contenido), save=False)
         catalogo.productos_hash = hash_actual
         catalogo.total_productos = total
+        catalogo.tamano_bytes = tamano  # 👈 se guarda acá para reusarlo después
         catalogo.save()
 
         self._limpiar_catalogos_antiguos(mantener=3)
 
+    def _marcar_completado_desde_cache(self, catalogo):
+        self.job.file.name = catalogo.archivo.name
+        self.job.tamano_bytes = catalogo.tamano_bytes  # 👈 ya no llama a catalogo.archivo.size
+        self.job.total_products = catalogo.total_productos
+        self.job.processed_products = catalogo.total_productos
+        self.job.status = PDFGenerationJob.Estado.COMPLETED
+        self.job.completed_at = timezone.now()
+        self.job.progress = 100
+        self.job.save()
     # ------------------------------------------------------------------
     def _limpiar_catalogos_antiguos(self, mantener: int = 3):
         """Borra del storage y de la DB los CatalogoPDF más viejos,
@@ -120,16 +133,6 @@ class PDFGeneradorService:
             if viejo.archivo:
                 viejo.archivo.delete(save=False)
         antiguos.delete()
-
-    def _marcar_completado_desde_cache(self, catalogo):
-        self.job.file.name = catalogo.archivo.name
-        self.job.tamano_bytes = catalogo.archivo.size
-        self.job.total_products = catalogo.total_productos
-        self.job.processed_products = catalogo.total_productos
-        self.job.status = PDFGenerationJob.Estado.COMPLETED
-        self.job.completed_at = timezone.now()
-        self.job.progress = 100
-        self.job.save()
 
     def _marcar_fallido(self, exc: Exception):
         self.job.status = PDFGenerationJob.Estado.FAILED

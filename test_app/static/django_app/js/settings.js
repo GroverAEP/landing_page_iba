@@ -3,6 +3,11 @@
  * Brand customization, logo file upload preview, accent colors, theme switching, admin profile
  * + Gestión de Categorías y Unidades de Medida (CRUD directo contra Django, sin pasar
  *   por el botón "Guardar cambios": cada alta/baja se refleja de inmediato en la BD).
+ *
+ * NOTA: todas las referencias a elementos del DOM están guardadas con chequeo `if (el)`
+ * antes de usarlas. Esto permite que, si en el futuro se comenta/quita alguna card del
+ * HTML (marca/logo, categorías, unidades), el resto del script SIGA funcionando en vez
+ * de romperse entero en el primer elemento null.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -15,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const logoPreviewImg = document.getElementById('logoPreviewImg');
   const settingLogoInput = document.getElementById('settingLogoInput');
   const btnRestoreDefaultLogo = document.getElementById('btnRestoreDefaultLogo');
+  const sidebarLogo = document.getElementById('sidebarLogo');
 
   const themeRadioLight = document.querySelector('input[name="themeChoice"][value="light"]');
   const themeRadioDark = document.querySelector('input[name="themeChoice"][value="dark"]');
@@ -47,6 +53,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnAddUnit = document.getElementById('btnAddUnit');
   const unitChipList = document.getElementById('unitChipList');
 
+
+  //COnfiguracion para los limites del pdf en el storage
+  const settingPdfLimitMb = document.getElementById('settingPdfLimitMb');
+  const settingPdfExpiryDays = document.getElementById('settingPdfExpiryDays');
+
   // State
   let currentSettings = window.storage.getSettings();
   let uploadedLogoBase64 = currentSettings.companyLogo || '';
@@ -62,45 +73,97 @@ document.addEventListener('DOMContentLoaded', () => {
     await loadUnits();
   }
 
-  function populateSettings() {
-    // Company Name
-    settingCompanyName.value = currentSettings.companyName || 'Ibafex';
 
-    // Logo
-    if (currentSettings.companyLogo) {
-      logoPreviewImg.src = currentSettings.companyLogo;
-      uploadedLogoBase64 = currentSettings.companyLogo;
-    } else {
-      const defaultLogo = (logoPreviewImg && logoPreviewImg.getAttribute('data-default-src')) || '../../assets/img/logo.svg';
-      logoPreviewImg.src = defaultLogo;
-      uploadedLogoBase64 = '';
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
+
+  async function guardarConfiguracionPdf(pdfLimitMb, pdfExpiryDays) {
+    const response = await fetch('/administracion/api/configuracion-pdf/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken'),
+      },
+      body: JSON.stringify({
+        pdf_limit_mb: pdfLimitMb,
+        pdf_expiry_days: pdfExpiryDays,
+      }),
+    });
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'No se pudo guardar la configuración de PDF.');
+    }
+    return data;
+  }
+
+  
+
+
+
+
+  function populateSettings() {
+    //Configuracion de limites del pdfs
+    if (settingPdfLimitMb) settingPdfLimitMb.value = currentSettings.pdfLimitMb || 5;
+    if (settingPdfExpiryDays) settingPdfExpiryDays.value = currentSettings.pdfExpiryDays || 7;
+
+
+    // Company Name (solo si la card de marca existe en el HTML)
+    if (settingCompanyName) {
+      settingCompanyName.value = currentSettings.companyName || 'Ibafex';
+    }
+    
+
+    // Logo (solo si la card de marca existe en el HTML)
+    if (logoPreviewImg) {
+      if (currentSettings.companyLogo) {
+        logoPreviewImg.src = currentSettings.companyLogo;
+        uploadedLogoBase64 = currentSettings.companyLogo;
+      } else {
+        const defaultLogo = logoPreviewImg.getAttribute('data-default-src') || '../../assets/img/logo.svg';
+        logoPreviewImg.src = defaultLogo;
+        uploadedLogoBase64 = '';
+      }
     }
 
     // Theme Choice
-    if (currentSettings.theme === 'dark') {
-      themeRadioDark.checked = true;
-    } else {
-      themeRadioLight.checked = true;
+    if (themeRadioDark && themeRadioLight) {
+      if (currentSettings.theme === 'dark') {
+        themeRadioDark.checked = true;
+      } else {
+        themeRadioLight.checked = true;
+      }
     }
 
     // Accent Color
     selectedAccentColor = currentSettings.accentColor || '#059669';
-    settingAccentColor.value = selectedAccentColor;
-    customColorCode.textContent = selectedAccentColor.toUpperCase();
+    if (settingAccentColor) settingAccentColor.value = selectedAccentColor;
+    if (customColorCode) customColorCode.textContent = selectedAccentColor.toUpperCase();
     highlightActiveSwatch(selectedAccentColor);
 
     // Language & Date Format
-    settingLanguage.value = currentSettings.language || 'es';
-    settingDateFormat.value = currentSettings.dateFormat || 'DD/MM/YYYY';
+    if (settingLanguage) settingLanguage.value = currentSettings.language || 'es';
+    if (settingDateFormat) settingDateFormat.value = currentSettings.dateFormat || 'DD/MM/YYYY';
 
     // Admin Profile
     if (currentSettings.admin) {
-      settingAdminName.value = currentSettings.admin.name || '';
-      settingAdminEmail.value = currentSettings.admin.email || '';
-      settingAdminRole.value = currentSettings.admin.role || '';
-      settingAdminPhone.value = currentSettings.admin.phone || '';
+      if (settingAdminName) settingAdminName.value = currentSettings.admin.name || '';
+      if (settingAdminEmail) settingAdminEmail.value = currentSettings.admin.email || '';
+      if (settingAdminRole) settingAdminRole.value = currentSettings.admin.role || '';
+      if (settingAdminPhone) settingAdminPhone.value = currentSettings.admin.phone || '';
     }
+    
   }
+
+
+
+
+
+
+  
 
   /* --- Logo Upload with Instant Preview --- */
   function handleLogoUpload(e) {
@@ -116,10 +179,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const reader = new FileReader();
     reader.onload = (event) => {
       uploadedLogoBase64 = event.target.result;
-      logoPreviewImg.src = uploadedLogoBase64;
+      if (logoPreviewImg) logoPreviewImg.src = uploadedLogoBase64;
 
       // Update sidebar logo immediately for preview
-      const sidebarLogo = document.getElementById('sidebarLogo');
       if (sidebarLogo) sidebarLogo.src = uploadedLogoBase64;
 
       window.utils.showToast('Logo cargado', 'Vista previa del logo actualizada. Guarda los cambios para conservarlo.', 'info');
@@ -127,15 +189,18 @@ document.addEventListener('DOMContentLoaded', () => {
     reader.readAsDataURL(file);
   }
 
+
+  
   function restoreDefaultLogo() {
     uploadedLogoBase64 = '';
-    const defaultLogo = (logoPreviewImg && logoPreviewImg.getAttribute('data-default-src')) || 
-                        (sidebarLogo && sidebarLogo.getAttribute('data-default-src')) || 
-                        '../../assets/img/logo.svg';
-    logoPreviewImg.src = defaultLogo;
-    const sidebarLogo = document.getElementById('sidebarLogo');
+    const defaultLogo =
+      (logoPreviewImg && logoPreviewImg.getAttribute('data-default-src')) ||
+      (sidebarLogo && sidebarLogo.getAttribute('data-default-src')) ||
+      '../../assets/img/logo.svg';
+
+    if (logoPreviewImg) logoPreviewImg.src = defaultLogo;
     if (sidebarLogo) sidebarLogo.src = defaultLogo;
-    settingLogoInput.value = '';
+    if (settingLogoInput) settingLogoInput.value = '';
     window.utils.showToast('Logo restaurado', 'Se ha reestablecido el logo predeterminado de Ibafex.', 'info');
   }
 
@@ -152,8 +217,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function applyAccentColorPreview(colorHex) {
     selectedAccentColor = colorHex;
-    settingAccentColor.value = colorHex;
-    customColorCode.textContent = colorHex.toUpperCase();
+    if (settingAccentColor) settingAccentColor.value = colorHex;
+    if (customColorCode) customColorCode.textContent = colorHex.toUpperCase();
     highlightActiveSwatch(colorHex);
 
     // Apply live to CSS variables
@@ -173,6 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
    * Categorías de productos (CRUD contra Django, en vivo)
    * ───────────────────────────────────────────────────────── */
   async function loadCategories() {
+    if (!categoryChipList) return; // card comentada/ausente en el HTML
     try {
       const categories = await window.storage.getCategories();
       renderChipList(categoryChipList, categories, {
@@ -185,6 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function handleAddCategory() {
+    if (!newCategoryInput || !btnAddCategory) return;
     const name = newCategoryInput.value.trim();
     if (!name) {
       newCategoryInput.focus();
@@ -222,10 +289,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+
+  
+
+
   /* ─────────────────────────────────────────────────────────
    * Unidades de Medida (CRUD contra Django, en vivo)
    * ───────────────────────────────────────────────────────── */
   async function loadUnits() {
+    if (!unitChipList) return; // card comentada/ausente en el HTML
     try {
       const units = await window.storage.getUnits();
       renderChipList(unitChipList, units, {
@@ -238,6 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function handleAddUnit() {
+    if (!newUnitInput || !btnAddUnit) return;
     const name = newUnitInput.value.trim();
     if (!name) {
       newUnitInput.focus();
@@ -302,20 +375,24 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* --- Form Submission & Persistence (configuración general, no toca categorías/unidades) --- */
-  function handleFormSubmit(e) {
+  async function handleFormSubmit(e) {
     e.preventDefault();
 
-    const companyName = settingCompanyName.value.trim();
-    const adminName = settingAdminName.value.trim();
-    const adminEmail = settingAdminEmail.value.trim().toLowerCase();
-    const adminRole = settingAdminRole.value.trim();
-    const adminPhone = settingAdminPhone.value.trim();
-    const theme = document.querySelector('input[name="themeChoice"]:checked').value;
-    const language = settingLanguage.value;
-    const dateFormat = settingDateFormat.value;
+    const companyName = settingCompanyName ? settingCompanyName.value.trim() : (currentSettings.companyName || 'Ibafex');
+    const adminName = settingAdminName ? settingAdminName.value.trim() : '';
+    const adminEmail = settingAdminEmail ? settingAdminEmail.value.trim().toLowerCase() : '';
+    const adminRole = settingAdminRole ? settingAdminRole.value.trim() : '';
+    const adminPhone = settingAdminPhone ? settingAdminPhone.value.trim() : '';
+    const checkedTheme = document.querySelector('input[name="themeChoice"]:checked');
+    const theme = checkedTheme ? checkedTheme.value : 'light';
+    const language = settingLanguage ? settingLanguage.value : 'es';
+    const dateFormat = settingDateFormat ? settingDateFormat.value : 'DD/MM/YYYY';
+    const pdfLimitMb = settingPdfLimitMb ? Number(settingPdfLimitMb.value) : 5;
+    const pdfExpiryDays = settingPdfExpiryDays ? Number(settingPdfExpiryDays.value) : 7;
+    // ...
 
-    // Validate Company Name & Admin
-    if (!companyName) {
+    // Validate Company Name (solo si el campo existe en el HTML)
+    if (settingCompanyName && !companyName) {
       window.utils.showToast('Campo requerido', 'Por favor, escribe el nombre de la empresa.', 'warning');
       settingCompanyName.focus();
       return;
@@ -327,22 +404,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Password validation (if user entered new password)
-    const newPass = settingNewPassword.value;
-    const confirmPass = settingConfirmPassword.value;
+    const newPass = settingNewPassword ? settingNewPassword.value : '';
+    const confirmPass = settingConfirmPassword ? settingConfirmPassword.value : '';
 
     if (newPass || confirmPass) {
       if (newPass.length < 8 || newPass !== confirmPass) {
-        settingsPasswordError.classList.add('visible');
+        if (settingsPasswordError) settingsPasswordError.classList.add('visible');
         window.utils.showToast('Contraseña inválida', 'La nueva contraseña debe tener mínimo 8 caracteres y coincidir en ambos campos.', 'danger');
         return;
       }
     }
-    settingsPasswordError.classList.remove('visible');
+    if (settingsPasswordError) settingsPasswordError.classList.remove('visible');
 
     // Button feedback
-    const originalBtnHtml = btnSaveSettings.innerHTML;
-    btnSaveSettings.disabled = true;
-    btnSaveSettings.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+    const originalBtnHtml = btnSaveSettings ? btnSaveSettings.innerHTML : '';
+    if (btnSaveSettings) {
+      btnSaveSettings.disabled = true;
+      btnSaveSettings.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+    }
+
+    // Guardar límite/expiración de PDFs en el backend (ConfiguracionPDF real en BD)
+    try {
+      await guardarConfiguracionPdf(pdfLimitMb, pdfExpiryDays);
+    } catch (err) {
+      window.utils.showToast('Error', err.message || 'No se pudo guardar la configuración de PDF.', 'danger');
+      if (btnSaveSettings) {
+        btnSaveSettings.disabled = false;
+        btnSaveSettings.innerHTML = originalBtnHtml;
+      }
+      return;
+    }
 
     // Construct settings payload
     const updatedSettings = {
@@ -352,6 +443,8 @@ document.addEventListener('DOMContentLoaded', () => {
       theme,
       language,
       dateFormat,
+      pdfLimitMb,
+      pdfExpiryDays,
       admin: {
         name: adminName,
         email: adminEmail,
@@ -372,30 +465,32 @@ document.addEventListener('DOMContentLoaded', () => {
       window.utils.initCommonLayout('settings');
 
       // Clear password fields
-      settingCurrentPassword.value = '';
-      settingNewPassword.value = '';
-      settingConfirmPassword.value = '';
+      if (settingCurrentPassword) settingCurrentPassword.value = '';
+      if (settingNewPassword) settingNewPassword.value = '';
+      if (settingConfirmPassword) settingConfirmPassword.value = '';
 
-      btnSaveSettings.disabled = false;
-      btnSaveSettings.innerHTML = '<i class="fa-solid fa-check"></i> ¡Cambios guardados!';
+      if (btnSaveSettings) {
+        btnSaveSettings.disabled = false;
+        btnSaveSettings.innerHTML = '<i class="fa-solid fa-check"></i> ¡Cambios guardados!';
+      }
 
       window.utils.showToast('Configuración guardada', 'Las preferencias han sido persistidas exitosamente en localStorage.', 'success');
 
       setTimeout(() => {
-        btnSaveSettings.innerHTML = originalBtnHtml;
+        if (btnSaveSettings) btnSaveSettings.innerHTML = originalBtnHtml;
       }, 2500);
     }, 450);
   }
 
   /* --- Event Listeners --- */
   function setupEventListeners() {
-    // Logo Upload
-    settingLogoInput.addEventListener('change', handleLogoUpload);
-    btnRestoreDefaultLogo.addEventListener('click', restoreDefaultLogo);
+    // Logo Upload (solo si la card de marca existe en el HTML)
+    if (settingLogoInput) settingLogoInput.addEventListener('change', handleLogoUpload);
+    if (btnRestoreDefaultLogo) btnRestoreDefaultLogo.addEventListener('click', restoreDefaultLogo);
 
     // Live theme selection
-    themeRadioLight.addEventListener('change', () => applyThemePreview('light'));
-    themeRadioDark.addEventListener('change', () => applyThemePreview('dark'));
+    if (themeRadioLight) themeRadioLight.addEventListener('change', () => applyThemePreview('light'));
+    if (themeRadioDark) themeRadioDark.addEventListener('change', () => applyThemePreview('dark'));
 
     // Color swatches click
     colorSwatches.forEach(swatch => {
@@ -405,29 +500,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Custom color picker input
-    settingAccentColor.addEventListener('input', (e) => {
-      applyAccentColorPreview(e.target.value);
-    });
+    if (settingAccentColor) {
+      settingAccentColor.addEventListener('input', (e) => {
+        applyAccentColorPreview(e.target.value);
+      });
+    }
 
     // Save form
-    settingsForm.addEventListener('submit', handleFormSubmit);
+    if (settingsForm) settingsForm.addEventListener('submit', handleFormSubmit);
 
-    // Categorías
-    btnAddCategory.addEventListener('click', handleAddCategory);
-    newCategoryInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        handleAddCategory();
-      }
-    });
+    // Categorías (solo si la card existe en el HTML)
+    if (btnAddCategory) btnAddCategory.addEventListener('click', handleAddCategory);
+    if (newCategoryInput) {
+      newCategoryInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleAddCategory();
+        }
+      });
+    }
 
-    // Unidades de Medida
-    btnAddUnit.addEventListener('click', handleAddUnit);
-    newUnitInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        handleAddUnit();
-      }
-    });
+    // Unidades de Medida (solo si la card existe en el HTML)
+    if (btnAddUnit) btnAddUnit.addEventListener('click', handleAddUnit);
+    if (newUnitInput) {
+      newUnitInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleAddUnit();
+        }
+      });
+    }
   }
 });

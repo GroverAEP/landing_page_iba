@@ -14,10 +14,61 @@
 {% block content %}
   <main class="page-body">
     <form id="settingsForm" novalidate>
+      {% csrf_token %}
       <div class="settings-grid">
-        
-        <!-- Column 1: Configuración General del Panel y Marca -->
+
+        <!-- Column 1: Marca, Preferencias del Panel y Catálogo PDF -->
         <div class="settings-column">
+
+          <!-- Company Name & Logo Card (oculta a pedido)
+          <section class="card settings-card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <i class="fa-solid fa-building" style="color: var(--primary-color);"></i>
+                <span>Identidad de Marca</span>
+              </h2>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label for="settingCompanyName" class="form-label">
+                  <span>Nombre de la empresa</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="input-group">
+                  <i class="fa-solid fa-signature input-icon"></i>
+                  <input type="text" id="settingCompanyName" class="form-control has-icon-left" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Logo del panel</label>
+                <div class="logo-upload-row" style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+                  <img
+                    id="logoPreviewImg"
+                    src="{% static 'django_app/img/logo.png' %}"
+                    data-default-src="{% static 'django_app/img/logo.png' %}"
+                    alt="Logo actual"
+                    style="width:64px;height:64px;object-fit:contain;border-radius:8px;background:#f3f4f6;padding:4px;">
+                  <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                    <label for="settingLogoInput" class="btn btn-secondary btn-sm" style="cursor:pointer; margin:0;">
+                      <i class="fa-solid fa-upload"></i>
+                      <span>Subir logo</span>
+                    </label>
+                    <input type="file" id="settingLogoInput" accept="image/*" style="display:none;">
+                    <button type="button" id="btnRestoreDefaultLogo" class="btn btn-secondary btn-sm">
+                      <i class="fa-solid fa-rotate-left"></i>
+                      <span>Restaurar por defecto</span>
+                    </button>
+                  </div>
+                </div>
+                <span class="upload-hint">Formatos PNG o SVG, tamaño máximo 2 MB.</span>
+              </div>
+            </div>
+          </section>
+          -->
+
+
+
           <!-- Panel & Brand Settings Card -->
           <section class="card settings-card">
             <div class="card-header">
@@ -27,39 +78,6 @@
               </h2>
             </div>
             <div class="card-body">
-              <!-- Company Name -->
-              <div class="form-group">
-                <label for="settingCompanyName" class="form-label">
-                  <span>Nombre de la empresa</span>
-                  <span class="required-star">*</span>
-                </label>
-                <div class="input-group">
-                  <i class="fa-solid fa-building input-icon"></i>
-                  <input type="text" id="settingCompanyName" class="form-control has-icon-left" value="Ibafex" required>
-                </div>
-              </div>
-
-              <!-- Logo Upload & Preview -->
-              <div class="form-group">
-                <label class="form-label">Logo de la empresa</label>
-                <div class="logo-uploader-box">
-                  <div class="logo-preview-wrapper" id="logoPreviewWrap">
-                    <img src="{% static 'django_app/img/logo.svg' %}" alt="Vista previa del Logo" id="logoPreviewImg" data-default-src="{% static 'django_app/img/logo.svg' %}">
-                  </div>
-                  <div class="logo-uploader-actions">
-                    <label for="settingLogoInput" class="btn btn-outline btn-sm" style="cursor: pointer;">
-                      <i class="fa-solid fa-cloud-arrow-up"></i>
-                      <span>Subir nuevo logo</span>
-                    </label>
-                    <input type="file" id="settingLogoInput" accept="image/*" style="display: none;">
-                    <button type="button" class="btn btn-sm btn-secondary" id="btnRestoreDefaultLogo">
-                      Restaurar por defecto
-                    </button>
-                    <span class="upload-hint">Formatos: SVG, PNG o JPG (Máx. 2MB).</span>
-                  </div>
-                </div>
-              </div>
-
               <!-- Theme Mode Selector (Light / Dark) -->
               <div class="form-group">
                 <label class="form-label">Tema visual de la interfaz</label>
@@ -118,6 +136,84 @@
               </div>
             </div>
           </section>
+
+          <!-- Catalog PDF Settings Card -->
+          <section class="card settings-card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <i class="fa-solid fa-file-pdf" style="color: var(--primary-color);"></i>
+                <span>Historial de Catálogos PDF</span>
+              </h2>
+            </div>
+            <div class="card-body">
+              <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                  <label for="settingPdfLimitMb" class="form-label">
+                    <span>Límite de espacio del historial (MB)</span>
+                    <span class="required-star">*</span>
+                  </label>
+                  <input type="number" min="1" id="settingPdfLimitMb" class="form-control" value="5" required>
+                  <span class="upload-hint">Al superar este límite no se podrán generar nuevos catálogos hasta eliminar antiguos.</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="settingPdfExpiryDays" class="form-label">
+                    <span>Días para expiración automática</span>
+                    <span class="required-star">*</span>
+                  </label>
+                  <input type="number" min="1" id="settingPdfExpiryDays" class="form-control" value="7" required>
+                  <span class="upload-hint">Los catálogos se eliminan automáticamente al superar este plazo.</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Categorías de Productos (oculta a pedido)
+          <section class="card settings-card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <i class="fa-solid fa-tags" style="color: var(--primary-color);"></i>
+                <span>Categorías de Productos</span>
+              </h2>
+            </div>
+            <div class="card-body">
+              <div class="form-group" style="display:flex; gap:0.5rem;">
+                <div class="input-group" style="flex:1;">
+                  <i class="fa-solid fa-tag input-icon"></i>
+                  <input type="text" id="newCategoryInput" class="form-control has-icon-left" placeholder="Nueva categoría...">
+                </div>
+                <button type="button" id="btnAddCategory" class="btn btn-primary">
+                  <i class="fa-solid fa-plus"></i>
+                </button>
+              </div>
+              <div id="categoryChipList" class="chip-list"></div>
+            </div>
+          </section>
+          -->
+
+          <!-- Unidades de Medida (oculta a pedido)
+          <section class="card settings-card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <i class="fa-solid fa-ruler" style="color: var(--primary-color);"></i>
+                <span>Unidades de Medida</span>
+              </h2>
+            </div>
+            <div class="card-body">
+              <div class="form-group" style="display:flex; gap:0.5rem;">
+                <div class="input-group" style="flex:1;">
+                  <i class="fa-solid fa-ruler-combined input-icon"></i>
+                  <input type="text" id="newUnitInput" class="form-control has-icon-left" placeholder="Nueva unidad...">
+                </div>
+                <button type="button" id="btnAddUnit" class="btn btn-primary">
+                  <i class="fa-solid fa-plus"></i>
+                </button>
+              </div>
+              <div id="unitChipList" class="chip-list"></div>
+            </div>
+          </section>
+          -->
+
         </div>
 
         <!-- Column 2: Perfil del Administrador y Seguridad -->
@@ -216,7 +312,7 @@
       <div class="settings-bottom-bar">
         <div class="bottom-bar-hint">
           <i class="fa-solid fa-circle-info"></i>
-          <span>Los cambios se guardan localmente en tu navegador y se aplican en todo el panel.</span>
+          <span>Los cambios se guardan en tu cuenta y se aplican en todo el panel.</span>
         </div>
         <button type="submit" class="btn btn-primary btn-lg" id="btnSaveSettings">
           <i class="fa-solid fa-floppy-disk"></i>

@@ -7,7 +7,7 @@ ConfiguracionSitioForm reemplaza saveSettings.
 """
 from django import forms
 from django.contrib.auth import get_user_model
-from .models import Producto, PerfilUsuario, ConfiguracionSitio
+from products.models import Producto
 
 User = get_user_model()
 
@@ -20,6 +20,7 @@ class ProductoForm(forms.ModelForm):
             'unit_price', 'unit_of_measure',
             'bulk_price', 'bulk_unit_of_measure',
             'product_of_stock',
+            'is_visible',   # 👈 agregar
         ]
         widgets = {
             'image': forms.URLInput(attrs={'class': 'form-control'}),
@@ -30,6 +31,7 @@ class ProductoForm(forms.ModelForm):
             'unit_of_measure': forms.Select(attrs={'class': 'form-select'}),
             'bulk_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'bulk_unit_of_measure': forms.TextInput(attrs={'class': 'form-control'}),
+            'is_visible': forms.CheckboxInput(attrs={'class': 'form-check-input'}),  # 👈 agregar
         }
 
 
@@ -62,27 +64,27 @@ class UserForm(forms.ModelForm):
         return email
 
 
-class PerfilUsuarioForm(forms.ModelForm):
-    class Meta:
-        model = PerfilUsuario
-        fields = ['role', 'status']
-        widgets = {
-            'role': forms.Select(attrs={'class': 'form-select'}),
-            'status': forms.Select(attrs={'class': 'form-select'}),
-        }
+# class PerfilUsuarioForm(forms.ModelForm):
+#     class Meta:
+#         model = PerfilUsuario
+#         fields = ['role', 'status']
+#         widgets = {
+#             'role': forms.Select(attrs={'class': 'form-select'}),
+#             'status': forms.Select(attrs={'class': 'form-select'}),
+#         }
 
 
-class ConfiguracionSitioForm(forms.ModelForm):
-    class Meta:
-        model = ConfiguracionSitio
-        fields = [
-            'company_name', 'company_logo', 'accent_color',
-            'theme', 'language', 'date_format',
-        ]
-        widgets = {
-            'company_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'accent_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
-            'theme': forms.Select(attrs={'class': 'form-select'}),
-            'language': forms.Select(attrs={'class': 'form-select'}),
-            'date_format': forms.TextInput(attrs={'class': 'form-control'}),
-        }
+# class ConfiguracionSitioForm(forms.ModelForm):
+#     class Meta:
+#         model = ConfiguracionSitio
+#         fields = [
+#             'company_name', 'company_logo', 'accent_color',
+#             'theme', 'language', 'date_format',
+#         ]
+#         widgets = {
+#             'company_name': forms.TextInput(attrs={'class': 'form-control'}),
+#             'accent_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
+#             'theme': forms.Select(attrs={'class': 'form-select'}),
+#             'language': forms.Select(attrs={'class': 'form-select'}),
+#             'date_format': forms.TextInput(attrs={'class': 'form-control'}),
+#         }

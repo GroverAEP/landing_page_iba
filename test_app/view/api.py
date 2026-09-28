@@ -48,6 +48,7 @@ def _serializar(p: Producto) -> dict:
         'bulk_unit_of_measure': str(p.bulk_unit_of_measure) if p.bulk_unit_of_measure else None,
         'date_added': p.date_added.isoformat(),
         'product_of_stock': p.product_of_stock,
+        'is_visible': p.is_visible,   # 👈 agregar
     }
 
 
@@ -64,7 +65,7 @@ def _resolver_categoria(nombre: str) -> Categoria:
     return categoria
 
 
-def _aplicar_datos(producto: Producto, data: dict, es_creacion: bool):
+def _aplicar_datos(producto: Producto, data: dict, archivo_imagen,es_creacion: bool):
     if 'name' in data:
         producto.name = (data.get('name') or '').strip()
     if 'brand' in data:
@@ -83,8 +84,16 @@ def _aplicar_datos(producto: Producto, data: dict, es_creacion: bool):
         producto.bulk_unit_of_measure = _resolver_unidad(bulk_unit) if bulk_unit not in ('', None) else None
     if 'image' in data:
         producto.image = data.get('image') or ''
+
+    if archivo_imagen:
+        producto.image = archivo_imagen
+
     if 'product_of_stock' in data:
         producto.product_of_stock = _to_bool(data.get('product_of_stock'))
+
+    if 'is_visible' in data:                          # 👈 agregar
+        producto.is_visible = _to_bool(data.get('is_visible'))
+
 
 def _resolver_unidad(nombre: str):
     nombre = (nombre or '').strip()
@@ -119,17 +128,22 @@ def api_productos(request):
 
         return JsonResponse([_serializar(p) for p in productos], safe=False)
 
-    # POST -> crear
-    try:
-        data = json.loads(request.body or '{}')
-    except json.JSONDecodeError:
-        return JsonResponse({'error': 'JSON inválido.'}, status=400)
+
+    # POST -> crear (ahora recibe multipart/form-data, no JSON)
+    data = request.POST  # campos de texto (name, brand, category, etc.)
+    archivo_imagen = request.FILES.get('image')  # el archivo real, si vino uno
+
+
+    # try:
+    #     data = json.loads(request.body or '{}')
+    # except json.JSONDecodeError:
+    #     return JsonResponse({'error': 'JSON inválido.'}, status=400)
 
     if not data.get('name') or not data.get('brand') or not data.get('category'):
         return JsonResponse({'error': 'Nombre, marca y categoría son obligatorios.'}, status=400)
 
     producto = Producto()
-    _aplicar_datos(producto, data, es_creacion=True)
+    _aplicar_datos(producto, data, archivo_imagen, es_creacion=True)
     producto.full_clean(exclude=['id'])
     producto.save()
     return JsonResponse(_serializar(producto), status=201)
@@ -152,13 +166,29 @@ def api_producto_detalle(request, pk):
         return JsonResponse({'deleted': True, 'id': pk})
 
     # PUT -> actualizar
-    try:
-        data = json.loads(request.body or '{}')
-    except json.JSONDecodeError:
-        return JsonResponse({'error': 'JSON inválido.'}, status=400)
+    # try:
+    #     data = json.loads(request.body or '{}')
+    # except json.JSONDecodeError:
+    #     return JsonResponse({'error': 'JSON inválido.'}, status=400)
+    from django.http import QueryDict
+    
+
+    if request.content_type.startswith('multipart/form-data'):
+        data = request.POST
+        archivo_imagen = request.FILES.get('image')
+    elif request.content_type.startswith('application/json'):
+        try:
+            data = json.loads(request.body or '{}')
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'JSON inválido.'}, status=400)
+        archivo_imagen = None
+    else:
+        data = QueryDict(request.body)
+        archivo_imagen = None
+
 
     try:
-        _aplicar_datos(producto, data, es_creacion=False)
+        _aplicar_datos(producto, data, archivo_imagen, es_creacion=True)
         producto.full_clean(exclude=['id'])
         producto.save()
         return JsonResponse(_serializar(producto))

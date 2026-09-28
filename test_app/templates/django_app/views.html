@@ -15,8 +15,15 @@
   <main class="page-body">
     <!-- Filter Bar for Period Selection -->
     <div class="views-filter-bar">
-      <div class="filter-bar-left">
+      <div class="filter-bar-left" style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
         <span class="filter-bar-label"><i class="fa-solid fa-sliders"></i> Periodo analizado:</span>
+
+        <!-- Toggle Mensual / Diario -->
+        <div class="btn-group" role="tablist" style="display:inline-flex; border:1px solid var(--border-color, #e2e8f0); border-radius:8px; overflow:hidden;">
+          <button type="button" class="btn btn-sm granularity-btn active" data-granularity="monthly" style="border:none; border-radius:0;">Mensual</button>
+          <button type="button" class="btn btn-sm granularity-btn" data-granularity="daily" style="border:none; border-radius:0;">Diario (30 días)</button>
+        </div>
+
         <select id="periodFilter" class="form-select filter-select-period" aria-label="Seleccionar periodo">
           <option value="year-2026" selected>Año 2026 (En curso)</option>
           <option value="last-6-months">Últimos 6 meses</option>
@@ -95,19 +102,18 @@
       </div>
     </section>
 
-    <!-- Monthly Visits Chart Card (Chart.js) -->
+    <!-- Monthly/Daily Visits Chart Card (Chart.js) -->
     <section class="card chart-card">
       <div class="card-header">
         <div>
           <h2 class="card-title">
             <i class="fa-solid fa-chart-area" style="color: var(--primary-color);"></i>
-            <span>Evolución Mensual de Visitas</span>
+            <span id="chartTitle">Evolución Mensual de Visitas</span>
           </h2>
-          <p class="card-subtitle">Comparativa entre visitas totales y visitantes únicos</p>
+          <p class="card-subtitle">Visitantes únicos por día (una visita por IP/día)</p>
         </div>
         <div class="chart-legend-custom">
-          <span class="legend-item"><span class="legend-dot dot-primary"></span> Visitas Totales</span>
-          <span class="legend-item"><span class="legend-dot dot-secondary"></span> Visitantes Únicos</span>
+          <span class="legend-item"><span class="legend-dot dot-primary"></span> Visitas</span>
         </div>
       </div>
       <div class="card-body">
@@ -135,12 +141,12 @@
         </div>
       </div>
 
-      <!-- Card 2: Desglose Mensual Detallado -->
+      <!-- Card 2: Desglose Detallado -->
       <div class="card">
         <div class="card-header">
           <h3 class="card-title">
             <i class="fa-solid fa-table" style="color: var(--primary-color);"></i>
-            <span>Rendimiento por Mes</span>
+            <span id="tableTitle">Rendimiento por Mes</span>
           </h3>
           <span class="badge badge-success">Detalle histórico</span>
         </div>
@@ -149,10 +155,8 @@
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>Mes</th>
+                  <th id="tableColLabel">Mes</th>
                   <th>Visitas</th>
-                  <th>Únicos</th>
-                  <th>Páginas Vistas</th>
                 </tr>
               </thead>
               <tbody id="monthlyTableBody">
@@ -163,6 +167,63 @@
         </div>
       </div>
     </div>
+
+    <!-- Comparación Mensual -->
+    <section class="card" style="margin-top: 1.5rem;">
+      <div class="card-header">
+        <h2 class="card-title">
+          <i class="fa-solid fa-scale-balanced" style="color: var(--primary-color);"></i>
+          <span>Comparación entre Meses</span>
+        </h2>
+      </div>
+      <div class="card-body">
+        <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap; margin-bottom:1.25rem;">
+          <select id="compareMonthA" class="form-select" style="max-width:220px;"></select>
+          <span style="font-weight:600; color:#94a3b8;">vs</span>
+          <select id="compareMonthB" class="form-select" style="max-width:220px;"></select>
+          <button type="button" class="btn btn-primary btn-sm" id="btnCompareMonths">
+            <i class="fa-solid fa-code-compare"></i>
+            <span>Comparar</span>
+          </button>
+        </div>
+
+        <div id="comparisonResult" style="display:none;">
+          <div style="display:grid; grid-template-columns: 1fr auto 1fr; gap:1.5rem; align-items:center;">
+            <div class="kpi-card" style="margin:0;">
+              <div class="kpi-info">
+                <h4 id="compareLabelA">Mes A</h4>
+                <div class="kpi-value" id="compareTotalA">0</div>
+                <div class="kpi-trend"><span>Visitas totales</span></div>
+              </div>
+            </div>
+
+            <div style="text-align:center;">
+              <div style="font-size:1.5rem; font-weight:700;" id="compareGrowth">+0.0%</div>
+              <div style="color:#94a3b8; font-size:0.85rem;">variación</div>
+            </div>
+
+            <div class="kpi-card" style="margin:0;">
+              <div class="kpi-info">
+                <h4 id="compareLabelB">Mes B</h4>
+                <div class="kpi-value" id="compareTotalB">0</div>
+                <div class="kpi-trend"><span>Visitas totales</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem; margin-top:1.5rem;">
+            <div>
+              <h4 style="margin-bottom:0.5rem;">Top páginas <span id="compareTopLabelA"></span></h4>
+              <ul class="top-pages-list" id="compareTopPagesA"></ul>
+            </div>
+            <div>
+              <h4 style="margin-bottom:0.5rem;">Top páginas <span id="compareTopLabelB"></span></h4>
+              <ul class="top-pages-list" id="compareTopPagesB"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 {% endblock content %}
 

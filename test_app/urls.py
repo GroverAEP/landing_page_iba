@@ -90,6 +90,18 @@ urlpatterns = [
         name="eliminar_catalogo_pdf",
     ),
 
+    path('api/visitas/comparar/', visites.visitas_comparar_view, name='visitas_comparar'),
+
+    #Url de configuraciones 
+    path('api/configuracion-pdf/', pdfs.actualizar_configuracion_pdf, name='actualizar_configuracion_pdf'),
+
+
+
+
+    path('recuperar-password/', views.recuperar_password, name='recuperar_password'),
+
+    path('resetear-password/<uidb64>/<token>/', views.resetear_password, name='resetear_password'),  # 👈 esta es la que falta
+
 
     #path('catalogos-pdf/generar/', views.GenerarCatalogoPDFView.as_view(), name='generar_catalogo_pdf'),
     #path('catalogos-pdf/<int:job_id>/estado/', views.estado_catalogo_pdf, name='estado_catalogo_pdf'),

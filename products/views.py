@@ -8,8 +8,7 @@ from .models import VisitCounter
 from django.shortcuts import render
 from django.utils import timezone
 
-
-
+from products.utilss.visit_tracking import registrar_visita  # <-- nuevo import
 
 def normalize(text):
     if text is None:
@@ -20,17 +19,22 @@ def normalize(text):
     ).lower()
 
 def catalog_products(request):
-    
+
+    registrar_visita(request, page_name="catalogo")  # <-- reemplaza el bloque manual de antes
+
     today = timezone.localdate()  # Obtiene la fecha actual sin hora
     counter, created = VisitCounter.objects.get_or_create(
         page_name="catalogo",
         date=today
     )
-    counter.visits += 1
-    counter.save()
+    #counter.visits += 1
+    #counter.save()
     
-    # Obtener todos los productos
-    products = Producto.objects.all()
+
+    # Obtener solo los productos visibles
+    products = Producto.objects.filter(is_visible=True)
+
+
     products_total_count = products.count()
     # Obtener solo las categorías que tienen productos asignados
     categories = Categoria.objects.filter(producto__isnull=False).distinct()  # Filtrar categorías con productos

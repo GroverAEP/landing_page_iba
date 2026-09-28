@@ -12,11 +12,12 @@
   font-family: var(--font-family-base, 'Plus Jakarta Sans', sans-serif);
   background-color: var(--bg-app);
   color: var(--text-primary);
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 /* Floating Theme Switcher */
@@ -78,8 +79,8 @@
   padding: 0;
   position: relative;
   z-index: 1;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100%;
+  overflow: hidden;
 }
 
 .ambient-glow {
@@ -121,13 +122,12 @@
 }
 
 /* ==========================================================================
-   Full-Screen Split Container (ya no es una tarjeta flotante:
-   ocupa el 100% del viewport, dividido en dos paneles)
+   Full-Screen Split Container (ocupa el 100% del viewport, sin scroll,
+   dividido en dos paneles que siempre miden exactamente lo mismo)
    ========================================================================== */
 .signin-card {
   width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100%;
   background-color: var(--bg-surface);
   border: none;
   border-radius: 0;
@@ -152,14 +152,15 @@
    ========================================================================== */
 .signin-hero {
   flex: 1.1;
+  height: 100%;
   background: linear-gradient(160deg, #065f46 0%, #042f21 55%, #021a13 100%);
   color: #ffffff;
-  padding: 3.5rem 3.1rem;
+  padding: clamp(1.25rem, 4vh, 3.5rem) clamp(1.5rem, 3vw, 3.1rem);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   position: relative;
-  overflow: hidden;
+  overflow: hidden; /* nunca genera scroll propio: si no entra, se comprime */
 }
 
 /* Hero background pattern overlay */
@@ -190,8 +191,11 @@
   justify-content: space-between;
   position: relative;
   z-index: 2;
+  flex-shrink: 0;
 }
 
+/* Caja del logo: blindada para que NUNCA pueda desbordar ni empujar el layout,
+   sea cual sea el tamaño real del archivo logo.png */
 .hero-logo-box {
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(8px);
@@ -200,12 +204,21 @@
   border: 1px solid rgba(255, 255, 255, 0.14);
   display: inline-flex;
   align-items: center;
+  max-width: 200px;
+  max-height: 64px;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
-.hero-logo {
-  height: 36px;
+.hero-logo,
+.brand-logo-img {
+  height: 50px;
   width: auto;
-  filter: brightness(0) invert(1);
+  max-width: 160px;
+  max-height: 50px;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
 }
 
 .hero-badge {
@@ -220,12 +233,15 @@
   font-size: var(--font-size-xs);
   font-weight: 600;
   letter-spacing: 0.02em;
+  flex-shrink: 0;
 }
 
 .hero-content {
   position: relative;
   z-index: 2;
-  margin: 2.5rem 0;
+  margin: clamp(1rem, 3vh, 2.5rem) 0;
+  overflow: hidden;
+  min-height: 0;
 }
 
 .hero-category {
@@ -235,23 +251,23 @@
   letter-spacing: 0.14em;
   color: #6ee7b7;
   font-weight: 700;
-  margin-bottom: 0.85rem;
+  margin-bottom: clamp(0.4rem, 1.2vh, 0.85rem);
 }
 
 .hero-title {
-  font-size: 2.05rem;
+  font-size: clamp(1.35rem, 2.4vh, 2.05rem);
   font-weight: 800;
-  line-height: 1.28;
+  line-height: 1.25;
   letter-spacing: -0.02em;
-  margin: 0 0 1.1rem 0;
+  margin: 0 0 clamp(0.5rem, 1.4vh, 1.1rem) 0;
   color: #ffffff;
 }
 
 .hero-description {
   font-size: var(--font-size-sm);
   color: #d1fae5;
-  line-height: 1.65;
-  margin: 0 0 2.25rem 0;
+  line-height: 1.5;
+  margin: 0 0 clamp(1rem, 2.8vh, 2.25rem) 0;
   opacity: 0.88;
   max-width: 34rem;
 }
@@ -262,7 +278,7 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: clamp(0.55rem, 1.8vh, 1.25rem);
 }
 
 .feature-item {
@@ -283,6 +299,7 @@
   align-items: center;
   justify-content: center;
   font-size: 0.95rem;
+  flex-shrink: 0;
 }
 
 .feature-text {
@@ -311,7 +328,10 @@
   position: relative;
   z-index: 2;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 1.35rem;
+  padding-top: clamp(0.65rem, 1.8vh, 1.35rem);
+  flex-shrink: 0; /* siempre visible, nunca se recorta ni se va a scroll */
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
 }
 
 .stat-pill {
@@ -342,14 +362,15 @@
    ========================================================================== */
 .signin-form-pane {
   flex: 1.15;
+  height: 100%;
   background-color: var(--bg-surface);
-  padding: 3.5rem 4rem;
+  padding: clamp(1.5rem, 4vh, 3.5rem) clamp(1.5rem, 4vw, 4rem);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  min-height: 100dvh;
+  overflow-y: auto; /* si en una pantalla muy baja no entra el form, este lado
+                        sí puede scrollear sin arrastrar al hero de la izquierda */
 }
 
 /* El contenido del formulario se mantiene legible con un ancho máximo,
@@ -644,7 +665,22 @@
    Responsive Adaptations
    ========================================================================== */
 @media (max-width: 991px) {
+  .signin-body {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .signin-wrapper {
+    height: auto;
+    overflow: visible;
+  }
+
   .signin-card {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
     flex-direction: column;
   }
 
@@ -657,7 +693,9 @@
   }
 
   .signin-form-pane {
+    height: auto;
     padding: 2.5rem 2rem;
+    overflow: visible;
   }
 }
 

@@ -192,10 +192,32 @@
               </button>
             </div>
 
-            <!-- Filter: Category -->
-          <select id="filterCategory" class="form-select filter-select" aria-label="Filtrar por categoría">
-            <!-- Opciones generadas por JS (PRODUCT_CATEGORIES en dashboard.js) -->
-          </select>
+            <!-- Export PDF Button -->
+              <div class="toolbar-right-buttons">
+                <button type="button" class="btn btn-outline" id="btnExportPdf" title="Exportar reporte en PDF">
+                  <i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i>
+                  <span>Descargar PDF</span>
+                </button>
+
+                <button type="button" class="btn btn-primary" id="btnAddProductToolbar">
+                  <i class="fa-solid fa-plus"></i>
+                  <span>Agregar producto</span>
+                </button>
+              </div>
+          </div>
+
+          <div class="toolbar-right">
+            <!-- Select All (todos los productos filtrados, no solo la página) -->
+            <button type="button" class="btn btn-outline" id="btnSelectAllFiltered" title="Seleccionar todos los productos filtrados">
+              <i class="fa-solid fa-square-check"></i>
+              <span id="btnSelectAllFilteredLabel">Seleccionar todo</span>
+            </button>
+
+
+                          <!-- Filter: Category -->
+            <select id="filterCategory" class="form-select filter-select" aria-label="Filtrar por categoría">
+              <!-- Opciones generadas por JS (PRODUCT_CATEGORIES en dashboard.js) -->
+            </select>
 
             <!-- Filter: Availability (product_of_stock) -->
             <select id="filterAvailability" class="form-select filter-select" aria-label="Filtrar por disponibilidad">
@@ -215,34 +237,10 @@
 
             <!-- Filter: Alphabet (A-Z), synced with the letter bar below -->
             <select id="filterLetter" class="form-select filter-select" aria-label="Filtrar por abecedario (A-Z)">
-              <option value="">Abecedario (A-Z)</option>
-              <option value="A">A</option>
-              <option value="B">B</option>
-              <option value="C">C</option>
-              <option value="D">D</option>
-              <option value="E">E</option>
-              <option value="F">F</option>
-              <option value="G">G</option>
-              <option value="H">H</option>
-              <option value="I">I</option>
-              <option value="J">J</option>
-              <option value="K">K</option>
-              <option value="L">L</option>
-              <option value="M">M</option>
-              <option value="N">N</option>
-              <option value="Ñ">Ñ</option>
-              <option value="O">O</option>
-              <option value="P">P</option>
-              <option value="Q">Q</option>
-              <option value="R">R</option>
-              <option value="S">S</option>
-              <option value="T">T</option>
-              <option value="U">U</option>
-              <option value="V">V</option>
-              <option value="W">W</option>
-              <option value="X">X</option>
-              <option value="Y">Y</option>
-              <option value="Z">Z</option>
+              <option value="">No seleccionado (A-Z)</option>
+              <option value="A">Abecedario (A-Z)</option>
+              <option value="B">Abecedario (Z-A)</option>
+
             </select>
 
             <!-- Reset Filters Button -->
@@ -252,12 +250,6 @@
             </button>
           </div>
 
-          <div class="toolbar-right">
-            <!-- Select All (todos los productos filtrados, no solo la página) -->
-            <button type="button" class="btn btn-outline" id="btnSelectAllFiltered" title="Seleccionar todos los productos filtrados">
-              <i class="fa-solid fa-square-check"></i>
-              <span id="btnSelectAllFilteredLabel">Seleccionar todo</span>
-            </button>
             <!-- View Mode Toggle (Card vs Table) -->
             <div class="view-toggle">
               <button type="button" class="view-btn active" id="btnCardView" title="Vista en tarjetas" aria-label="Vista en tarjetas">
@@ -268,65 +260,9 @@
               </button>
             </div>
 
-            <!-- Export PDF Button -->
-            <button type="button" class="btn btn-outline" id="btnExportPdf" title="Exportar reporte en PDF">
-              <i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i>
-              <span>Descargar PDF</span>
-            </button>
+          </div>
 
-            <!-- Add Product Button (its own id: the header button already uses btnOpenAddModal) -->
-            <button type="button" class="btn btn-primary" id="btnAddProductToolbar">
-              <i class="fa-solid fa-plus"></i>
-              <span>Agregar producto</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Alphabetical Filter Bar (A-Z) -->
-        <div class="alphabet-filter-container">
-          <div class="alphabet-filter-header">
-            <span class="alphabet-label">
-              <i class="fa-solid fa-arrow-down-a-z"></i>
-              <span>Filtrar por letra:</span>
-            </span>
-            <span class="alphabet-current" id="alphabetCurrentFilter" style="display: none;">
-              <span>Mostrando: Letra <strong id="alphabetCurrentLetter"></strong></span>
-              <button type="button" class="alphabet-clear-mini" id="btnClearLetterFilter" title="Quitar filtro de letra" aria-label="Quitar filtro de letra">
-                <i class="fa-solid fa-xmark"></i>
-              </button>
-            </span>
-          </div>
-          <div class="alphabet-nav" id="alphabetNav" role="toolbar" aria-label="Abecedario de la A a la Z">
-            <button type="button" class="alphabet-btn active" data-letter="" title="Mostrar todos los productos">Todos</button>
-            <button type="button" class="alphabet-btn" data-letter="A">A</button>
-            <button type="button" class="alphabet-btn" data-letter="B">B</button>
-            <button type="button" class="alphabet-btn" data-letter="C">C</button>
-            <button type="button" class="alphabet-btn" data-letter="D">D</button>
-            <button type="button" class="alphabet-btn" data-letter="E">E</button>
-            <button type="button" class="alphabet-btn" data-letter="F">F</button>
-            <button type="button" class="alphabet-btn" data-letter="G">G</button>
-            <button type="button" class="alphabet-btn" data-letter="H">H</button>
-            <button type="button" class="alphabet-btn" data-letter="I">I</button>
-            <button type="button" class="alphabet-btn" data-letter="J">J</button>
-            <button type="button" class="alphabet-btn" data-letter="K">K</button>
-            <button type="button" class="alphabet-btn" data-letter="L">L</button>
-            <button type="button" class="alphabet-btn" data-letter="M">M</button>
-            <button type="button" class="alphabet-btn" data-letter="N">N</button>
-            <button type="button" class="alphabet-btn" data-letter="Ñ">Ñ</button>
-            <button type="button" class="alphabet-btn" data-letter="O">O</button>
-            <button type="button" class="alphabet-btn" data-letter="P">P</button>
-            <button type="button" class="alphabet-btn" data-letter="Q">Q</button>
-            <button type="button" class="alphabet-btn" data-letter="R">R</button>
-            <button type="button" class="alphabet-btn" data-letter="S">S</button>
-            <button type="button" class="alphabet-btn" data-letter="T">T</button>
-            <button type="button" class="alphabet-btn" data-letter="U">U</button>
-            <button type="button" class="alphabet-btn" data-letter="V">V</button>
-            <button type="button" class="alphabet-btn" data-letter="W">W</button>
-            <button type="button" class="alphabet-btn" data-letter="X">X</button>
-            <button type="button" class="alphabet-btn" data-letter="Y">Y</button>
-            <button type="button" class="alphabet-btn" data-letter="Z">Z</button>
-          </div>
-        </div>
+  
 
         <!-- Bulk Selection Actions Bar -->
         <div class="bulk-bar" id="bulkActionsBar">
@@ -355,12 +291,13 @@
                 <th class="th-checkbox">
                   <input type="checkbox" id="selectAllCheckbox" aria-label="Seleccionar todo">
                 </th>
-                <th>Fecha</th>
+                <th>Id</th>
                 <th>Producto</th>
                 <th>Marca</th>
                 <th>Categoría</th>
                 <th>Precio por unidad</th>
                 <th>Precio por paquete</th>
+                <th>Fecha</th>
                 <th>Disponible</th>
                 <th style="text-align: right;">Acciones</th>
               </tr>
@@ -384,13 +321,40 @@
             <i class="fa-solid fa-arrow-rotate-left"></i>
             <span>Limpiar filtros</span>
           </button>
+          </div>
         </div>
+
       </div>
     </section>
   </main>
 {% endblock content %}
 
 {% block modals %}
+  <!-- Límite de historial alcanzado -->
+<div class="modal-overlay" id="limitReachedModalOverlay" role="dialog" aria-modal="true" aria-labelledby="limitReachedModalTitle">
+  <div class="modal" style="max-width: 420px;">
+    <div class="modal-header">
+      <h3 class="modal-title" id="limitReachedModalTitle">
+        <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i>
+        <span>Límite alcanzado</span>
+      </h3>
+      <button type="button" class="modal-close" id="btnLimitModalClose" aria-label="Cerrar modal">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <p id="limitReachedModalMessage" style="margin: 0; color: var(--text-muted);">
+        El historial de catálogos alcanzó el límite permitido.
+      </p>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" id="btnLimitModalOk">
+        <span>Entendido</span>
+      </button>
+    </div>
+  </div>
+</div>
+
   <!-- Add / Edit Product Modal -->
   <div class="modal-overlay" id="productModal" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
     <div class="modal" style="max-width: 620px;">
@@ -543,7 +507,19 @@
               <option value="false">No disponible</option>
             </select>
           </div>
+          <!-- Visibilidad (is_visible) -->
+          <div class="form-group">
+            <label for="productVisible" class="form-label">
+              <span>Visibilidad</span>
+              <span class="required-star">*</span>
+            </label>
+            <select id="productVisible" class="form-select" required>
+              <option value="true">Visible</option>
+              <option value="false">Oculto</option>
+            </select>
+          </div>
         </div>
+
 
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-modal-close="productModal">Cancelar</button>

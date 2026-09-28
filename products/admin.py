@@ -27,42 +27,87 @@ def descargar_pdf_productos(modeladmin, request, queryset):
 descargar_pdf_productos.short_description = "Descargar PDF de productos seleccionados"
 
 
+
+# Acción personalizada para ocultar productos
+def marcar_como_no_visibles(modeladmin, request, queryset):
+    queryset.update(is_visible=False)
+    modeladmin.message_user(
+        request,
+        "Los productos seleccionados fueron ocultados del catálogo."
+    )
+
+# Acción personalizada para mostrar productos
+def marcar_como_visibles(modeladmin, request, queryset):
+    queryset.update(is_visible=True)
+    modeladmin.message_user(
+        request,
+        "Los productos seleccionados ahora son visibles en el catálogo."
+    )
+
 # Personalización de la interfaz de administración para 'Producto'
 class ProductoAdmin(admin.ModelAdmin):
-    # Mostrar las columnas en la lista de productos
-    list_display = ('id', 'name', 'category', 'unit_price', 'unit_of_measure', 'bulk_price', 'bulk_unit_of_measure', 'product_of_stock')
 
-    # Filtro de búsqueda en la lista
-    search_fields = ('name', 'brand', 'category__name')
+    list_display = (
+        'id',
+        'name',
+        'category',
+        'unit_price',
+        'unit_of_measure',
+        'bulk_price',
+        'bulk_unit_of_measure',
+        'product_of_stock',
+        'is_visible'
+    )
 
-    # Agregar filtros laterales para una mejor navegación
-    list_filter = ('category', 'product_of_stock')
+    search_fields = (
+        'name',
+        'brand',
+        'category__name'
+    )
 
-    # Personalización de las etiquetas en la interfaz
+    list_filter = (
+        'category',
+        'product_of_stock',
+        'is_visible'
+    )
+
     fieldsets = (
         (None, {
-            'fields': ('name', 'brand', 'category', 'unit_price', 'unit_of_measure', 'bulk_price', 'bulk_unit_of_measure', 'image')
+            'fields': (
+                'name',
+                'brand',
+                'category',
+                'unit_price',
+                'unit_of_measure',
+                'bulk_price',
+                'bulk_unit_of_measure',
+                'image'
+            )
         }),
+
         ('Disponibilidad', {
-            'fields': ('product_of_stock',),
+            'fields': (
+                'product_of_stock',
+                'is_visible'
+            ),
             'classes': ('collapse',),
         }),
     )
 
-    # Excluir el campo 'date_added' del formulario en el admin
     exclude = ('date_added',)
-    
-    # Función personalizada para mostrar un número incremental de producto
+
     def num_product(self, obj):
-        # El número de producto es el índice + 1
         return f"Producto {obj.pk}"
-    num_product.short_description = 'ID Producto'  # Título de la columna
 
-    # Hacer que la columna 'ID Producto' sea ordenable (por pk)
-    num_product.admin_order_field = 'pk'  # Ordenar por el campo 'pk' (ID del producto)
+    num_product.short_description = "ID Producto"
+    num_product.admin_order_field = "pk"
 
-    # Acciones personalizadas en lote
-    actions = [marcar_como_agotados, marcar_como_disponibles,descargar_pdf_productos]  # Agregar las acciones aquí
+    actions = [
+        marcar_como_agotados,
+        marcar_como_disponibles,
+        marcar_como_visibles,
+        marcar_como_no_visibles,
+    ]
     
 # Registrar los modelos 'Producto' y 'Categoria' en el admin
 class CategoriaAdmin(admin.ModelAdmin):

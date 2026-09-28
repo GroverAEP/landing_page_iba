@@ -70,6 +70,8 @@ function startCatalogHistory() {
   let pendingDeleteId = null;
   let isDeleting = false;
 
+const DIAS_EXPIRACION_PDF = Number(pageBody?.dataset.diasExpiracion) || 7;
+
   const requiredIds = ['searchInput', 'searchClearBtn', 'filterSort', 'btnResetFilters', 'btnCardView', 'btnTableView', 'cardViewContainer', 'tableViewContainer'];
   const missingIds = requiredIds.filter(id => !$(id));
   if (missingIds.length) {
@@ -85,6 +87,10 @@ function startCatalogHistory() {
     safe('listeners', setupEventListeners);
     safe('vista inicial', () => applyViewMode(currentViewMode));
     safe('filtro inicial', applyFilters);
+    safe('contador expiración', () => {
+      actualizarContadoresExpiracion();
+      setInterval(actualizarContadoresExpiracion, 1000);
+    });
     console.info('[historial-pdf] iniciado');
   }
 
@@ -109,6 +115,41 @@ function startCatalogHistory() {
       };
     });
   }
+
+
+  function formatearTiempoRestante(ms) {
+    if (ms <= 0) return 'Expirado';
+    const totalSeg = Math.floor(ms / 1000);
+    const dias = Math.floor(totalSeg / 86400);
+    const horas = Math.floor((totalSeg % 86400) / 3600);
+    const min = Math.floor((totalSeg % 3600) / 60);
+    const seg = totalSeg % 60;
+
+      if (dias > 0) return `${dias}d ${horas}h ${min}m ${seg}s`;
+      if (horas > 0) return `${horas}h ${min}m ${seg}s`;
+      if (min > 0) return `${min}m ${seg}s`;
+      return `${seg}s`;
+  }
+
+  function  actualizarContadoresExpiracion() {
+    const items = getAllItems();
+    const ahora = Date.now();
+
+    items.forEach(item => {
+      if (!item.timestamp) return;
+      const expiraEn = (item.timestamp * 1000) + (DIAS_EXPIRACION_PDF * 86400 * 1000);
+      const restante = expiraEn - ahora;
+      const texto = formatearTiempoRestante(restante);
+
+      document.querySelectorAll(`[data-expiry-id="${item.id}"]`).forEach(el => {
+        el.textContent = texto;
+        el.classList.toggle('expiry-warning', restante > 0 && restante < 24 * 3600 * 1000);
+      });
+    });
+  }
+
+
+
 
   function applyFilters() {
     const query = normalizeSearchText((searchInput && searchInput.value) || '').trim();
@@ -194,13 +235,25 @@ function startCatalogHistory() {
     on(btnGenerateNewPdf, 'click', startGeneration);
 
     // Delete from history: click en la papelera abre el modal, no elimina directo
+    
     const handleDeleteClick = (e) => {
       const btn = e.target.closest('.btn-delete-catalog');
       if (!btn) return;
       openDeleteModal(btn.dataset.id);
     };
+    
     on(cardViewContainer, 'click', handleDeleteClick);
     on(catalogTableBody, 'click', handleDeleteClick);
+    
+        
+    // 👇 AGREGADO: además, atamos el evento directo a cada botón individual
+    document.querySelectorAll('.btn-delete-catalog').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('[DEBUG] click directo en botón eliminar, id:', btn.dataset.id);
+        openDeleteModal(btn.dataset.id);
+      });
+    });
 
     // Delete confirmation modal
     on(btnModalCancel, 'click', closeDeleteModal);
@@ -326,12 +379,14 @@ function startCatalogHistory() {
     }
 
     setDisplay(deleteModalOverlay, 'flex');
+    if (deleteModalOverlay) deleteModalOverlay.classList.add('active'); // 👈 AGREGADO
     if (btnModalConfirm) btnModalConfirm.focus();
   }
 
   function closeDeleteModal() {
-    if (isDeleting) return; // no cerrar mientras hay una eliminación en curso
+    if (isDeleting) return;
     pendingDeleteId = null;
+    if (deleteModalOverlay) deleteModalOverlay.classList.remove('active'); // 👈 AGREGADO
     setDisplay(deleteModalOverlay, 'none');
   }
 
@@ -384,6 +439,7 @@ function startCatalogHistory() {
       }
       applyFilters();
       showToast('Catálogo eliminado del historial.', 'success');
+      setTimeout(() => window.location.reload(), 600); // 👈 AGREGADO: recarga para refrescar los KPIs del server
     } catch (err) {
       console.error('[historial-pdf] Error al eliminar el catálogo:', err);
       showToast(`No se pudo eliminar el catálogo: ${err.message || err}`, 'error');
@@ -393,7 +449,7 @@ function startCatalogHistory() {
       setDisplay(deleteModalOverlay, 'none');
     }
   }
-}
+  }
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', startCatalogHistory);

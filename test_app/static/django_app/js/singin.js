@@ -300,24 +300,37 @@ document.addEventListener('DOMContentLoaded', () => {
     return re.test(email);
   }
 
-  function handleRecoverySubmit(e) {
-    e.preventDefault();
-    const email = recoveryEmail.value.trim();
 
-    if (!email || !validateEmail(email)) {
-      if (recoveryEmail) recoveryEmail.classList.add('is-invalid');
-      if (recoveryEmailError) recoveryEmailError.classList.add('visible');
-      return;
-    }
 
-    btnRecoverySubmit.disabled = true;
-    btnRecoverySubmit.innerHTML = '<span class="spinner-border" style="width:14px;height:14px;"></span> Enviando...';
 
-    setTimeout(() => {
-      btnRecoverySubmit.disabled = false;
-      btnRecoverySubmit.innerHTML = '<i class="fa-solid fa-paper-plane"></i> <span>Enviar enlace</span>';
+async function handleRecoverySubmit(e) {
+  e.preventDefault();
+  const email = recoveryEmail.value.trim();
+
+  if (!email || !validateEmail(email)) {
+    if (recoveryEmail) recoveryEmail.classList.add('is-invalid');
+    if (recoveryEmailError) recoveryEmailError.classList.add('visible');
+    return;
+  }
+
+  btnRecoverySubmit.disabled = true;
+  btnRecoverySubmit.innerHTML = '<span class="spinner-border" style="width:14px;height:14px;"></span> Enviando...';
+
+  try {
+    const body = new URLSearchParams({ email });
+    const response = await fetch('/administracion/recuperar-password/', {
+      method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': getCookie('csrftoken'),
+      },
+      body,
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
       closeRecoveryModal();
-
       if (window.utils && window.utils.showToast) {
         window.utils.showToast(
           'Enlace de recuperación enviado',
@@ -325,14 +338,26 @@ document.addEventListener('DOMContentLoaded', () => {
           'info',
           4500
         );
-      } else {
-        if (signinAlert) {
-          signinAlert.className = 'signin-alert alert-success visible';
-          const msgEl = document.getElementById('alertMessage');
-          if (msgEl) msgEl.textContent = `Enlace de restablecimiento enviado a ${email}.`;
-        }
       }
-    }, 800);
+    } else {
+      if (recoveryEmail) recoveryEmail.classList.add('is-invalid');
+      if (recoveryEmailError) {
+        recoveryEmailError.querySelector('span').textContent =
+          data.message || 'No se pudo procesar la solicitud.';
+        recoveryEmailError.classList.add('visible');
+      }
+    }
+  } catch (err) {
+    console.error('Error al solicitar recuperación:', err);
+  } finally {
+    btnRecoverySubmit.disabled = false;
+    btnRecoverySubmit.innerHTML = '<i class="fa-solid fa-paper-plane"></i> <span>Enviar enlace</span>';
   }
+}
 
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+}
 });

@@ -284,7 +284,7 @@ class StorageService {
     }
   }
 
-  /* --- Products Methods (ahora hablan con Django) --- */
+    /* --- Products Methods (ahora hablan con Django) --- */
 
   /**
    * @param {Object} [filters] opcional: { q, categoria, disponible } igual que los
@@ -301,20 +301,84 @@ class StorageService {
     return apiFetch(`${API_BASE}/productos/${qs ? `?${qs}` : ''}`);
   }
 
-  async addProduct(productData) {
-    return apiFetch(`${API_BASE}/productos/`, {
+  async addProduct(productPayload, imageFile) {
+    const formData = new FormData();
+    formData.append('name', productPayload.name);
+    formData.append('brand', productPayload.brand);
+    formData.append('category', productPayload.category);
+    formData.append('unit_price', productPayload.unit_price);
+    formData.append('is_visible', productPayload.is_visible); // 👈 nuevo
+    formData.append('unit_of_measure', productPayload.unit_of_measure);
+    if (productPayload.bulk_price != null) formData.append('bulk_price', productPayload.bulk_price);
+    if (productPayload.bulk_unit_of_measure) formData.append('bulk_unit_of_measure', productPayload.bulk_unit_of_measure);
+    formData.append('product_of_stock', productPayload.product_of_stock);
+
+    if (imageFile) {
+      formData.append('image', imageFile); // el File real, no base64
+    }
+
+    const res = await fetch(`${API_BASE}/productos/`, {
       method: 'POST',
-      body: JSON.stringify(productData)
+      headers: {
+        'X-CSRFToken': getCsrfToken()
+        // OJO: NO pongas Content-Type manualmente, el navegador lo arma solo con el boundary correcto
+      },
+      body: formData
     });
+
+    if (!res.ok) {
+      let detail = '';
+      try {
+        const body = await res.json();
+        detail = body.error || JSON.stringify(body);
+      } catch (_) { /* respuesta sin JSON */ }
+      throw new Error(detail || `Error ${res.status} al crear producto`);
+    }
+
+    return res.json();
   }
 
-  async updateProduct(id, updatedData) {
+  async updateProduct(id, updatedData, imageFile) {
+  // Sin imagen nueva: PUT normal en JSON, como antes.
+  if (!imageFile) {
     return apiFetch(`${API_BASE}/productos/${id}/`, {
       method: 'PUT',
       body: JSON.stringify(updatedData)
     });
   }
 
+  // Con imagen nueva: multipart/form-data, mismos campos que addProduct
+  const formData = new FormData();
+      formData.append('name', updatedData.name);
+      formData.append('brand', updatedData.brand);
+      formData.append('category', updatedData.category);
+      formData.append('unit_price', updatedData.unit_price);
+      formData.append('is_visible', updatedData.is_visible); // 👈 nuevo
+      formData.append('unit_of_measure', updatedData.unit_of_measure);
+      if (updatedData.bulk_price != null) formData.append('bulk_price', updatedData.bulk_price);
+      if (updatedData.bulk_unit_of_measure) formData.append('bulk_unit_of_measure', updatedData.bulk_unit_of_measure);
+      formData.append('product_of_stock', updatedData.product_of_stock);
+      formData.append('image', imageFile);
+
+      const res = await fetch(`${API_BASE}/productos/${id}/`, {
+        method: 'PUT',
+        headers: {
+          'X-CSRFToken': getCsrfToken()
+        },
+        body: formData
+      });
+
+      if (!res.ok) {
+        let detail = '';
+        try {
+          const body = await res.json();
+          detail = body.error || JSON.stringify(body);
+        } catch (_) { /* respuesta sin JSON */ }
+        throw new Error(detail || `Error ${res.status} al actualizar producto`);
+      }
+
+      return res.json();
+    }
   async deleteProduct(id) {
     const result = await apiFetch(`${API_BASE}/productos/${id}/`, { method: 'DELETE' });
     return !!(result && result.deleted);

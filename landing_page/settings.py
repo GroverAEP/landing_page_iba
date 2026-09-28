@@ -228,11 +228,54 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'products/media')  # ❌ Ya no se usa, porque usas Cloudinary
 
 # Configuración de Cloudinary IMAGENES SUBIDAS 
+
+#CUenta de cloudinary de marlon
+# cloudinary.config(
+#     cloud_name='duv5jc1d0',  # Tu nombre de la nube de Cloudinary
+#     api_key='561134372158658',  # Tu API Key de Cloudinary
+#     api_secret='neo6ehkdBBVnaMC9lPZc-D-iPx8'  # Tu API Secret de Cloudinary
+# )
+# CLOUDINARY_STORAGE = {
+#     'CLOUD_NAME': 'duv5jc1d0',
+#     'API_KEY': '561134372158658',
+#     'API_SECRET': 'neo6ehkdBBVnaMC9lPZc-D-iPx8',
+# }
+
+
+#Mi cuenta de cloudinary ALex
+# 
 cloudinary.config(
-    cloud_name='duv5jc1d0',  # Tu nombre de la nube de Cloudinary
-    api_key='561134372158658',  # Tu API Key de Cloudinary
-    api_secret='neo6ehkdBBVnaMC9lPZc-D-iPx8'  # Tu API Secret de Cloudinary
+    cloud_name='vjspls25',  # Tu nombre de la nube de Cloudinary
+    api_key='587922397873573',  # Tu API Key de Cloudinary
+    api_secret='cSbH-Ji81BbJDI0Shi_PzwSCtPM'  # Tu API Secret de Cloudinary
 )
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'vjspls25',
+    'API_KEY': '587922397873573',
+    'API_SECRET': 'cSbH-Ji81BbJDI0Shi_PzwSCtPM',
+}
+
+
+
+
+
+
+
+
+
+
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": (
+            "whitenoise.storage.CompressedManifestStaticFilesStorage"
+            if not DEBUG
+            else "django.contrib.staticfiles.storage.StaticFilesStorage"
+        ),
+    },
+}
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 

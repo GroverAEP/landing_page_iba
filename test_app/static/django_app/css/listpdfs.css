@@ -147,6 +147,12 @@
   border-left-color: #ef4444;
 }
 
+.catalog-expiry {
+  white-space: nowrap;
+  font-size: 0.85em;      /* un poco más chico que el resto de los valores */
+  letter-spacing: -0.01em;
+}
+
 @keyframes toast-in {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }

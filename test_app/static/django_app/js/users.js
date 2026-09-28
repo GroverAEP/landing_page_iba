@@ -247,45 +247,55 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     }).join('');
 
-    // 2. List View
-    tableBody.innerHTML = filteredUsers.map(u => {
-      const initials = getInitials(u.name);
-      const bg = u.avatarBg || '#059669';
 
-      // Las acciones de editar/eliminar solo se muestran a Administrador
-      const actionsHtml = isAdmin ? `
-            <div class="table-actions">
-              <button type="button" class="btn-icon btn-sm btn-edit-user" data-id="${u.id}" title="Editar">
-                <i class="fa-solid fa-pen-to-square"></i>
-              </button>
-              <button type="button" class="btn-icon btn-sm btn-icon-danger btn-delete-user" data-id="${u.id}" title="Eliminar">
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
-            </div>
-        ` : '<span style="color: var(--text-secondary); font-size: 0.85rem;">Sin acceso</span>';
 
-      return `
-        <tr data-id="${u.id}">
-          <td>
-            <div class="user-table-cell">
-              <div class="user-mini-avatar" style="background-color: ${bg};">${initials}</div>
-              <div>
-                <strong>${window.utils.escapeHtml(u.name)}</strong>
-              </div>
-            </div>
-          </td>
-          <td>${window.utils.escapeHtml(u.email)}</td>
-          <td>
-            <span class="role-badge ${getRoleClass(u.role)}">${window.utils.escapeHtml(u.role)}</span>
-          </td>
-          <td>${getStatusBadge(u.status)}</td>
-          <td>${window.utils.formatDate(u.registrationDate)}</td>
-          <td>
-            ${actionsHtml}
-          </td>
-        </tr>
-      `;
-    }).join('');
+    function generateUserCode(globalIndex, total) {
+  const number = total - globalIndex; // el primero de la lista (más nuevo) = número más alto
+  return `U${String(number).padStart(4, '0')}`;
+}
+
+// 2. List View
+const totalUsers = filteredUsers.length;
+
+tableBody.innerHTML = filteredUsers.map((u, index) => {
+  const userCode = generateUserCode(index, totalUsers);
+  const initials = getInitials(u.name);
+  const bg = u.avatarBg || '#059669';
+
+  const actionsHtml = isAdmin ? `
+    <div class="table-actions">
+      <button type="button" class="btn-icon btn-sm btn-edit-user" data-id="${u.id}" title="Editar">
+        <i class="fa-solid fa-pen-to-square"></i>
+      </button>
+      <button type="button" class="btn-icon btn-sm btn-icon-danger btn-delete-user" data-id="${u.id}" title="Eliminar">
+        <i class="fa-solid fa-trash-can"></i>
+      </button>
+    </div>
+  ` : '<span style="color: var(--text-secondary); font-size: 0.85rem;">Sin acceso</span>';
+
+  return `
+    <tr data-id="${u.id}">
+      <td><span class="pcard-sku">${userCode}</span></td>
+      <td>
+        <div class="user-table-cell">
+          <div class="user-mini-avatar" style="background-color: ${bg};">${initials}</div>
+          <div>
+            <strong>${window.utils.escapeHtml(u.name)}</strong>
+          </div>
+        </div>
+      </td>
+      <td>${window.utils.escapeHtml(u.email)}</td>
+      <td>
+        <span class="role-badge ${getRoleClass(u.role)}">${window.utils.escapeHtml(u.role)}</span>
+      </td>
+      <td>${getStatusBadge(u.status)}</td>
+      <td>${window.utils.formatDate(u.registrationDate)}</td>
+      <td>
+        ${actionsHtml}
+      </td>
+    </tr>
+  `;
+}).join('');
   }
 
   /* --- Add / Edit User Modal --- */

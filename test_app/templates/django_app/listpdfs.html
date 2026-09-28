@@ -5,7 +5,7 @@
 
 {% block extra_css %}
   <!-- Page Specific Style -->
-  <link rel="stylesheet" href="{% static 'django_app/css/lista_generaciones.css' %}">
+  <link rel="stylesheet" href="{% static 'django_app/css/listpdfs.css' %}">
 
   <!-- Fallback styles: usan :where() (especificidad 0), así que si el archivo
        de arriba ya define estas clases, esas reglas ganan y esto no cambia nada. -->
@@ -149,26 +149,17 @@
 
 {% block page_title %}Historial de Catálogos PDF{% endblock %}
 {% block page_subtitle %}Consulta, descarga y verifica los catálogos en PDF generados previamente{% endblock %}
-
-{% block header_actions %}
-  <button type="button" class="btn btn-secondary" id="btnRefreshList" title="Actualizar lista">
-    <i class="fa-solid fa-arrow-rotate-right"></i>
-    <span>Actualizar</span>
-  </button>
-  <button type="button" class="btn btn-primary" id="btnGenerateNewPdf">
-    <i class="fa-solid fa-file-circle-plus"></i>
-    <span>Generar nuevo catálogo</span>
-  </button>
-{% endblock %}
-
 {% block content %}
+  {% csrf_token %}  {# 👈 AGREGADO: sin esto, deleteCatalog() manda el header X-CSRFToken vacío y Django devuelve 403 #}
+
   <main
     class="page-body"
     id="catalogPageBody"
-    data-generate-url="{% url 'django_app:generar_catalogo_pdf' %}"
-    data-status-url-template="{% url 'django_app:estado_catalogo_pdf' 0 %}"
-    data-delete-url-template="{% url 'django_app:eliminar_catalogo_pdf' 0 %}"
-  >
+      data-generate-url="{% url 'django_app:generar_catalogo_pdf' %}"
+      data-status-url-template="{% url 'django_app:estado_catalogo_pdf' 0 %}"
+      data-delete-url-template="{% url 'django_app:eliminar_catalogo_pdf' 0 %}"
+      data-dias-expiracion="{{ dias_expiracion }}">
+  
     <!-- KPI Summary Cards -->
     <section class="kpi-grid">
       <div class="kpi-card">
@@ -273,7 +264,6 @@
             </div>
           </div>
         </div>
-
         <!-- Card View -->
         <div class="catalog-card-grid" id="cardViewContainer">
           {% for job in jobs %}
@@ -316,11 +306,15 @@
                     {{ job.started_at|date:"d M, H:i"|default:"—" }}
                   </span>
                 </div>
+                <div>
+                  <span class="catalog-metric-label">Expira en</span>
+                  <span class="catalog-metric-value catalog-expiry" data-expiry-id="{{ job.id }}">—</span>
+                </div>
               </div>
 
               <div class="catalog-card-footer">
-                {% if job.file %}
-                  <a href="{{ job.file.url }}" class="btn btn-secondary btn-sm" download title="Descargar PDF">
+               {% if job.file %}
+                <a href="{{ job.file.url }}" class="btn btn-secondary btn-sm" download title="Descargar PDF">
                     <i class="fa-solid fa-download"></i>
                     <span>Descargar</span>
                   </a>
@@ -330,9 +324,15 @@
                     <span>No disponible</span>
                   </button>
                 {% endif %}
-                <button type="button" class="btn-icon btn-icon-danger btn-delete-catalog" data-id="{{ job.id }}" title="Eliminar del historial">
-                  <i class="fa-solid fa-trash-can"></i>
-                </button>
+                <button
+          type="button"
+          class="btn-icon btn-icon-danger btn-delete-catalog"
+          data-id="{{ job.id }}"
+          title="Eliminar del historial"
+          aria-label="Eliminar catálogo {{ job.id }} del historial"
+        >
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
               </div>
             </article>
           {% endfor %}
@@ -347,6 +347,7 @@
                 <th>Fecha de generación</th>
                 <th>Productos</th>
                 <th>Tamaño</th>
+                <th>Expira</th>
                 <th>Estado</th>
                 <th style="text-align: right;">Acciones</th>
               </tr>
@@ -364,6 +365,7 @@
                   <td>{{ job.completed_at|date:"d M Y, H:i" }}</td>
                   <td>{{ job.total_products }}</td>
                   <td>{{ job.tamano_legible }}</td>
+                  <td><span class="catalog-expiry" data-expiry-id="{{ job.id }}">—</span></td>
                   <td>
                     <span class="badge {% if job.status == 'completed' %}badge-success{% elif job.status == 'failed' %}badge-danger{% elif job.status == 'processing' %}badge-warning{% else %}badge-neutral{% endif %}">
                       <span class="badge-dot"></span>{{ job.get_status_display }}
@@ -380,7 +382,13 @@
                           <i class="fa-solid fa-ban"></i>
                         </button>
                       {% endif %}
-                      <button type="button" class="btn-icon btn-sm btn-icon-danger btn-delete-catalog" data-id="{{ job.id }}" title="Eliminar">
+                      <button
+                        type="button"
+                        class="btn-icon btn-sm btn-icon-danger btn-delete-catalog"
+                        data-id="{{ job.id }}"
+                        title="Eliminar"
+                        aria-label="Eliminar catálogo {{ job.id }} del historial"
+                      >
                         <i class="fa-solid fa-trash-can"></i>
                       </button>
                     </div>
@@ -390,7 +398,6 @@
             </tbody>
           </table>
         </div>
-
         <!-- Empty State (real: no jobs at all) -->
         {% if not jobs %}
           <div class="empty-state" id="emptyStateReal">

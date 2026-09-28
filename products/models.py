@@ -3,7 +3,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from cloudinary.models import CloudinaryField
 from django.utils import timezone
-
+from cloudinary_storage.storage import RawMediaCloudinaryStorage
 # Crear el modelo de categorías
 class Categoria(models.Model):
     name = models.CharField(max_length=255, unique=True, verbose_name="Nombre de la Categoría")
@@ -74,6 +74,12 @@ class Producto(models.Model):
     
     date_added = models.DateTimeField(auto_now_add=True, verbose_name="Fecha")  # Fecha en que se añadió el producto 
     product_of_stock = models.BooleanField(default=True, verbose_name="Disponible")  # Indica si el producto es destacado o no
+
+
+    # ✅ NUEVO CAMPO
+    is_visible = models.BooleanField(
+        default=True,
+        verbose_name="Visible en el catálogo")
     
     # def save(self, *args, **kwargs):
     #     self.name_normalized = self.normalize_text(self.name)
@@ -107,7 +113,24 @@ class VisitCounter(models.Model):
         return f"{self.page_name} ({self.visits} visitas, {self.date})"
 
 
- 
+ # ---------------------------------------------------------------------------
+# 1. Modelo nuevo: solo para deduplicar, NO es el contador que se muestra
+# ---------------------------------------------------------------------------
+class PageVisitLog(models.Model):
+    page_name = models.CharField(max_length=255, verbose_name="Página")
+    ip_address = models.GenericIPAddressField(verbose_name="IP del visitante")
+    date = models.DateField(default=timezone.now, verbose_name="Fecha")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Registro de visita (IP)"
+        verbose_name_plural = "Registros de visita (IP)"
+        unique_together = ('page_name', 'ip_address', 'date')
+
+    def __str__(self):
+        return f"{self.page_name} - {self.ip_address} ({self.date})"
+
+
  
 class CatalogoPDF(models.Model):
     """
@@ -120,9 +143,13 @@ class CatalogoPDF(models.Model):
     tu caso necesitas varios catálogos (por ejemplo, uno por sucursal),
     agrega un campo que los distinga y ajusta el filtro en la vista.
     """
-    archivo = models.FileField(upload_to="catalogos_pdf/")
+    archivo = models.FileField(
+        upload_to="catalogos_pdf/",
+        storage=RawMediaCloudinaryStorage(),  # 👈 agregado, mismo motivo que en PDFGenerationJob
+    )
     productos_hash = models.CharField(max_length=64, db_index=True)
     total_productos = models.PositiveIntegerField(default=0)
+    tamano_bytes = models.PositiveIntegerField(null=True, blank=True)  # 👈 nuevo campo
     generado_en = models.DateTimeField(auto_now=True)
  
     class Meta:
@@ -184,7 +211,12 @@ class PDFGenerationJob(models.Model):
     processed_products = models.PositiveIntegerField(default=0)
     progress = models.PositiveSmallIntegerField(default=0)  # 0-100
 
-    file = models.FileField(upload_to="catalogos_pdf/jobs/", null=True, blank=True)
+    file = models.FileField(
+        upload_to="catalogos_pdf/jobs/",
+        null=True,
+        blank=True,
+        storage=RawMediaCloudinaryStorage(),
+    )    
     tamano_bytes = models.PositiveIntegerField(null=True, blank=True)
 
     error_message = models.TextField(null=True, blank=True)
@@ -192,6 +224,7 @@ class PDFGenerationJob(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     started_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
+    descargado = models.BooleanField(default=False)  # 👈 nuevo
 
     class Meta:
         verbose_name = "Trabajo de generación de PDF"
@@ -215,3 +248,22 @@ class PDFGenerationJob(models.Model):
         self.total_products = total
         self.progress = int((procesados / total) * 100) if total else 0
         self.save(update_fields=["processed_products", "total_products", "progress"])
+
+
+# products/models.py
+class ConfiguracionPDF(models.Model):
+    """Fila única con la configuración del historial de catálogos PDF."""
+    limite_historial_mb = models.PositiveIntegerField(default=5)
+    dias_expiracion = models.PositiveIntegerField(default=7)
+
+    class Meta:
+        verbose_name = "Configuración de catálogos PDF"
+        verbose_name_plural = "Configuración de catálogos PDF"
+
+    def __str__(self):
+        return f"Límite: {self.limite_historial_mb} MB — Expira en {self.dias_expiracion} días"
+
+    @classmethod
+    def obtener(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj

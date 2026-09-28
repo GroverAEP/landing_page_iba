@@ -207,7 +207,6 @@
   gap: 0.35rem;
 }
 
-/* Card Body */
 .pcard-sku {
   display: inline-block;
   font-size: 0.7rem;
@@ -219,6 +218,10 @@
   padding: 0.15rem 0.45rem;
   border-radius: var(--radius-sm);
   margin-bottom: 0.4rem;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .pcard-title {
@@ -330,19 +333,52 @@
   color: var(--text-muted);
 }
 
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* empuja buscador a la izq. y botones a la derecha */
+  width: 100%;
+  gap: 10px;
+}
+
+.search-input-wrap {
+  width: 60%;          /* toma el 50% del ancho del toolbar-left */
+  flex: 0 0 75%;        /* evita que crezca o se encoja más allá del 50% */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Botones (PDF + Agregar) agrupados juntos, pegados al borde derecho */
+.toolbar-right-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 @media (max-width: 768px) {
   .toolbar {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .toolbar-left, .toolbar-right {
+  .toolbar-left {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .toolbar-right,
+  .toolbar-right-buttons {
     width: 100%;
     justify-content: space-between;
   }
 
   .search-input-wrap {
     width: 100%;
+    flex: 0 0 auto; /* en móvil ya no aplica el 50% fijo */
   }
 
   .filter-select {

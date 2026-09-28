@@ -112,6 +112,7 @@ function startDashboard() {
   let isSaving = false; // blocks double submit of the product form
   let selectedLetter = ''; // A-Z filter: '' = all, otherwise one uppercase letter (Ñ included)
   let currentPage = 1; // 1-based current page for pagination
+  let pendingImageFile = null; // File optimizado (canvas -> Blob) listo para subir; null = no hay imagen nueva seleccionada
   safe('getViewPref', () => {
     currentViewMode = window.storage.getViewPref('dashboard_view', 'card');
   });
@@ -163,7 +164,7 @@ function startDashboard() {
   const productBulkPriceInput = $('productBulkPrice'); // bulk_price (optional)
   const productBulkUnitInput = $('productBulkUnit'); // bulk_unit_of_measure (optional)
   const productAvailableInput = $('productAvailable'); // product_of_stock
-
+  const productVisibleInput = document.getElementById('productVisible'); // 👈 nuevo
   // Image Upload Elements
   const imageUploadZone = $('imageUploadZone');
   const productImageFile = $('productImageFile');
@@ -337,7 +338,10 @@ function init() {
   }
 
   /* --- KPIs Calculation --- */
-  function updateKPIs() {
+  // Async porque window.storage.getUsers() ahora habla con Django (fetch) y
+  // devuelve una Promise; safe('KPIs', updateKPIs) sigue funcionando igual
+  // porque no espera el resultado, solo dispara la función.
+  async function updateKPIs() {
     const totalItems = products.length;
     const uniqueBrands = new Set(products.map(p => String(p.brand).trim())).size;
     const availableCount = products.filter(p => p.product_of_stock).length;
@@ -352,8 +356,12 @@ function init() {
     // Update user badge in nav if users exist
     const userBadge = $('navUserBadge');
     if (userBadge) {
-      const usersList = window.storage.getUsers() || [];
-      userBadge.textContent = usersList.length;
+      try {
+        const usersList = await window.storage.getUsers();
+        userBadge.textContent = Array.isArray(usersList) ? usersList.length : 0;
+      } catch (err) {
+        console.error('[dashboard] Error al cargar usuarios para el badge:', err);
+      }
     }
   }
 
@@ -603,7 +611,26 @@ function populateCatalogSelects() {
       </div>
     `;
   }
+  function formatDate(dateString) {
+  if (!dateString) return '—';
 
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateString);
+  let date;
+  if (match) {
+    date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  } else {
+    date = new Date(dateString);
+  }
+
+  if (isNaN(date.getTime())) return '—';
+
+  const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  const dia = String(date.getDate()).padStart(2, '0');
+  const mes = meses[date.getMonth()];
+  const anio = String(date.getFullYear()).slice(-2);
+
+  return `${dia}/${mes}/${anio}`;
+}
   function goToPage(page) {
     const totalPages = getTotalPages();
     const nextPage = Math.min(Math.max(1, page), totalPages);
@@ -654,11 +681,20 @@ function populateCatalogSelects() {
         const availBadgeClass = p.product_of_stock ? 'badge-success' : 'badge-danger';
         const availText = p.product_of_stock ? 'Disponible' : 'No disponible';
         const imgSrc = p.image || fallbackImg;
-        const bulkText = p.bulk_price != null
-          ? `${window.utils.formatCurrency(p.bulk_price)} <small style="font-size: 0.7rem; font-weight: normal; color: var(--text-muted);">/${esc(p.bulk_unit_of_measure)}</small>`
-          : '—';
 
-        return `
+
+
+        const isVisible = p.is_visible !== false; // por defecto true si viene undefined
+        const visibleIcon = isVisible ? 'fa-eye' : 'fa-eye-slash';
+        const visibleTitle = isVisible ? 'Visible en catálogo' : 'Oculto del catálogo';
+        const visibleClass = isVisible ? 'btn-icon-success' : 'btn-icon-muted';
+
+
+        const bulkText = p.bulk_price != null
+      ? `${window.utils.formatCurrency(p.bulk_price)} <small style="font-size: 0.7rem; font-weight: normal; color: var(--text-muted);">/${esc(p.bulk_unit_of_measure)}</small>`
+      : '—';
+
+    return `
           <article class="product-card ${isSelected ? 'card-selected' : ''}" data-id="${esc(p.id)}">
             <div class="pcard-image-wrap">
               <img src="${imgSrc}" alt="${esc(p.name)}" class="pcard-img" loading="lazy" onerror="this.src='${fallbackImg}'">
@@ -692,6 +728,9 @@ function populateCatalogSelects() {
             </div>
 
             <div class="pcard-actions">
+              <button type="button" class="btn-icon btn-toggle-visible ${visibleClass}" data-id="${esc(p.id)}" data-visible="${isVisible}" title="${visibleTitle}">
+                <i class="fa-solid ${visibleIcon}"></i>
+              </button>
               <button type="button" class="btn-icon btn-edit-product" data-id="${esc(p.id)}" title="Editar producto">
                 <i class="fa-solid fa-pen-to-square"></i>
               </button>
@@ -701,56 +740,77 @@ function populateCatalogSelects() {
             </div>
           </article>
         `;
-      }).join('');
-    }
+  }).join('');
+}
+    
 
+    function generateProductCode(globalIndex, total) {
+      const number = total - globalIndex; // el primero de la lista (más nuevo) = número más alto
+      return `P${String(number).padStart(4, '0')}`;
+    }
     // 2. Render Table View (current page only)
     // Columns: [checkbox] Fecha | Producto | Marca | Categoría | Precio unitario | Precio paquete | Disponible | [acciones]
     if (productTableBody) {
-      productTableBody.innerHTML = pageProducts.map(p => {
+      const total = filteredProducts.length;
+      const pageStartIndex = (currentPage - 1) * PRODUCTS_PER_PAGE; // offset global de esta página
+
+      productTableBody.innerHTML = pageProducts.map((p, localIndex) => {
+        const globalIndex = pageStartIndex + localIndex;
+        const productCode = generateProductCode(globalIndex, total);
+
         const isSelected = selectedIds.has(String(p.id));
         const availBadgeClass = p.product_of_stock ? 'badge-success' : 'badge-danger';
         const availText = p.product_of_stock ? 'Disponible' : 'No disponible';
         const imgSrc = p.image || fallbackImg;
-        const bulkText = p.bulk_price != null
-          ? `${window.utils.formatCurrency(p.bulk_price)} <small style="color: var(--text-muted);">/${esc(p.bulk_unit_of_measure)}</small>`
-          : '—';
 
-        return `
-          <tr class="${isSelected ? 'row-selected' : ''}" data-id="${esc(p.id)}">
-            <td class="td-checkbox">
-              <input type="checkbox" class="product-select-box" data-id="${esc(p.id)}" ${isSelected ? 'checked' : ''} aria-label="Seleccionar ${esc(p.name)}">
-            </td>
-            <td><span class="pcard-sku">${formatDate(p.date_added)}</span></td>
-            <td>
-              <div class="product-table-cell">
-                <img src="${imgSrc}" alt="${esc(p.name)}" class="table-product-thumb" loading="lazy" onerror="this.src='${fallbackImg}'">
-                <div class="product-thumb-name">
-                  <strong>${esc(p.name)}</strong>
-                  <span class="product-sub-producer">Unidad: ${esc(p.unit_of_measure)}</span>
-                </div>
-              </div>
-            </td>
-            <td>${esc(p.brand)}</td>
-            <td><span class="badge badge-neutral">${esc(p.category)}</span></td>
-            <td style="font-weight: 700; color: var(--primary-color);">${window.utils.formatCurrency(p.unit_price)} <small style="font-weight: normal; color: var(--text-muted);">/${esc(p.unit_of_measure)}</small></td>
-            <td>${bulkText}</td>
-            <td><span class="badge ${availBadgeClass}"><span class="badge-dot"></span>${availText}</span></td>
-            <td>
-              <div class="table-actions">
-                <button type="button" class="btn-icon btn-sm btn-edit-product" data-id="${esc(p.id)}" title="Editar">
-                  <i class="fa-solid fa-pen-to-square"></i>
-                </button>
-                <button type="button" class="btn-icon btn-sm btn-icon-danger btn-delete-product" data-id="${esc(p.id)}" title="Eliminar">
-                  <i class="fa-solid fa-trash-can"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-        `;
-      }).join('');
+  // 👇 faltaba esto en este scope
+  const isVisible = p.is_visible !== false;
+  const visibleIcon = isVisible ? 'fa-eye' : 'fa-eye-slash';
+  const visibleTitle = isVisible ? 'Visible en catálogo' : 'Oculto del catálogo';
+  const visibleClass = isVisible ? 'btn-icon-success' : 'btn-icon-muted';
+
+  const bulkText = p.bulk_price != null
+    ? `${window.utils.formatCurrency(p.bulk_price)} <small style="color: var(--text-muted);">/${esc(p.bulk_unit_of_measure)}</small>`
+    : '—';
+
+  return `
+    <tr class="${isSelected ? 'row-selected' : ''}" data-id="${esc(p.id)}">
+      <td class="td-checkbox">
+        <input type="checkbox" class="product-select-box" data-id="${esc(p.id)}" ${isSelected ? 'checked' : ''} aria-label="Seleccionar ${esc(p.name)}">
+      </td>
+      <td><span class="pcard-sku">${productCode}</span></td>
+      <td>
+        <div class="product-table-cell">
+          <img src="${imgSrc}" alt="${esc(p.name)}" class="table-product-thumb" loading="lazy" onerror="this.src='${fallbackImg}'">
+          <div class="product-thumb-name">
+            <strong>${esc(p.name)}</strong>
+            <span class="product-sub-producer">Unidad: ${esc(p.unit_of_measure)}</span>
+          </div>
+        </div>
+      </td>
+      <td>${esc(p.brand)}</td>
+      <td><span class="badge badge-neutral">${esc(p.category)}</span></td>
+      <td style="font-weight: 700; color: var(--primary-color);">${window.utils.formatCurrency(p.unit_price)} <small style="font-weight: normal; color: var(--text-muted);">/${esc(p.unit_of_measure)}</small></td>
+      <td>${bulkText}</td>
+      <td><span class="pcard-sku">${formatDate(p.date_added)}</span></td>
+      <td><span class="badge ${availBadgeClass}"><span class="badge-dot"></span>${availText}</span></td>
+      <td>
+        <div class="pcard-actions">
+          <button type="button" class="btn-icon btn-toggle-visible ${visibleClass}" data-id="${esc(p.id)}" data-visible="${isVisible}" title="${visibleTitle}">
+            <i class="fa-solid ${visibleIcon}"></i>
+          </button>
+          <button type="button" class="btn-icon btn-edit-product" data-id="${esc(p.id)}" title="Editar producto">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </button>
+          <button type="button" class="btn-icon btn-icon-danger btn-delete-product" data-id="${esc(p.id)}" title="Eliminar producto">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+      </td>
+    </tr>
+  `;
+}).join('');
     }
-
     // Update select all checkbox state (only reflects the visible page) and pagination bar
     updateSelectAllState(pageProducts);
     updateBulkActionBar();
@@ -860,6 +920,18 @@ function populateCatalogSelects() {
     }
   }
 
+  // Convierte el <canvas> ya redimensionado en un File real (Blob) para subirlo
+  // vía multipart/form-data en addProduct/updateProduct. Se guarda en pendingImageFile.
+  function canvasToPendingFile(canvas, originalFileName) {
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => {
+        if (!blob) { resolve(null); return; }
+        const safeName = (originalFileName || 'imagen').replace(/\.\w+$/, '') + '.jpg';
+        resolve(new File([blob], safeName, { type: 'image/jpeg' }));
+      }, 'image/jpeg', 0.85);
+    });
+  }
+
   function handleImageFile(file) {
     if (!file || !file.type.startsWith('image/')) {
       window.utils.showToast('Archivo no válido', 'Por favor selecciona un archivo de imagen (PNG, JPG o WEBP).', 'warning');
@@ -875,7 +947,7 @@ function populateCatalogSelects() {
     reader.onload = (e) => {
       // Resize on canvas to optimize storage size (max 640x480)
       const img = new Image();
-      img.onload = () => {
+      img.onload = async () => {
         const maxDim = 640;
         let w = img.width;
         let h = img.height;
@@ -893,8 +965,14 @@ function populateCatalogSelects() {
         canvas.height = h;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, w, h);
+
+        // Preview visual (dataURL, liviano de mostrar en <img>)
         const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
         setImagePreview(optimizedDataUrl);
+
+        // Archivo real que se va a subir al backend (multipart/form-data)
+        pendingImageFile = await canvasToPendingFile(canvas, file.name);
+
         window.utils.showToast('Imagen cargada', 'Fotografía procesada con éxito.', 'success', 2000);
       };
       img.src = e.target.result;
@@ -923,6 +1001,7 @@ function populateCatalogSelects() {
 
     on(btnRemoveImage, 'click', (e) => {
       e.stopPropagation();
+      pendingImageFile = null;
       setImagePreview('');
     });
 
@@ -950,10 +1029,11 @@ function populateCatalogSelects() {
       }
     });
 
-    // Apply URL button
+    // Apply URL button (imagen por URL: no hay File nuevo que subir, va como string en el JSON)
     on(btnApplyImageUrl, 'click', () => {
       const url = productImageUrl ? productImageUrl.value.trim() : '';
       if (url) {
+        pendingImageFile = null;
         setImagePreview(url);
         window.utils.showToast('Enlace aplicado', 'URL de imagen vinculada al producto.', 'info', 2000);
       }
@@ -976,6 +1056,7 @@ function populateCatalogSelects() {
     setValue(productBulkPriceInput, '');
     setValue(productBulkUnitInput, '');
 
+    pendingImageFile = null;
     setImagePreview('');
     clearFormValidation();
     window.utils.openModal('productModal');
@@ -1000,6 +1081,9 @@ function populateCatalogSelects() {
     setValue(productBulkUnitInput, product.bulk_unit_of_measure ?? '');
     setValue(productAvailableInput, String(Boolean(product.product_of_stock)));
 
+    // Editar no implica subir una imagen nueva hasta que el usuario elija una:
+    // el preview muestra la imagen existente, pero pendingImageFile queda en null.
+    pendingImageFile = null;
     setImagePreview(product.image || '');
 
     if (productModalTitle) {
@@ -1017,6 +1101,7 @@ function populateCatalogSelects() {
     productForm.querySelectorAll('.form-error').forEach(el => el.classList.remove('visible'));
     productForm.querySelectorAll('.form-control, .form-select').forEach(input => input.classList.remove('is-invalid'));
   }
+
 
   // Disables the submit button while the request is in flight (avoids duplicate products)
   function setSaving(saving) {
@@ -1044,7 +1129,7 @@ function populateCatalogSelects() {
     const unit_price = parseFloat(productPriceInput ? productPriceInput.value : '');
     const unit_of_measure = (productUnitInput && productUnitInput.value) || '';
     const product_of_stock = productAvailableInput ? productAvailableInput.value === 'true' : true;
-
+    const is_visible = productVisibleInput ? productVisibleInput.value === 'true' : true; // 👈 nuevo
     let isValid = true;
 
     const nameOk = name.length > 0 && name.length <= 55;
@@ -1091,20 +1176,27 @@ function populateCatalogSelects() {
       'Derivados': 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=600&auto=format&fit=crop&q=80'
     };
 
+    // 'image' solo se usa como string (URL) cuando NO hay un archivo nuevo pendiente
+    // (pendingImageFile). Si hay archivo, se sube aparte como multipart y no se
+    // manda 'image' en el JSON para no pisarlo con un string.
     const image = (productImageInput && productImageInput.value.trim())
       ? productImageInput.value.trim()
       : (defaultCatImages[category] || 'https://images.unsplash.com/photo-1495107334309-fcf20504a5ab?w=600&auto=format&fit=crop&q=80');
 
     const productPayload = {
-      image,
       brand,
       category,
       name,
       unit_price,
       unit_of_measure,
+      is_visible,
       ...payloadBulk,
       product_of_stock
     };
+
+    if (!pendingImageFile) {
+      productPayload.image = image;
+    }
 
     const existing = productIdInput && productIdInput.value ? findProduct(productIdInput.value) : null;
 
@@ -1113,11 +1205,11 @@ function populateCatalogSelects() {
       if (existing) {
         // Edit (keep the original id type and creation date)
         productPayload.date_added = existing.date_added;
-        await window.storage.updateProduct(existing.id, productPayload);
+        await window.storage.updateProduct(existing.id, productPayload, pendingImageFile);
       } else {
         // Add
         productPayload.date_added = new Date().toISOString();
-        await window.storage.addProduct(productPayload);
+        await window.storage.addProduct(productPayload, pendingImageFile);
       }
     } catch (err) {
       // The server rejected it (or the network failed): keep the modal open so nothing is lost
@@ -1127,6 +1219,8 @@ function populateCatalogSelects() {
     } finally {
       setSaving(false);
     }
+
+    pendingImageFile = null;
 
     if (existing) {
       window.utils.showToast('Producto actualizado', `Se guardaron los cambios para "${name}".`, 'success');
@@ -1214,6 +1308,53 @@ function populateCatalogSelects() {
       }
     });
   }
+
+
+ async function toggleProductVisibility(id, currentlyVisible, btnEl) {
+  const newVisible = !currentlyVisible;
+
+  // 👇 Cambio visual INMEDIATO (optimista), antes de esperar la respuesta del server
+  if (btnEl) {
+    const icon = btnEl.querySelector('i');
+    btnEl.dataset.visible = String(newVisible);
+    btnEl.title = newVisible ? 'Visible en catálogo' : 'Oculto del catálogo';
+    btnEl.classList.toggle('btn-icon-success', newVisible);
+    btnEl.classList.toggle('btn-icon-muted', !newVisible);
+    if (icon) {
+      icon.classList.toggle('fa-eye', newVisible);
+      icon.classList.toggle('fa-eye-slash', !newVisible);
+    }
+    btnEl.disabled = true; // evitar doble click mientras se guarda
+    console.log('clases del icon DESPUÉS:', btnEl?.querySelector('i')?.className);
+  }
+
+  try {
+    await window.storage.updateProduct(id, { is_visible: newVisible }, null);
+    window.utils.showToast(
+      newVisible ? 'Producto visible' : 'Producto oculto',
+      '',
+      'success'
+    );
+    await loadProducts(); // re-renderiza para mantener todo sincronizado con el server
+  } catch (err) {
+    console.error('[dashboard] Error al cambiar visibilidad:', err);
+    window.utils.showToast('No se pudo cambiar la visibilidad', errorMessage(err), 'danger');
+
+    // 👇 Revertir el cambio visual si falló
+    if (btnEl) {
+      const icon = btnEl.querySelector('i');
+      btnEl.dataset.visible = String(currentlyVisible);
+      btnEl.title = currentlyVisible ? 'Visible en catálogo' : 'Oculto del catálogo';
+      btnEl.classList.toggle('btn-icon-success', currentlyVisible);
+      btnEl.classList.toggle('btn-icon-muted', !currentlyVisible);
+      if (icon) {
+        icon.classList.toggle('fa-eye', currentlyVisible);
+        icon.classList.toggle('fa-eye-slash', !currentlyVisible);
+      }
+      btnEl.disabled = false;
+    }
+  }
+}
 
   /* --- Export to PDF with jsPDF and AutoTable --- */
   // function exportProductsToPdf() {
@@ -1315,7 +1456,6 @@ const getCsrfToken = () => {
   return input ? input.value : '';
 };
 
-
 async function exportProductsToPdf() {
   if (!pdfGenerateUrl) {
     console.error('[dashboard] Falta #pdfExportUrls con data-generate-url en el HTML.');
@@ -1332,6 +1472,9 @@ async function exportProductsToPdf() {
   setExportingUI(true);
 
   let jobId = null;
+
+  console.log(pdfGenerateUrl)
+
   try {
     const res = await fetch(pdfGenerateUrl, {
       method: 'POST',
@@ -1345,6 +1488,13 @@ async function exportProductsToPdf() {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
+
+      if (data.limit_reached) {
+        setExportingUI(false);
+        openLimitReachedModal(data);   // 👈 modal en vez de toast
+        return;
+      }
+
       throw new Error(data.error || `El servidor respondió ${res.status}.`);
     }
 
@@ -1359,6 +1509,20 @@ async function exportProductsToPdf() {
 
   pollPdfJobStatus(jobId, idsToExport.length);
 }
+
+function openLimitReachedModal(data) {
+  const overlay = document.getElementById('limitReachedModalOverlay');
+  if (!overlay) {
+    // fallback por si todavía no agregaste el modal al HTML
+    window.utils.showToast('Límite alcanzado', data.error, 'danger');
+    return;
+  }
+  const msgEl = overlay.querySelector('#limitReachedModalMessage');
+  if (msgEl) msgEl.textContent = data.error;
+  overlay.style.display = 'flex';
+  overlay.classList.add('active');
+}
+
 
 function setExportingUI(isExporting) {
   if (!btnExportPdf) return;
@@ -1486,8 +1650,10 @@ function pollPdfJobStatus(jobId, totalSelected) {
 
       const pageBtn = e.target.closest('.page-number-btn');
       if (pageBtn) { goToPage(Number(pageBtn.dataset.page)); return; }
-    });
 
+      // 👇 nuevo: toggle de visibilidad
+    });
+    
     // Delegation for Cards & Table actions (Edit, Delete, Checkbox)
     const handleActionClick = (e) => {
       const selectBox = e.target.closest('.product-select-box');
@@ -1495,16 +1661,21 @@ function pollPdfJobStatus(jobId, totalSelected) {
         handleSelectToggle(selectBox.dataset.id, selectBox.checked);
         return;
       }
-
+      
       const editBtn = e.target.closest('.btn-edit-product');
       if (editBtn) {
         openEditModal(editBtn.dataset.id);
         return;
       }
-
+      
       const deleteBtn = e.target.closest('.btn-delete-product');
       if (deleteBtn) {
         deleteSingleProduct(deleteBtn.dataset.id);
+        return;
+      }
+      const visibleBtn = e.target.closest('.btn-toggle-visible');
+      if (visibleBtn) {
+        toggleProductVisibility(visibleBtn.dataset.id, visibleBtn.dataset.visible === 'true');
         return;
       }
     };
