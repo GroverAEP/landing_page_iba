@@ -1,3 +1,5 @@
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.db import models
 from django.conf import settings
 
@@ -33,9 +35,6 @@ class PerfilUsuario(models.Model):
     def __str__(self):
         return f"Perfil de {self.user}"
 
-
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def crear_perfil_usuario(sender, instance, created, **kwargs):

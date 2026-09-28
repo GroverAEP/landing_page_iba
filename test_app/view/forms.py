@@ -11,7 +11,6 @@ from products.models import Producto
 
 User = get_user_model()
 
-
 class ProductoForm(forms.ModelForm):
     class Meta:
         model = Producto
@@ -33,7 +32,6 @@ class ProductoForm(forms.ModelForm):
             'bulk_unit_of_measure': forms.TextInput(attrs={'class': 'form-control'}),
             'is_visible': forms.CheckboxInput(attrs={'class': 'form-check-input'}),  # 👈 agregar
         }
-
 
 class UserForm(forms.ModelForm):
     """Datos base de auth.User: nombre, email, username."""
@@ -63,28 +61,3 @@ class UserForm(forms.ModelForm):
             raise forms.ValidationError('El correo electrónico ya está registrado.')
         return email
 
-
-# class PerfilUsuarioForm(forms.ModelForm):
-#     class Meta:
-#         model = PerfilUsuario
-#         fields = ['role', 'status']
-#         widgets = {
-#             'role': forms.Select(attrs={'class': 'form-select'}),
-#             'status': forms.Select(attrs={'class': 'form-select'}),
-#         }
-
-
-# class ConfiguracionSitioForm(forms.ModelForm):
-#     class Meta:
-#         model = ConfiguracionSitio
-#         fields = [
-#             'company_name', 'company_logo', 'accent_color',
-#             'theme', 'language', 'date_format',
-#         ]
-#         widgets = {
-#             'company_name': forms.TextInput(attrs={'class': 'form-control'}),
-#             'accent_color': forms.TextInput(attrs={'class': 'form-control', 'type': 'color'}),
-#             'theme': forms.Select(attrs={'class': 'form-select'}),
-#             'language': forms.Select(attrs={'class': 'form-select'}),
-#             'date_format': forms.TextInput(attrs={'class': 'form-control'}),
-#         }

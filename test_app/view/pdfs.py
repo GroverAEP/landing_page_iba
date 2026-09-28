@@ -7,31 +7,26 @@ Se apoyan en:
 
 Ajusta los imports según dónde vivan realmente estos módulos en tu proyecto.
 """
-
-import threading
-
 from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Sum
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils.decorators import method_decorator
-from django.views import View
-from django.views.decorators.http import require_GET, require_http_methods, require_POST
-from products.models import PDFGenerationJob, Producto, ConfiguracionPDF  # ajustar import según tu app
 from test_app.utils.generated_service import PDFGeneradorService  # ajustar import
-from django.http import FileResponse, Http404, JsonResponse
 from django.urls import reverse
-
-LIMITE_HISTORIAL_BYTES = 180 * 1024  # 180 KB   
-DIAS_EXPIRACION_PDF = 7  # 👈 nuevo, junto a LIMITE_HISTORIAL_BYTES
-
-
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+from django.utils import timezone
+from django.http import Http404, FileResponse, HttpResponse,JsonResponse
+import cloudinary.utils
+import urllib.request
+from products.models import PDFGenerationJob, Producto, ConfiguracionPDF  # ajustar import según tu app
+from datetime import timedelta
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
+from django.views import View
+import threading
 import json
-from products.models import ConfiguracionPDF  # ajustar import según tu proyecto
 
+# ----------------------------------------------------------------------
+# Actualiacion de configuracion de reportes de catalogo
+# ----------------------------------------------------------------------
 @login_required
 @require_POST
 def actualizar_configuracion_pdf(request):
@@ -65,15 +60,9 @@ def actualizar_configuracion_pdf(request):
         "limite_historial_mb": config.limite_historial_mb,
     })
 
-
-
-
-
-
-
-
-from datetime import timedelta
-from django.utils import timezone
+# ----------------------------------------------------------------------
+# Limpiar reportes de catalogos Expirados
+# ----------------------------------------------------------------------
 def _limpiar_catalogos_expirados():
     """
     Borra (archivo + registro) los catálogos completados hace más de
@@ -98,7 +87,6 @@ def _formatear_tamano(total_bytes):
         return "0"
     mb = total_bytes / (1024 * 1024)
     return f"{mb:.1f} MB" if mb >= 1 else f"{total_bytes / 1024:.0f} KB"
-
 
 # ----------------------------------------------------------------------
 # Listado (ya existía; se agregan los agregados para los KPIs del HTML)
@@ -128,15 +116,11 @@ class ListaGeneracionesView(View):
             }
             return render(request, "django_app/listpdfs.html", context)
 
-
-    
 # ----------------------------------------------------------------------
 # Descargar el PDF de un job (lee el archivo del disco y lo sirve directo,
 # sin depender de MEDIA_URL/MEDIA_ROOT en urls.py)
 # ----------------------------------------------------------------------
-import cloudinary.utils
-import urllib.request
-from django.http import Http404, FileResponse, HttpResponse
+
 @require_GET
 def descargar_catalogo_pdf(request, job_id):
     job = get_object_or_404(PDFGenerationJob, id=job_id)
@@ -168,13 +152,9 @@ def descargar_catalogo_pdf(request, job_id):
     response["Content-Disposition"] = f'attachment; filename="{nombre_descarga}"'
     return response
 
-
-
-
 # ----------------------------------------------------------------------
 # Generar un catálogo nuevo (botón "Generar nuevo catálogo")
 # ----------------------------------------------------------------------
-import json
 
 @method_decorator([login_required, require_POST], name="dispatch")
 class GenerarCatalogoPDFView(View):

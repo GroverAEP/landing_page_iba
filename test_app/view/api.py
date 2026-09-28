@@ -128,7 +128,6 @@ def api_productos(request):
 
         return JsonResponse([_serializar(p) for p in productos], safe=False)
 
-
     # POST -> crear (ahora recibe multipart/form-data, no JSON)
     data = request.POST  # campos de texto (name, brand, category, etc.)
     archivo_imagen = request.FILES.get('image')  # el archivo real, si vino uno
@@ -147,7 +146,6 @@ def api_productos(request):
     producto.full_clean(exclude=['id'])
     producto.save()
     return JsonResponse(_serializar(producto), status=201)
-
 
 # ---------------------------------------------------------------------------
 # PUT    /api/productos/<id>/  -> storage.updateProduct(id, updatedData)

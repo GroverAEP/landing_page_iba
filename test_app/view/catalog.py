@@ -114,7 +114,6 @@ def unidades_list_create(request):
     unidad = UnidadMedida.objects.create(name=name)
     return JsonResponse(_serialize_unidad(unidad), status=201)
 
-
 @login_required
 @require_http_methods(['PATCH', 'PUT', 'DELETE'])
 def unidad_detail(request, pk):

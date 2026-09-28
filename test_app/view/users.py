@@ -10,7 +10,6 @@ from ..utils.serializers import UsuarioSerializer
 
 User = get_user_model()
 
-
 # LISTAR usuarios del panel (GET)  |  CREAR usuario (POST)
 @api_view(["GET", "POST"])
 @permission_classes([IsAdminUser])
@@ -43,7 +42,6 @@ def user_details(request, pk):
         usuario.delete()
         return Response({"deleted": True}, status=status.HTTP_200_OK)
 
-    # PATCH
     serializer = UsuarioSerializer(usuario, data=request.data, partial=True)
     serializer.is_valid(raise_exception=True)
     serializer.save()

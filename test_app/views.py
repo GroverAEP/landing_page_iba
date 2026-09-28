@@ -1,7 +1,24 @@
-from django.shortcuts import render, redirect
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes, force_str
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect, render
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.views.decorators.http import require_POST
+from django.contrib.auth import get_user_model
+import json
 
+#Usuario 3D
+User = get_user_model()
 
+#Redireccionamiento
 def index_view(request):
     """
     Vista raíz: redirige al inicio de sesión tal como lo hacía index.html.
@@ -9,58 +26,7 @@ def index_view(request):
     return redirect('django_app:signin')
 
 
-def signin_view(request):
-    """
-    Vista de inicio de sesión (Sign In).
-    """
-    return render(request, 'django_app/singin.html')
-
-
-def signup_view(request):
-    """
-    Vista de registro (redirige a inicio de sesión como en el frontend original).
-    """
-    return redirect('django_app:signin')
-
-
-@login_required(login_url='django_app:signin')
-def dashboard_view(request):
-    """
-    Vista principal del panel de administración (Dashboard).
-    """
-    return render(request, 'django_app/dashboard.html', {'active_page': 'dashboard'})
-
-
-@login_required(login_url='django_app:signin')
-def users_view(request):
-    """
-    Vista para gestión y administración de usuarios.
-    """
-    return render(request, 'django_app/users.html', {'active_page': 'users'})
-
-
-@login_required(login_url='django_app:signin')
-def views_view(request):
-    """
-    Vista para análisis de métricas y visitas.
-    """
-    return render(request, 'django_app/views.html', {'active_page': 'views'})
-
-
-@login_required(login_url='django_app:signin')
-def settings_view(request):
-    """
-    Vista para configuración del sistema y preferencias del panel.
-    """
-    return render(request, 'django_app/settings.html', {'active_page': 'settings'})
-
-
-from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect, render
-from django.views.decorators.http import require_POST
-
+#Panel Session inicio - 
 def signin_view(request):
     """
     Renderiza y procesa el formulario de inicio de sesión (signin.html).
@@ -141,8 +107,7 @@ def signin_view(request):
     return render(request, 'django_app/signin.html')
 
 
-
-
+# Logout Session
 @login_required
 @require_POST
 def logout_view(request):
@@ -151,30 +116,6 @@ def logout_view(request):
     return redirect('django_app:signin')
 
 
-
-
-
-
-
-from django.conf import settings
-from django.contrib import messages
-from django.contrib.auth import get_user_model
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
-from django.shortcuts import render, redirect
-from django.template.loader import render_to_string
-from django.urls import reverse
-from django.utils.encoding import force_bytes, force_str
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
- 
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from django.contrib import messages
-import json
-
-
-
-User = get_user_model()
 
  # --- Paso 1: el usuario pide el enlace con su correo ---
 def recuperar_password(request):
@@ -228,6 +169,7 @@ def recuperar_password(request):
         'error_envio': error_envio,
         'form': type('FormFalso', (), {'errors': hubo_error})(),
     })
+
 
 # --- Paso 2: el usuario abre el enlace del correo y define la nueva contraseña ---
 def resetear_password(request, uidb64, token):

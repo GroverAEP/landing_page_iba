@@ -15,7 +15,6 @@ class UsuarioSerializer(serializers.ModelSerializer):
     status = serializers.ChoiceField(choices=PerfilUsuario.ESTADOS, source="perfil.status")
     avatarBg = serializers.CharField(source="perfil.avatar_bg", required=False)
     password = serializers.CharField(write_only=True, required=False)
-
     # 'username' ahora SÍ es un campo real del serializer. required=False porque,
     # si no lo mandan, lo generamos automáticamente a partir del email en create().
     # Al declararlo así, ModelSerializer conserva el UniqueValidator automático

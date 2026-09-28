@@ -17,20 +17,25 @@ igual, solo que la UI de progreso se ve "saltar" al final.
 """
 
 from datetime import datetime
-
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.utils import timezone
-
+from django.views import View
+from django.shortcuts import render
+from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_GET
+from django.contrib.staticfiles import finders
 from products.models import PDFGenerationJob, CatalogoPDF, Producto  # ajustar import según tu app
 from .utils import generar_pdf_productos, calcular_hash_productos  # ajustar import
-from django.contrib.staticfiles import finders
-
-from django.conf import settings
 import os
-
-
+from io import BytesIO 
 import requests
-from io import BytesIO
+
+
+
+
+
+
 
 
 class PDFGeneradorService:
@@ -140,12 +145,7 @@ class PDFGeneradorService:
         self.job.completed_at = timezone.now()
         self.job.save(update_fields=["status", "error_message", "completed_at"])
 
-from products.models import PDFGenerationJob
-from django.shortcuts import render
-from django.utils.decorators import method_decorator
-from django.views import View
-from django.views.decorators.http import require_GET
- 
+
  
 @method_decorator(require_GET, name="dispatch")
 class ListaGeneracionesView(View):

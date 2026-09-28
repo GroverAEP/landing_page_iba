@@ -27,14 +27,9 @@ def catalog_products(request):
         page_name="catalogo",
         date=today
     )
-    #counter.visits += 1
-    #counter.save()
-    
 
     # Obtener solo los productos visibles
     products = Producto.objects.filter(is_visible=True)
-
-
     products_total_count = products.count()
     # Obtener solo las categorías que tienen productos asignados
     categories = Categoria.objects.filter(producto__isnull=False).distinct()  # Filtrar categorías con productos

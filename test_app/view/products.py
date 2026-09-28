@@ -13,11 +13,12 @@ from products.models import Producto, Categoria
 from .forms import ProductoForm
 
 
+#VERIFICACION DEL ADMINISTRADOR
 def es_administrador(user):
     return user.is_authenticated and user.is_staff
 
 
-# storage.getProducts() + los filtros que ya tenías en panel_admin
+#storage.getProducts() + los filtros que ya tenías en panel_admin
 @user_passes_test(es_administrador, login_url='login')
 def panel_admin(request):
     query = request.GET.get('q', '').strip()

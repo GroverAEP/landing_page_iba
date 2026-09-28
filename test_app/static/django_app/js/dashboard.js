@@ -127,6 +127,7 @@ function startDashboard() {
   const filterPriceRange = $('filterPriceRange');
   // A-Z filter (all optional: if the HTML doesn't have them, the filter is simply inactive)
   const filterLetter = $('filterLetter');
+  const sortAlpha = $('sortAlpha');
   const alphabetNav = $('alphabetNav');
   const alphabetCurrentFilter = $('alphabetCurrentFilter');
   const alphabetCurrentLetter = $('alphabetCurrentLetter');
@@ -382,12 +383,16 @@ function init() {
   // resetPage: true when the user changes a filter/search/letter (go back to page 1).
   // false when we're just re-rendering after a data reload (keep the current page).
   function applyFilters(resetPage = true) {
-    const query = normalizeSearchText((searchInput && searchInput.value) || '').trim();
-    const category = (filterCategory && filterCategory.value) || '';
-    const availability = (filterAvailability && filterAvailability.value) || ''; // '', 'true', 'false'
-    const priceRange = (filterPriceRange && filterPriceRange.value) || '';
+  const query = normalizeSearchText((searchInput && searchInput.value) || '').trim();
+  const category = (filterCategory && filterCategory.value) || '';
+  const availability = (filterAvailability && filterAvailability.value) || '';
+  const priceRange = (filterPriceRange && filterPriceRange.value) || '';
 
-    if (searchClearBtn) searchClearBtn.classList.toggle('active', query.length > 0);
+  const alphaOrder = (sortAlpha && sortAlpha.value) || '';
+  const collator = new Intl.Collator('es', { sensitivity: 'base', numeric: true });
+
+  if (searchClearBtn) searchClearBtn.classList.toggle('active', query.length > 0);
+
 
     filteredProducts = products.filter(p => {
       // Search match: accent-insensitive and case-insensitive (café = cafe = CAFÉ)
@@ -433,6 +438,13 @@ function init() {
         .sort((a, b) => (a.rank - b.rank) || (a.index - b.index))
         .map(({ p }) => p);
     }
+
+
+    // 2) Ordenar: el orden A-Z / Z-A elegido manda; si no hay, relevancia de búsqueda
+ if (alphaOrder) {
+    const dir = alphaOrder === 'desc' ? -1 : 1;
+    filteredProducts.sort((a, b) => dir * collator.compare(a.name || '', b.name || ''));
+  }
 
     if (resetPage) currentPage = 1;
 
@@ -1598,7 +1610,8 @@ function pollPdfJobStatus(jobId, totalSelected) {
     on(filterPriceRange, 'change', () => applyFilters());
 
     // Alphabet (A-Z) filter: select, button bar (delegated) and "clear letter" button
-    on(filterLetter, 'change', (e) => setLetterFilter(e.target.value));
+    on(sortAlpha, 'change', () => applyFilters());
+
     on(alphabetNav, 'click', (e) => {
       const btn = e.target.closest('.alphabet-btn');
       if (btn) setLetterFilter(btn.dataset.letter || '');

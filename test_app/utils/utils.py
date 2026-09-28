@@ -1,10 +1,7 @@
 """
 Lógica de generación del catálogo de productos en PDF.
 
-UBICACIÓN SUGERIDA:
-    administracion/utils_pdf.py
-(o, si prefieres una carpeta de servicios: administracion/services/pdf_productos.py
- — en ese caso ajusta el import en views.py acorde a la ruta que elijas)
+Formato del PDF
 
 Este módulo NO sabe nada de Django requests/responses — solo recibe una
 lista de productos y devuelve un buffer con el PDF ya armado. Así se
